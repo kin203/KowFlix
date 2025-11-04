@@ -1,0 +1,6 @@
+kowflix-backend/.env
+kowflix-backend/node_modules/
+kowflix-backend/media/
+kowflix-backend/coverage/
+kowflix-backend/logs/
+kowflix-backend/.DS_Store
