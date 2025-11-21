@@ -1,0 +1,89 @@
+:root {
+  --primary-red: #e50914;
+  --background-black: #141414;
+  --text-white: #ffffff;
+  --text-gray: #e5e5e5;
+  --text-dark-gray: #b3b3b3;
+  --input-bg: #333333;
+  --error-color: #e87c03;
+  
+  --font-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  
+  --transition-fast: 0.2s ease-in-out;
+  --transition-normal: 0.3s ease-in-out;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-black);
+  color: var(--text-white);
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background-black);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Utilities */
+.container {
+  max-width: 100%;
+  padding: 0 4%;
+}
+
+.btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-red);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #f40612;
+}
+
+.btn-secondary {
+  background-color: rgba(109, 109, 110, 0.7);
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: rgba(109, 109, 110, 0.4);
+}

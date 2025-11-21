@@ -1,27 +1,49 @@
+// src/routes/movieRoutes.js
 import express from "express";
-import Movie from "../models/Movie.js";
+import {
+  listMovies,
+  getMovie,
+  createMovie,
+  updateMovie,
+  deleteMovie,
+  playMovie
+} from "../controllers/movieController.js";
+
+import auth from "../middleware/auth.js";
+import isAdmin from "../middleware/admin.js";
+
+import { uploadMix } from "../utils/multer.js";
 
 const router = express.Router();
 
-// [GET] /api/movies — danh sách phim
-router.get("/", async (req, res) => {
-  try {
-    const { q, genre, page = 1, limit = 10 } = req.query;
-    const query = {};
+router.get("/", listMovies);
+router.get("/:id", getMovie);
+router.get("/:id/play", playMovie);
 
-    if (q) query.$text = { $search: q };
-    if (genre) query.genres = genre;
 
-    const movies = await Movie.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+router.post(
+  "/",
+  auth,
+  isAdmin,
+  uploadMix.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  createMovie
+);
 
-    res.json({ success: true, count: movies.length, data: movies });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+router.put(
+  "/:id",
+  auth,
+  isAdmin,
+  uploadMix.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  updateMovie
+);
+
+
+router.delete("/:id", auth, isAdmin, deleteMovie);
 
 export default router;
