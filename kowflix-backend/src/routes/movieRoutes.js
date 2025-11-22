@@ -6,7 +6,9 @@ import {
   createMovie,
   updateMovie,
   deleteMovie,
-  playMovie
+  playMovie,
+  searchTMDb,
+  getTMDbDetails
 } from "../controllers/movieController.js";
 
 import auth from "../middleware/auth.js";
@@ -15,6 +17,10 @@ import isAdmin from "../middleware/admin.js";
 import { uploadMix } from "../utils/multer.js";
 
 const router = express.Router();
+
+// TMDb routes (no auth required for search)
+router.get("/search-tmdb", searchTMDb);
+router.get("/tmdb/:tmdbId", getTMDbDetails);
 
 router.get("/", listMovies);
 router.get("/:id", getMovie);

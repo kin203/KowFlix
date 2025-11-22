@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 
 const ProfileSchema = new mongoose.Schema({
   name: { type: String, default: "" },
-  avatar: { type: String, default: "" }
+  avatar: { type: String, default: "" },
+  avatarPublicId: { type: String, default: "" }, // For Cloudinary deletion
+  bio: { type: String, default: "" }
 }, { _id: false });
 
 const UserSchema = new mongoose.Schema({

@@ -24,7 +24,17 @@ api.interceptors.request.use(
 export const authAPI = {
     login: (email, password) => api.post('/auth/login', { email, password }),
     register: (email, password) => api.post('/auth/register', { email, password }),
-    getProfile: () => api.get('/auth/me'),
+    getProfile: () => api.get('/profile'),
+    updateProfile: (data) => api.put('/profile', data),
+    uploadAvatar: (formData) => {
+        return axios.post(`${API_URL}/profile/avatar`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+    },
+    deleteAvatar: () => api.delete('/profile/avatar'),
 };
 
 export const movieAPI = {
@@ -39,8 +49,26 @@ export const movieAPI = {
             },
         });
     },
+    update: (id, formData) => {
+        return axios.put(`${API_URL}/movies/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+    },
     delete: (id) => api.delete(`/movies/${id}`),
     startEncode: (id) => api.post(`/encode/${id}/start`),
+    // TMDb integration
+    searchTMDb: (query) => api.get('/movies/search-tmdb', { params: { query } }),
+    getTMDbDetails: (tmdbId) => api.get(`/movies/tmdb/${tmdbId}`),
+};
+
+export const progressAPI = {
+    save: (movieId, data) => api.post(`/progress/${movieId}`, data),
+    get: (movieId) => api.get(`/progress/${movieId}`),
+    getAll: () => api.get('/progress'),
+    delete: (movieId) => api.delete(`/progress/${movieId}`),
 };
 
 export default api;

@@ -4,6 +4,7 @@ import path from "path";
 import slugify from "slugify";
 import Movie from "../models/Movie.js";
 import { uploadPoster, uploadVideo } from "../utils/remoteUpload.js";
+import { searchMovies, getMovieDetails } from "../utils/tmdb.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
 
@@ -87,6 +88,14 @@ export const createMovie = async (req, res) => {
       genres: typeof genres === "string" ? genres.split(",").map(s => s.trim()) : genres,
       releaseYear: releaseYear ? Number(releaseYear) : undefined,
       duration: duration ? Number(duration) : undefined,
+      // TMDb metadata
+      tmdbId: req.body.tmdbId ? Number(req.body.tmdbId) : undefined,
+      imdbId: req.body.imdbId || undefined,
+      runtime: req.body.runtime ? Number(req.body.runtime) : undefined,
+      cast: req.body.cast ? (typeof req.body.cast === "string" ? req.body.cast.split(",").map(s => s.trim()) : req.body.cast) : undefined,
+      director: req.body.director || undefined,
+      imdbRating: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
+      voteAverage: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
       status: "draft"
     });
 
@@ -251,5 +260,47 @@ export const playMovie = async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// ====================== TMDB SEARCH ======================
+export const searchTMDb = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ success: false, message: "Query parameter is required" });
+    }
+
+    const results = await searchMovies(query);
+
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error("TMDb search error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ====================== TMDB GET DETAILS ======================
+export const getTMDbDetails = async (req, res) => {
+  try {
+    const { tmdbId } = req.params;
+
+    if (!tmdbId) {
+      return res.status(400).json({ success: false, message: "TMDb ID is required" });
+    }
+
+    const details = await getMovieDetails(parseInt(tmdbId));
+
+    res.json({
+      success: true,
+      data: details
+    });
+  } catch (error) {
+    console.error("TMDb getDetails error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

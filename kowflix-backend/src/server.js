@@ -9,6 +9,8 @@ import path from "path";
 import movieRoutes from "./routes/movieRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import encodeRoutes from "./routes/encodeRoutes.js";
+import progressRoutes from "./routes/progressRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
 
 dotenv.config();
 
@@ -45,6 +47,8 @@ app.use('/media', express.static(MEDIA_ROOT));
 app.use("/api/movies", movieRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", encodeRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/profile", profileRoutes);
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

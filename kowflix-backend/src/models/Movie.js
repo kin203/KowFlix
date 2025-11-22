@@ -36,7 +36,7 @@ import mongoose from "mongoose";
 const ContentFileSchema = new mongoose.Schema({
   type: { type: String, enum: ["hls", "mp4"], required: true },
   path: { type: String, required: true },
-  quality: { type: String, enum: ["1080p","720p","480p","360p"], default: "720p" },
+  quality: { type: String, enum: ["1080p", "720p", "480p", "360p"], default: "720p" },
   filesize: { type: Number, default: 0 }
 }, { _id: false });
 
@@ -46,11 +46,24 @@ const MovieSchema = new mongoose.Schema({
   description: { type: String, default: "" },
   genres: { type: [String], default: [] },
   poster: { type: String, default: "" },
+  backdrop: { type: String, default: "" }, // NEW: backdrop image
   duration: { type: Number, default: 0 },
   releaseYear: { type: Number },
 
+  // TMDb metadata
+  tmdbId: { type: Number }, // TMDb movie ID
+  imdbId: { type: String }, // IMDb ID
+  imdbRating: { type: Number }, // Vote average from TMDb (0-10)
+  runtime: { type: Number }, // Runtime in minutes
+  releaseDate: { type: Date }, // Full release date
+  cast: { type: [String], default: [] }, // Array of actor names
+  director: { type: String }, // Director name
+  voteAverage: { type: Number }, // TMDb vote average
+  voteCount: { type: Number }, // TMDb vote count
+  tagline: { type: String }, // Movie tagline
+
   // trạng thái encode
-  status: { type: String, enum: ["draft","processing","ready","error"], default: "draft" },
+  status: { type: String, enum: ["draft", "processing", "ready", "error"], default: "draft" },
   hlsFolder: { type: String, default: "" }, // ví dụ: /media/hls/<movieId>/
   thumbnails: { type: [String], default: [] },
 

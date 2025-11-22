@@ -5,7 +5,7 @@ dotenv.config();
 
 export default function auth(req, res, next) {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ success:false, message: "No token" });
+  if (!authHeader) return res.status(401).json({ success: false, message: "No token" });
 
   const token = authHeader.split(" ")[1];
   try {
@@ -13,6 +13,9 @@ export default function auth(req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ success:false, message: "Token invalid" });
+    return res.status(401).json({ success: false, message: "Token invalid" });
   }
 }
+
+// Export as 'protect' for compatibility
+export const protect = auth;
