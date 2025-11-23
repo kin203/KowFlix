@@ -6,11 +6,13 @@ import Register from './pages/Register';
 import Watch from './pages/Watch';
 import AdminUpload from './pages/AdminUpload';
 import Profile from './pages/Profile';
+import PatrioticLoader from './components/PatrioticLoader';
 import './index.css';
 
 function App() {
   return (
     <Router>
+      <PatrioticLoader />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

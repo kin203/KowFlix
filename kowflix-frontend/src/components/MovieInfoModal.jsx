@@ -40,7 +40,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                             <div className="modal-actions">
                                 <button className="modal-play-btn" onClick={handlePlayClick}>
                                     <Play size={24} fill="black" />
-                                    Play
+                                    Xem ngay
                                 </button>
                                 <button className="modal-icon-btn">
                                     <Plus size={24} />

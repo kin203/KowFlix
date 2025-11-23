@@ -65,7 +65,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    background: #e50914;
+    background: hsl(63, 100%, 58%);
     border-radius: 3px;
     transition: width 0.1s linear;
 }
@@ -76,7 +76,7 @@
     transform: translate(-50%, -50%);
     width: 14px;
     height: 14px;
-    background: #e50914;
+    background: hsl(63, 100%, 58%);
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.2s ease;
