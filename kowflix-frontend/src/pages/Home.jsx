@@ -13,9 +13,13 @@ const Home = () => {
     useEffect(() => {
         const fetchMovies = async () => {
             try {
-                const { data } = await movieAPI.getAll();
+                const response = await movieAPI.getAll();
+                console.log('API Response:', response);
+                console.log('Response data:', response.data);
+
                 // Backend returns: { success: true, data: [...movies] }
-                const movieList = data.data || [];
+                const movieList = response.data.data || response.data || [];
+                console.log('Movie list:', movieList);
                 setMovies(movieList);
 
                 if (movieList.length > 0) {

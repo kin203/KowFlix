@@ -29,18 +29,19 @@ export const startEncode = async (req, res) => {
             .then(async () => {
                 console.log(`✅ Encode completed for: ${movie.slug}`);
 
-                // Update movie with HLS URLs
-                const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || "https://nk203.id.vn/media";
-                const hlsBase = `${PUBLIC_MEDIA_URL}/hls/${movie.slug}`;
+                // Update movie with HLS paths (store relative paths, not full URLs)
+                // Structure: /hls/<slug>/master.m3u8 and /hls/<slug>/<quality>/index.m3u8
+                const hlsBasePath = `/hls/${movie.slug}`;
 
                 const updatedMovie = await Movie.findByIdAndUpdate(movieId, {
                     status: "ready",
-                    hlsFolder: `/media/hls/${movie.slug}`,
+                    hlsFolder: `/hls/${movie.slug}`,
                     contentFiles: [
                         ...movie.contentFiles.filter(f => f.type !== "hls"),
-                        { type: "hls", path: `${hlsBase}/1080p/index.m3u8`, quality: "1080p" },
-                        { type: "hls", path: `${hlsBase}/720p/index.m3u8`, quality: "720p" },
-                        { type: "hls", path: `${hlsBase}/480p/index.m3u8`, quality: "480p" }
+                        { type: "hls", path: `${hlsBasePath}/master.m3u8`, quality: "master" },
+                        { type: "hls", path: `${hlsBasePath}/1080p/index.m3u8`, quality: "1080p" },
+                        { type: "hls", path: `${hlsBasePath}/720p/index.m3u8`, quality: "720p" },
+                        { type: "hls", path: `${hlsBasePath}/480p/index.m3u8`, quality: "480p" }
                     ]
                 }, { new: true });
 

@@ -220,45 +220,76 @@ export const playMovie = async (req, res) => {
 
     const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || "";
 
-    const qualities = movie.contentFiles
-      .filter(f => f.type === "hls")
-      .map(f => {
-        // If path starts with /media/, strip it if PUBLIC_MEDIA_URL already has it?
-        // Or just assume PUBLIC_MEDIA_URL is the root.
-        // User env: PUBLIC_MEDIA_URL=https://nk203.id.vn/media
-        // Stored path might be: /media/hls/... or /hls/...
+    // Get all HLS content files
+    const hlsFiles = movie.contentFiles.filter(f => f.type === "hls");
 
-        // Safe join:
-        let url = f.path;
+    // Find the master playlist
+    const masterFile = hlsFiles.find(f => f.quality === "master");
+
+    // Build qualities array with full URLs
+    const qualities = hlsFiles.map(f => {
+      let url = f.path;
+
+      // Only build URL if it's not already a full URL
+      if (!url.startsWith("http")) {
+        // Paths are stored as /hls/... or /media/hls/...
+        // PUBLIC_MEDIA_URL is like https://nk203.id.vn/media
+
         if (PUBLIC_MEDIA_URL) {
-          // If stored path has /media prefix but we want to use PUBLIC_MEDIA_URL which points to media root
-          // we might need to adjust. 
-          // Case 1: Stored = /media/hls/x.m3u8, Public = .../media
-          // Result should be .../media/hls/x.m3u8
-
-          // If stored path starts with /media, and public url ends with /media, we might get double.
-          // But usually web server maps /media to MEDIA_ROOT.
-          // So https://nk203.id.vn/media/hls/x.m3u8 is correct if file is at MEDIA_ROOT/hls/x.m3u8
-
-          // If we stored "/media/hls/...", we are good if we just concat.
-          // But if we stored "/hls/..." (new logic), we need to ensure slash.
-
-          if (!url.startsWith("http")) {
+          // If path starts with /hls/, prepend PUBLIC_MEDIA_URL
+          // Result: https://nk203.id.vn/media/hls/...
+          if (url.startsWith("/hls/")) {
+            url = `${PUBLIC_MEDIA_URL}${url}`;
+          }
+          // If path starts with /media/hls/, strip /media and prepend PUBLIC_MEDIA_URL
+          else if (url.startsWith("/media/hls/")) {
+            url = `${PUBLIC_MEDIA_URL}${url.replace("/media", "")}`;
+          }
+          // Otherwise just prepend
+          else {
             url = `${PUBLIC_MEDIA_URL}${url}`;
           }
         }
+      }
 
-        return {
-          quality: f.quality,
-          url
-        };
-      });
+      return {
+        quality: f.quality,
+        url
+      };
+    });
 
+    // Build master URL
+    let masterUrl = null;
+    if (masterFile) {
+      masterUrl = masterFile.path;
+
+      if (!masterUrl.startsWith("http")) {
+        if (PUBLIC_MEDIA_URL) {
+          if (masterUrl.startsWith("/hls/")) {
+            masterUrl = `${PUBLIC_MEDIA_URL}${masterUrl}`;
+          } else if (masterUrl.startsWith("/media/hls/")) {
+            masterUrl = `${PUBLIC_MEDIA_URL}${masterUrl.replace("/media", "")}`;
+          } else {
+            masterUrl = `${PUBLIC_MEDIA_URL}${masterUrl}`;
+          }
+        }
+      }
+    }
+
+    // Return both master (for backward compatibility) and qualities
     res.json({
       success: true,
-      data: { id: movie._id, title: movie.title, qualities }
+      data: {
+        id: movie._id,
+        title: movie.title,
+        poster: movie.poster,
+        description: movie.description,
+        master: masterUrl,  // Add master URL for frontend compatibility
+        qualities
+      }
     });
   } catch (e) {
+    console.error("playMovie error:", e);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

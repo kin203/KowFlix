@@ -22,6 +22,8 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
     const [audioTracks, setAudioTracks] = useState([]);
     const [currentAudio, setCurrentAudio] = useState(0);
     const [buffered, setBuffered] = useState(0);
+    const [isLoadingQuality, setIsLoadingQuality] = useState(false);
+    const [hoverTime, setHoverTime] = useState(null);
 
     // Initialize HLS
     useEffect(() => {
@@ -180,6 +182,16 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
         }
     };
 
+    const handleProgressHover = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        setHoverTime(pos * duration);
+    };
+
+    const handleProgressLeave = () => {
+        setHoverTime(null);
+    };
+
     const handleVolumeChange = (e) => {
         const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
@@ -208,10 +220,52 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
     };
 
     const changeQuality = (levelIndex) => {
-        if (hlsRef.current) {
+        if (hlsRef.current && videoRef.current && !isLoadingQuality) {
+            setIsLoadingQuality(true);
+            const wasPlaying = !videoRef.current.paused;
+            const savedTime = videoRef.current.currentTime;
+
+            // Pause video during quality switch to prevent glitches
+            if (wasPlaying) {
+                videoRef.current.pause();
+            }
+
+            // Change quality level
             hlsRef.current.currentLevel = levelIndex;
             setCurrentQuality(levelIndex);
             setShowSettings(false);
+
+            // Wait for level switch to complete, then restore playback state
+            const onLevelSwitched = () => {
+                if (videoRef.current) {
+                    // Restore time position
+                    videoRef.current.currentTime = savedTime;
+
+                    // Small delay to ensure new segments are loaded
+                    setTimeout(() => {
+                        if (videoRef.current && wasPlaying) {
+                            videoRef.current.play().catch(err => {
+                                console.error('Failed to resume playback:', err);
+                            });
+                        }
+                        setIsLoadingQuality(false);
+                    }, 100);
+                }
+
+                // Remove the event listener after handling
+                hlsRef.current?.off(Hls.Events.LEVEL_SWITCHED, onLevelSwitched);
+            };
+
+            // Fallback timeout in case event doesn't fire
+            const fallbackTimeout = setTimeout(() => {
+                setIsLoadingQuality(false);
+                hlsRef.current?.off(Hls.Events.LEVEL_SWITCHED, onLevelSwitched);
+            }, 3000);
+
+            hlsRef.current.on(Hls.Events.LEVEL_SWITCHED, () => {
+                clearTimeout(fallbackTimeout);
+                onLevelSwitched();
+            });
         }
     };
 
@@ -283,13 +337,35 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
                 onClick={togglePlay}
             />
 
+            {/* Loading indicator during quality switch */}
+            {isLoadingQuality && (
+                <div className="quality-loading">
+                    <div className="loading-spinner"></div>
+                </div>
+            )}
+
             {/* Controls Overlay */}
             <div className={`video-controls ${showControls ? 'show' : ''}`}>
                 {/* Progress Bar */}
-                <div className="progress-bar-container" onClick={handleSeek}>
+                <div
+                    className="progress-bar-container"
+                    onClick={handleSeek}
+                    onMouseMove={handleProgressHover}
+                    onMouseLeave={handleProgressLeave}
+                >
                     <div className="progress-bar-buffered" style={{ width: `${buffered}%` }} />
                     <div className="progress-bar-played" style={{ width: `${(currentTime / duration) * 100}%` }} />
                     <div className="progress-bar-thumb" style={{ left: `${(currentTime / duration) * 100}%` }} />
+
+                    {/* Hover time tooltip */}
+                    {hoverTime !== null && (
+                        <div
+                            className="progress-time-tooltip"
+                            style={{ left: `${(hoverTime / duration) * 100}%` }}
+                        >
+                            {formatTime(hoverTime)}
+                        </div>
+                    )}
                 </div>
 
                 {/* Bottom Controls */}
@@ -363,6 +439,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
                         <button
                             className={currentQuality === -1 ? 'active' : ''}
                             onClick={() => changeQuality(-1)}
+                            disabled={isLoadingQuality}
                         >
                             Auto
                         </button>
@@ -371,6 +448,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
                                 key={quality.index}
                                 className={currentQuality === quality.index ? 'active' : ''}
                                 onClick={() => changeQuality(quality.index)}
+                                disabled={isLoadingQuality}
                             >
                                 {quality.label}
                             </button>
