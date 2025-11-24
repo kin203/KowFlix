@@ -7,8 +7,8 @@ const PatrioticLoader = () => {
     const location = useLocation();
 
     useEffect(() => {
-        // Don't show loader on video player page
-        if (location.pathname.startsWith('/watch')) {
+        // Don't show loader on video player page or admin pages
+        if (location.pathname.startsWith('/watch') || location.pathname.startsWith('/admin')) {
             setLoading(false);
             return;
         }

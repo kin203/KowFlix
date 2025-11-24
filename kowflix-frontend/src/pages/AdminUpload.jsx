@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { movieAPI } from '../services/api';
 import TMDbSearch from '../components/TMDbSearch';
+import DashboardSidebar from '../components/admin/DashboardSidebar';
 import './AdminUpload.css';
 
 const AdminUpload = () => {
@@ -259,176 +260,179 @@ const AdminUpload = () => {
     };
 
     return (
-        <div className="admin-page">
-            <div className="admin-header">
-                <div>
-                    <h1>Admin Panel</h1>
-                    <p>Upload and manage movies</p>
+        <div className="admin-dashboard-container">
+            <DashboardSidebar />
+            <div className="admin-dashboard-content">
+                <div className="admin-header">
+                    <div>
+                        <h1>Admin Panel</h1>
+                        <p>Upload and manage movies</p>
+                    </div>
+                    <button
+                        className="btn-secondary"
+                        onClick={handleMigration}
+                        disabled={migrating}
+                        style={{ alignSelf: 'flex-start' }}
+                    >
+                        {migrating ? 'Migrating...' : '🔄 Migrate HLS Paths'}
+                    </button>
                 </div>
-                <button
-                    className="btn-secondary"
-                    onClick={handleMigration}
-                    disabled={migrating}
-                    style={{ alignSelf: 'flex-start' }}
-                >
-                    {migrating ? 'Migrating...' : '🔄 Migrate HLS Paths'}
-                </button>
-            </div>
 
-            {message.text && (
-                <div className={`message ${message.type}`}>
-                    {message.text}
-                </div>
-            )}
-
-            <div className="upload-section">
-                <h2>{editingMovie ? `Edit Movie: ${editingMovie.title}` : 'Upload New Movie'}</h2>
-                <form className="upload-form" onSubmit={editingMovie ? handleUpdate : handleSubmit}>
-                    {/* TMDb Search */}
-                    <TMDbSearch onSelectMovie={handleTMDbSelect} />
-
-                    <div className="form-field">
-                        <label>Title *</label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleInputChange}
-                            required
-                        />
+                {message.text && (
+                    <div className={`message ${message.type}`}>
+                        {message.text}
                     </div>
+                )}
 
-                    <div className="form-field">
-                        <label>Release Year</label>
-                        <input
-                            type="number"
-                            name="releaseYear"
-                            value={formData.releaseYear}
-                            onChange={handleInputChange}
-                        />
-                    </div>
+                <div className="upload-section">
+                    <h2>{editingMovie ? `Edit Movie: ${editingMovie.title}` : 'Upload New Movie'}</h2>
+                    <form className="upload-form" onSubmit={editingMovie ? handleUpdate : handleSubmit}>
+                        {/* TMDb Search */}
+                        <TMDbSearch onSelectMovie={handleTMDbSelect} />
 
-                    <div className="form-field full-width">
-                        <label>Description</label>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="form-field">
-                        <label>Genres (comma separated)</label>
-                        <input
-                            type="text"
-                            name="genres"
-                            value={formData.genres}
-                            onChange={handleInputChange}
-                            placeholder="Action, Drama, Sci-Fi"
-                        />
-                    </div>
-
-                    <div className="form-field">
-                        <label>Poster Image</label>
-                        <div className="file-input-wrapper">
-                            <label className="file-input-label">
-                                Choose File
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleFileChange(e, 'poster')}
-                                />
-                            </label>
-                            {posterFile && <div className="file-name">{posterFile.name}</div>}
+                        <div className="form-field">
+                            <label>Title *</label>
+                            <input
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                required
+                            />
                         </div>
-                    </div>
 
-                    <div className="form-field">
-                        <label>Video File</label>
-                        <div className="file-input-wrapper">
-                            <label className="file-input-label">
-                                Choose File
-                                <input
-                                    type="file"
-                                    accept="video/*"
-                                    onChange={(e) => handleFileChange(e, 'video')}
-                                />
-                            </label>
-                            {videoFile && <div className="file-name">{videoFile.name}</div>}
+                        <div className="form-field">
+                            <label>Release Year</label>
+                            <input
+                                type="number"
+                                name="releaseYear"
+                                value={formData.releaseYear}
+                                onChange={handleInputChange}
+                            />
                         </div>
-                    </div>
 
-                    <div className="form-actions">
-                        <button type="submit" className="submit-btn" disabled={uploading}>
-                            {uploading ? (editingMovie ? 'Updating...' : 'Uploading...') : (editingMovie ? 'Update Movie' : 'Upload Movie')}
-                        </button>
-                        {editingMovie && (
-                            <button type="button" className="cancel-btn" onClick={handleCancelEdit}>
-                                Cancel Edit
+                        <div className="form-field full-width">
+                            <label>Description</label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div className="form-field">
+                            <label>Genres (comma separated)</label>
+                            <input
+                                type="text"
+                                name="genres"
+                                value={formData.genres}
+                                onChange={handleInputChange}
+                                placeholder="Action, Drama, Sci-Fi"
+                            />
+                        </div>
+
+                        <div className="form-field">
+                            <label>Poster Image</label>
+                            <div className="file-input-wrapper">
+                                <label className="file-input-label">
+                                    Choose File
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleFileChange(e, 'poster')}
+                                    />
+                                </label>
+                                {posterFile && <div className="file-name">{posterFile.name}</div>}
+                            </div>
+                        </div>
+
+                        <div className="form-field">
+                            <label>Video File</label>
+                            <div className="file-input-wrapper">
+                                <label className="file-input-label">
+                                    Choose File
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) => handleFileChange(e, 'video')}
+                                    />
+                                </label>
+                                {videoFile && <div className="file-name">{videoFile.name}</div>}
+                            </div>
+                        </div>
+
+                        <div className="form-actions">
+                            <button type="submit" className="submit-btn" disabled={uploading}>
+                                {uploading ? (editingMovie ? 'Updating...' : 'Uploading...') : (editingMovie ? 'Update Movie' : 'Upload Movie')}
                             </button>
-                        )}
-                    </div>
-                </form>
-            </div>
+                            {editingMovie && (
+                                <button type="button" className="cancel-btn" onClick={handleCancelEdit}>
+                                    Cancel Edit
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </div>
 
-            <div className="movies-section">
-                <h2>Uploaded Movies ({movies.length})</h2>
-                <table className="movies-table">
-                    <thead>
-                        <tr>
-                            <th>Poster</th>
-                            <th>Title</th>
-                            <th>Year</th>
-                            <th>Genres</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {movies.map((movie) => (
-                            <tr key={movie._id}>
-                                <td>
-                                    {movie.poster && (
-                                        <img
-                                            src={movie.poster}
-                                            alt={movie.title}
-                                            className="movie-poster-thumb"
-                                        />
-                                    )}
-                                </td>
-                                <td>{movie.title}</td>
-                                <td>{movie.releaseYear || 'N/A'}</td>
-                                <td>{movie.genres?.join(', ') || 'N/A'}</td>
-                                <td>{movie.status || 'pending'}</td>
-                                <td>
-                                    {movie.status !== 'ready' && (
+                <div className="movies-section">
+                    <h2>Uploaded Movies ({movies.length})</h2>
+                    <table className="movies-table">
+                        <thead>
+                            <tr>
+                                <th>Poster</th>
+                                <th>Title</th>
+                                <th>Year</th>
+                                <th>Genres</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {movies.map((movie) => (
+                                <tr key={movie._id}>
+                                    <td>
+                                        {movie.poster && (
+                                            <img
+                                                src={movie.poster}
+                                                alt={movie.title}
+                                                className="movie-poster-thumb"
+                                            />
+                                        )}
+                                    </td>
+                                    <td>{movie.title}</td>
+                                    <td>{movie.releaseYear || 'N/A'}</td>
+                                    <td>{movie.genres?.join(', ') || 'N/A'}</td>
+                                    <td>{movie.status || 'pending'}</td>
+                                    <td>
+                                        {movie.status !== 'ready' && (
+                                            <button
+                                                className="btn-secondary"
+                                                onClick={() => handleEncode(movie._id)}
+                                                disabled={encoding[movie._id]}
+                                                style={{ marginRight: '0.5rem' }}
+                                            >
+                                                {encoding[movie._id] ? 'Encoding...' : 'Encode'}
+                                            </button>
+                                        )}
                                         <button
                                             className="btn-secondary"
-                                            onClick={() => handleEncode(movie._id)}
-                                            disabled={encoding[movie._id]}
+                                            onClick={() => handleEdit(movie)}
                                             style={{ marginRight: '0.5rem' }}
                                         >
-                                            {encoding[movie._id] ? 'Encoding...' : 'Encode'}
+                                            Edit
                                         </button>
-                                    )}
-                                    <button
-                                        className="btn-secondary"
-                                        onClick={() => handleEdit(movie)}
-                                        style={{ marginRight: '0.5rem' }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => handleDelete(movie._id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                        <button
+                                            className="delete-btn"
+                                            onClick={() => handleDelete(movie._id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

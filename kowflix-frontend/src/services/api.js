@@ -72,4 +72,13 @@ export const progressAPI = {
     delete: (movieId) => api.delete(`/progress/${movieId}`),
 };
 
+export const analyticsAPI = {
+    getStats: () => api.get('/analytics/stats'),
+    getWeeklyViews: () => api.get('/analytics/weekly-views'),
+    getTopMovies: (limit = 5) => api.get('/analytics/top-movies', { params: { limit } }),
+    getActiveUsers: (limit = 10) => api.get('/analytics/active-users', { params: { limit } }),
+    getUserGrowth: () => api.get('/analytics/user-growth'),
+};
+
+
 export default api;

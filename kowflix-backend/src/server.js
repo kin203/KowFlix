@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import encodeRoutes from "./routes/encodeRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", encodeRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
