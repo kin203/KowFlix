@@ -24,6 +24,7 @@ const AdminUpload = () => {
     const [uploading, setUploading] = useState(false);
     const [encoding, setEncoding] = useState({});
     const [editingMovie, setEditingMovie] = useState(null); // Track which movie is being edited
+    const [migrating, setMigrating] = useState(false);
 
     useEffect(() => {
         fetchMovies();
@@ -230,11 +231,48 @@ const AdminUpload = () => {
         }
     };
 
+    const handleMigration = async () => {
+        if (!window.confirm('Migrate all HLS paths from slug-based to movieId-based structure?')) return;
+
+        setMigrating(true);
+        setMessage({ type: 'info', text: 'Migration in progress...' });
+
+        try {
+            const response = await movieAPI.migrateHlsPaths();
+            const { results } = response.data;
+
+            setMessage({
+                type: 'success',
+                text: `Migration completed! Updated: ${results.updated}, Skipped: ${results.skipped}, Errors: ${results.errors.length}`
+            });
+
+            // Refresh movie list
+            fetchMovies();
+        } catch (err) {
+            setMessage({
+                type: 'error',
+                text: err.response?.data?.message || 'Migration failed'
+            });
+        } finally {
+            setMigrating(false);
+        }
+    };
+
     return (
         <div className="admin-page">
             <div className="admin-header">
-                <h1>Admin Panel</h1>
-                <p>Upload and manage movies</p>
+                <div>
+                    <h1>Admin Panel</h1>
+                    <p>Upload and manage movies</p>
+                </div>
+                <button
+                    className="btn-secondary"
+                    onClick={handleMigration}
+                    disabled={migrating}
+                    style={{ alignSelf: 'flex-start' }}
+                >
+                    {migrating ? 'Migrating...' : '🔄 Migrate HLS Paths'}
+                </button>
             </div>
 
             {message.text && (

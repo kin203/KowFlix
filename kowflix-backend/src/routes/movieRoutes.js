@@ -8,7 +8,8 @@ import {
   deleteMovie,
   playMovie,
   searchTMDb,
-  getTMDbDetails
+  getTMDbDetails,
+  migrateHlsPaths
 } from "../controllers/movieController.js";
 
 import auth from "../middleware/auth.js";
@@ -51,5 +52,8 @@ router.put(
 
 
 router.delete("/:id", auth, isAdmin, deleteMovie);
+
+// Migration route (admin only)
+router.post("/migrate-hls-paths", auth, isAdmin, migrateHlsPaths);
 
 export default router;

@@ -59,6 +59,7 @@ export const movieAPI = {
     },
     delete: (id) => api.delete(`/movies/${id}`),
     startEncode: (id) => api.post(`/encode/${id}/start`),
+    migrateHlsPaths: () => api.post('/movies/migrate-hls-paths'),
     // TMDb integration
     searchTMDb: (query) => api.get('/movies/search-tmdb', { params: { query } }),
     getTMDbDetails: (tmdbId) => api.get(`/movies/tmdb/${tmdbId}`),

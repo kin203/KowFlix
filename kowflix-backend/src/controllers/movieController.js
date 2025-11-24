@@ -5,6 +5,7 @@ import slugify from "slugify";
 import Movie from "../models/Movie.js";
 import { uploadPoster, uploadVideo } from "../utils/remoteUpload.js";
 import { searchMovies, getMovieDetails } from "../utils/tmdb.js";
+import { triggerEncode } from "../utils/remoteEncode.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
 
@@ -125,9 +126,50 @@ export const createMovie = async (req, res) => {
       // Update movie with remote paths
       movie.poster = posterPath;
       movie.contentFiles = videoPath ? [{ type: "mp4", path: videoPath, quality: "720p" }] : [];
-      await movie.save();
 
-      res.status(201).json({ success: true, data: movie });
+      // If video uploaded, trigger auto-encode
+      if (videoPath) {
+        movie.status = "processing";
+        await movie.save();
+
+        // Convert relative path to absolute path on remote server
+        const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || "/media/DATA/kowflix";
+        const absoluteVideoPath = `${REMOTE_MEDIA_ROOT}${videoPath.replace('/media', '')}`;
+
+        // Trigger encode with movieId (server creates folder with movieId)
+        triggerEncode(absoluteVideoPath, movieId)
+          .then(async () => {
+            console.log(`✅ Auto-encode completed for: ${movie.title} (${movieId})`);
+
+            // Update movie with HLS paths (using movieId as folder name)
+            const hlsBasePath = `/hls/${movieId}`;
+            await Movie.findByIdAndUpdate(movieId, {
+              status: "ready",
+              hlsFolder: `/hls/${movieId}`,
+              contentFiles: [
+                ...movie.contentFiles.filter(f => f.type !== "hls"),
+                { type: "hls", path: `${hlsBasePath}/master.m3u8`, quality: "master" },
+                { type: "hls", path: `${hlsBasePath}/1080p/index.m3u8`, quality: "1080p" },
+                { type: "hls", path: `${hlsBasePath}/720p/index.m3u8`, quality: "720p" },
+                { type: "hls", path: `${hlsBasePath}/480p/index.m3u8`, quality: "480p" }
+              ]
+            });
+            console.log(`✅ Movie ready: ${movie.title} (${movieId})`);
+          })
+          .catch((err) => {
+            console.error(`❌ Auto-encode failed for ${movie.title} (${movieId}):`, err);
+            Movie.findByIdAndUpdate(movieId, { status: "error" }).catch(e => console.error(e));
+          });
+
+        res.status(201).json({
+          success: true,
+          data: movie,
+          message: "Movie uploaded successfully. Encoding started automatically."
+        });
+      } else {
+        await movie.save();
+        res.status(201).json({ success: true, data: movie });
+      }
     } catch (uploadErr) {
       console.error("Upload error:", uploadErr);
 
@@ -291,6 +333,99 @@ export const playMovie = async (req, res) => {
   } catch (e) {
     console.error("playMovie error:", e);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// ====================== MIGRATE HLS PATHS ======================
+export const migrateHlsPaths = async (req, res) => {
+  try {
+    // Find all movies that are ready or have HLS content
+    const movies = await Movie.find({
+      $or: [
+        { "contentFiles.type": "hls" },
+        { status: "ready" }
+      ]
+    });
+
+    const results = {
+      total: movies.length,
+      updated: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    for (const movie of movies) {
+      try {
+        const movieId = movie._id.toString();
+        let needsUpdate = false;
+        let updatedContentFiles = [...movie.contentFiles];
+
+        // Check if movie has HLS files
+        const hasHlsFiles = movie.contentFiles.some(f => f.type === "hls");
+
+        if (hasHlsFiles) {
+          // Case 1: Has HLS files but using old slug-based paths
+          updatedContentFiles = movie.contentFiles.map(file => {
+            if (file.type === "hls") {
+              // Check if path contains slug pattern (not movieId)
+              if (file.path.includes(`/hls/${movie.slug}/`)) {
+                needsUpdate = true;
+                // Replace slug with movieId
+                return {
+                  ...file.toObject(),
+                  path: file.path.replace(`/hls/${movie.slug}/`, `/hls/${movieId}/`)
+                };
+              }
+            }
+            return file;
+          });
+        } else if (movie.status === "ready") {
+          // Case 2: Status is "ready" but no HLS entries - add them
+          needsUpdate = true;
+          const hlsBasePath = `/hls/${movieId}`;
+
+          // Keep existing files (like mp4) and add HLS entries
+          updatedContentFiles = [
+            ...movie.contentFiles.filter(f => f.type !== "hls"),
+            { type: "hls", path: `${hlsBasePath}/master.m3u8`, quality: "master" },
+            { type: "hls", path: `${hlsBasePath}/1080p/index.m3u8`, quality: "1080p" },
+            { type: "hls", path: `${hlsBasePath}/720p/index.m3u8`, quality: "720p" },
+            { type: "hls", path: `${hlsBasePath}/480p/index.m3u8`, quality: "480p" }
+          ];
+        }
+
+        if (needsUpdate) {
+          // Update hlsFolder as well
+          const newHlsFolder = `/hls/${movieId}`;
+
+          await Movie.findByIdAndUpdate(movieId, {
+            contentFiles: updatedContentFiles,
+            hlsFolder: newHlsFolder
+          });
+
+          results.updated++;
+          console.log(`✅ Migrated: ${movie.title} (${movie.slug} → ${movieId})`);
+        } else {
+          results.skipped++;
+        }
+      } catch (err) {
+        results.errors.push({
+          movieId: movie._id,
+          title: movie.title,
+          error: err.message
+        });
+        console.error(`❌ Failed to migrate ${movie.title}:`, err);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Migration completed",
+      results
+    });
+  } catch (err) {
+    console.error("Migration error:", err);
+    res.status(500).json({ success: false, message: "Migration failed: " + err.message });
   }
 };
 
