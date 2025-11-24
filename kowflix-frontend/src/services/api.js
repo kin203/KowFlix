@@ -80,5 +80,46 @@ export const analyticsAPI = {
     getUserGrowth: () => api.get('/analytics/user-growth'),
 };
 
+export const categoryAPI = {
+    getAll: () => api.get('/categories'),
+    getActive: () => api.get('/categories/active'),
+    getOne: (id) => api.get(`/categories/${id}`),
+    create: (data) => api.post('/categories', data),
+    update: (id, data) => api.put(`/categories/${id}`, data),
+    delete: (id) => api.delete(`/categories/${id}`),
+    reorder: (categories) => api.post('/categories/reorder', { categories }),
+};
+
+export const userAPI = {
+    getAll: (params) => api.get('/users', { params }),
+    getOne: (id) => api.get(`/users/${id}`),
+    updateRole: (id, role) => api.put(`/users/${id}/role`, { role }),
+    delete: (id) => api.delete(`/users/${id}`),
+};
+
+export const heroAPI = {
+    getAll: (activeOnly = false) => api.get('/hero', { params: { active: activeOnly } }),
+    create: (data) => api.post('/hero', data),
+    update: (id, data) => api.put(`/hero/${id}`, data),
+    delete: (id) => api.delete(`/hero/${id}`),
+    reorder: (banners) => api.post('/hero/reorder', { banners }),
+};
+
+export const reviewAPI = {
+    getAll: (params) => api.get('/reviews', { params }),
+    getMovieReviews: (movieId) => api.get(`/reviews/movie/${movieId}`),
+    create: (data) => api.post('/reviews', data),
+    delete: (id) => api.delete(`/reviews/${id}`),
+};
+
+export const notificationAPI = {
+    getAll: (params) => api.get('/notifications', { params }),
+    getUserNotifications: (userId) => api.get(`/notifications/user/${userId || ''}`),
+    create: (data) => api.post('/notifications', data),
+    markAsRead: (id) => api.put(`/notifications/${id}/read`),
+    delete: (id) => api.delete(`/notifications/${id}`),
+    getStats: () => api.get('/notifications/stats'),
+};
+
 
 export default api;

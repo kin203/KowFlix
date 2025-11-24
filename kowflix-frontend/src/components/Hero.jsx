@@ -8,18 +8,14 @@ const Hero = ({ movie, movies = [] }) => {
     const [showModal, setShowModal] = useState(false);
     const [activeMovie, setActiveMovie] = useState(movie);
 
-    // Update activeMovie when prop changes
     React.useEffect(() => {
         if (movie) setActiveMovie(movie);
     }, [movie]);
 
-    // Fallback if no movie provided
     if (!activeMovie) return null;
 
-    // Extract year from releaseDate
     const year = activeMovie.releaseYear || (activeMovie.releaseDate ? new Date(activeMovie.releaseDate).getFullYear() : '2024');
 
-    // Format runtime
     const formatRuntime = (minutes) => {
         if (!minutes) return null;
         const hours = Math.floor(minutes / 60);
@@ -27,7 +23,6 @@ const Hero = ({ movie, movies = [] }) => {
         return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     };
 
-    // Get top 6 movies for carousel (excluding current if needed, or just first 6)
     const carouselMovies = movies.slice(0, 6);
 
     return (
@@ -43,7 +38,6 @@ const Hero = ({ movie, movies = [] }) => {
                 <div className="hero-content">
                     <h1 className="hero-title">{activeMovie.title}</h1>
 
-                    {/* Movie metadata badges */}
                     <div className="hero-meta">
                         {activeMovie.imdbRating && (
                             <span className="badge badge-rating">
@@ -59,7 +53,6 @@ const Hero = ({ movie, movies = [] }) => {
                         <span className="badge badge-quality">HD</span>
                     </div>
 
-                    {/* Genre tags */}
                     {activeMovie.genres && activeMovie.genres.length > 0 && (
                         <div className="hero-genres">
                             {activeMovie.genres.slice(0, 4).map((genre, index) => (
@@ -68,10 +61,8 @@ const Hero = ({ movie, movies = [] }) => {
                         </div>
                     )}
 
-                    {/* Description */}
                     <p className="hero-description">{activeMovie.description}</p>
 
-                    {/* Action buttons */}
                     <div className="hero-buttons">
                         <Link to={`/watch/${activeMovie._id}`} className="btn-play">
                             <Play fill="black" size={24} />
@@ -86,7 +77,6 @@ const Hero = ({ movie, movies = [] }) => {
                     </div>
                 </div>
 
-                {/* Thumbnail Carousel */}
                 <div className="hero-carousel">
                     {carouselMovies.map((item) => (
                         <div

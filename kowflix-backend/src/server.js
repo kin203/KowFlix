@@ -12,6 +12,11 @@ import encodeRoutes from "./routes/encodeRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import heroRoutes from "./routes/heroRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -51,6 +56,11 @@ app.use("/api", encodeRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/hero", heroRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

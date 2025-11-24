@@ -1,0 +1,226 @@
+.user-management-container {
+    display: flex;
+    min-height: 100vh;
+    background: #000000;
+}
+
+.user-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: 2rem;
+    color: #FFFFFF;
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.user-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    color: #FFFFFF;
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #FFD700;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888888;
+}
+
+/* User Table */
+.user-table-container {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #333333;
+}
+
+.user-table th {
+    background: #222222;
+    color: #888888;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.user-table tr:last-child td {
+    border-bottom: none;
+}
+
+.user-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333333;
+}
+
+.user-details h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+    color: #FFFFFF;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #888888;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-badge.admin {
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.role-badge.user {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-active {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10B981;
+    font-size: 0.875rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #888888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+}
+
+.action-btn.delete:hover {
+    background: rgba(229, 9, 20, 0.15);
+    color: #E50914;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-btn {
+    padding: 0.5rem 1rem;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-btn:not(:disabled):hover {
+    border-color: #FFD700;
+    color: #FFD700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .user-content {
+        margin-left: 70px;
+        padding: 1.5rem;
+    }
+
+    .user-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .user-table th:nth-child(3),
+    .user-table td:nth-child(3) {
+        display: none;
+        /* Hide Last Active on mobile */
+    }
+}

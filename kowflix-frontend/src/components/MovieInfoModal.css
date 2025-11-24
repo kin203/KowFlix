@@ -106,6 +106,7 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    justify-content: flex-start;
 }
 
 /* Golden Play Button - matching Hero */
