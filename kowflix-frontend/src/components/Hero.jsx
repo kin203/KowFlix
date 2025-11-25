@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Info, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MovieInfoModal from './MovieInfoModal';
@@ -8,7 +8,7 @@ const Hero = ({ movie, movies = [] }) => {
     const [showModal, setShowModal] = useState(false);
     const [activeMovie, setActiveMovie] = useState(movie);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (movie) setActiveMovie(movie);
     }, [movie]);
 
@@ -25,14 +25,50 @@ const Hero = ({ movie, movies = [] }) => {
 
     const carouselMovies = movies.slice(0, 6);
 
+    // YouTube embed URL for trailer
+    const getTrailerUrl = (trailerKey) => {
+        if (!trailerKey) return null;
+        return `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&loop=1&playlist=${trailerKey}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`;
+    };
+
+    const trailerUrl = (activeMovie.useTrailer !== false) ? getTrailerUrl(activeMovie.trailerKey) : null;
+
     return (
         <>
-            <div
-                className="hero"
-                style={{
-                    backgroundImage: `url(${activeMovie.background || activeMovie.poster || ''})`
-                }}
-            >
+            <div className="hero">
+                {/* Video Trailer or Backdrop Image */}
+                {trailerUrl ? (
+                    <iframe
+                        className="hero-video"
+                        src={trailerUrl}
+                        title="Movie Trailer"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                ) : (
+                    <div
+                        className="hero-background"
+                        style={{
+                            backgroundImage: `url(${activeMovie.backdrop || activeMovie.background || activeMovie.poster || ''})`
+                        }}
+                    />
+                )}
+
+                {/* Preload trailers for carousel movies */}
+                {carouselMovies.map((m) => {
+                    if (m._id === activeMovie._id || !m.trailerKey || m.useTrailer === false) return null;
+                    return (
+                        <iframe
+                            key={m._id}
+                            src={getTrailerUrl(m.trailerKey)}
+                            title={`Preload ${m.title}`}
+                            style={{ display: 'none' }}
+                            frameBorder="0"
+                        />
+                    );
+                })}
+
                 <div className="hero-overlay"></div>
 
                 <div className="hero-content">
@@ -84,7 +120,7 @@ const Hero = ({ movie, movies = [] }) => {
                             className={`carousel-item ${activeMovie._id === item._id ? 'active' : ''}`}
                             onClick={() => setActiveMovie(item)}
                         >
-                            <img src={item.poster} alt={item.title} />
+                            <img src={item.backdrop || item.poster} alt={item.title} />
                         </div>
                     ))}
                 </div>

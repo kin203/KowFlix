@@ -33,7 +33,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                     <X size={28} />
                 </button>
 
-                <div className="modal-hero" style={{ backgroundImage: `url(${movie.background || movie.poster})` }}>
+                <div className="modal-hero" style={{ backgroundImage: `url(${movie.backdrop || movie.background || movie.poster || ''})` }}>
                     <div className="modal-hero-overlay">
                         <div className="modal-hero-content">
                             <h1 className="modal-title">{movie.title}</h1>

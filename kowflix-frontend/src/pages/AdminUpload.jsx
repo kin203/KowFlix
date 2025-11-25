@@ -17,6 +17,9 @@ const AdminUpload = () => {
         cast: '',
         director: '',
         imdbRating: '',
+        posterUrl: '', // TMDb poster URL
+        backdropUrl: '', // TMDb backdrop URL
+        useTrailer: true, // Toggle trailer
     });
     const [posterFile, setPosterFile] = useState(null);
     const [videoFile, setVideoFile] = useState(null);
@@ -54,7 +57,7 @@ const AdminUpload = () => {
     };
 
     const handleTMDbSelect = (movieData) => {
-        // Auto-fill form with TMDb data
+        // Auto-fill form with TMDb data including poster and backdrop URLs
         setFormData({
             ...formData,
             title: movieData.title || '',
@@ -67,11 +70,14 @@ const AdminUpload = () => {
             cast: movieData.cast?.join(', ') || '',
             director: movieData.director || '',
             imdbRating: movieData.voteAverage || '',
+            posterUrl: movieData.posterPath || '',
+            backdropUrl: movieData.backdropPath || '',
+            useTrailer: true,
         });
 
         setMessage({
             type: 'success',
-            text: `Auto-filled from TMDb: ${movieData.title}. You can now upload poster and video files.`
+            text: `Auto-filled from TMDb: ${movieData.title}. Poster and backdrop loaded automatically. Now upload the video file.`
         });
     };
 
@@ -94,6 +100,9 @@ const AdminUpload = () => {
             if (formData.cast) data.append('cast', formData.cast);
             if (formData.director) data.append('director', formData.director);
             if (formData.imdbRating) data.append('imdbRating', formData.imdbRating);
+            if (formData.posterUrl) data.append('posterUrl', formData.posterUrl);
+            if (formData.backdropUrl) data.append('backdropUrl', formData.backdropUrl);
+            data.append('useTrailer', formData.useTrailer);
 
             if (posterFile) data.append('poster', posterFile);
             if (videoFile) data.append('video', videoFile);
@@ -102,7 +111,21 @@ const AdminUpload = () => {
             setMessage({ type: 'success', text: 'Movie uploaded successfully!' });
 
             // Reset form
-            setFormData({ title: '', description: '', releaseYear: '', genres: '' });
+            setFormData({
+                title: '',
+                description: '',
+                releaseYear: '',
+                genres: '',
+                tmdbId: '',
+                imdbId: '',
+                runtime: '',
+                cast: '',
+                director: '',
+                imdbRating: '',
+                posterUrl: '',
+                backdropUrl: '',
+                useTrailer: true,
+            });
             setPosterFile(null);
             setVideoFile(null);
 
@@ -132,6 +155,9 @@ const AdminUpload = () => {
             cast: movie.cast?.join(', ') || '',
             director: movie.director || '',
             imdbRating: movie.imdbRating?.toString() || '',
+            posterUrl: movie.poster || '',
+            backdropUrl: movie.backdrop || '',
+            useTrailer: movie.useTrailer !== undefined ? movie.useTrailer : true,
         });
         setMessage({ type: 'info', text: `Editing: ${movie.title}` });
         // Scroll to form
@@ -159,6 +185,9 @@ const AdminUpload = () => {
             if (formData.cast) data.append('cast', formData.cast);
             if (formData.director) data.append('director', formData.director);
             if (formData.imdbRating) data.append('imdbRating', formData.imdbRating);
+            if (formData.posterUrl) data.append('posterUrl', formData.posterUrl);
+            if (formData.backdropUrl) data.append('backdropUrl', formData.backdropUrl);
+            data.append('useTrailer', formData.useTrailer);
 
             if (posterFile) data.append('poster', posterFile);
             if (videoFile) data.append('video', videoFile);
@@ -194,6 +223,8 @@ const AdminUpload = () => {
             cast: '',
             director: '',
             imdbRating: '',
+            posterUrl: '',
+            backdropUrl: '',
         });
         setPosterFile(null);
         setVideoFile(null);
@@ -232,6 +263,20 @@ const AdminUpload = () => {
         }
     };
 
+    const handleUpdateTrailer = async (movieId) => {
+        try {
+            setMessage({ type: 'info', text: 'Fetching trailer...' });
+            await movieAPI.update(movieId, {});
+            setMessage({ type: 'success', text: 'Trailer updated successfully!' });
+            fetchMovies();
+        } catch (err) {
+            setMessage({
+                type: 'error',
+                text: err.response?.data?.message || 'Failed to update trailer'
+            });
+        }
+    };
+
     const handleMigration = async () => {
         if (!window.confirm('Migrate all HLS paths from slug-based to movieId-based structure?')) return;
 
@@ -265,14 +310,13 @@ const AdminUpload = () => {
             <div className="admin-dashboard-content">
                 <div className="admin-header">
                     <div>
-                        <h1>Admin Panel</h1>
+                        <h1>Movie Management</h1>
                         <p>Upload and manage movies</p>
                     </div>
                     <button
-                        className="btn-secondary"
+                        className="btn-migrate"
                         onClick={handleMigration}
                         disabled={migrating}
-                        style={{ alignSelf: 'flex-start' }}
                     >
                         {migrating ? 'Migrating...' : '🔄 Migrate HLS Paths'}
                     </button>
@@ -300,7 +344,6 @@ const AdminUpload = () => {
                                 required
                             />
                         </div>
-
                         <div className="form-field">
                             <label>Release Year</label>
                             <input
@@ -331,19 +374,44 @@ const AdminUpload = () => {
                             />
                         </div>
 
+                        <div className="form-field checkbox-field" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    name="useTrailer"
+                                    checked={formData.useTrailer}
+                                    onChange={(e) => setFormData({ ...formData, useTrailer: e.target.checked })}
+                                />
+                                <span style={{ color: '#FFD700', fontWeight: 'bold' }}>Enable Trailer</span> (Auto-play on Hero Banner)
+                            </label>
+                        </div>
+
                         <div className="form-field">
-                            <label>Poster Image</label>
-                            <div className="file-input-wrapper">
-                                <label className="file-input-label">
-                                    Choose File
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange(e, 'poster')}
-                                    />
-                                </label>
-                                {posterFile && <div className="file-name">{posterFile.name}</div>}
-                            </div>
+                            <label>Poster Image {formData.posterUrl && <span className="auto-filled">✓ Auto-filled from TMDb</span>}</label>
+                            {formData.posterUrl ? (
+                                <div className="poster-preview">
+                                    <img src={formData.posterUrl} alt="Poster preview" />
+                                    <button
+                                        type="button"
+                                        className="btn-remove-poster"
+                                        onClick={() => setFormData({ ...formData, posterUrl: '' })}
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="file-input-wrapper">
+                                    <label className="file-input-label">
+                                        Choose File
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleFileChange(e, 'poster')}
+                                        />
+                                    </label>
+                                    {posterFile && <div className="file-name">{posterFile.name}</div>}
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-field">
@@ -372,7 +440,7 @@ const AdminUpload = () => {
                             )}
                         </div>
                     </form>
-                </div>
+                </div >
 
                 <div className="movies-section">
                     <h2>Uploaded Movies ({movies.length})</h2>
@@ -383,6 +451,7 @@ const AdminUpload = () => {
                                 <th>Title</th>
                                 <th>Year</th>
                                 <th>Genres</th>
+                                <th>Trailer</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -402,6 +471,15 @@ const AdminUpload = () => {
                                     <td>{movie.title}</td>
                                     <td>{movie.releaseYear || 'N/A'}</td>
                                     <td>{movie.genres?.join(', ') || 'N/A'}</td>
+                                    <td>
+                                        {movie.trailerKey ? (
+                                            <span className="trailer-status has-trailer">
+                                                {movie.useTrailer ? '✓ Enabled' : '✗ Disabled'}
+                                            </span>
+                                        ) : (
+                                            <span className="trailer-status no-trailer">No Trailer</span>
+                                        )}
+                                    </td>
                                     <td>{movie.status || 'pending'}</td>
                                     <td>
                                         {movie.status !== 'ready' && (
@@ -412,6 +490,16 @@ const AdminUpload = () => {
                                                 style={{ marginRight: '0.5rem' }}
                                             >
                                                 {encoding[movie._id] ? 'Encoding...' : 'Encode'}
+                                            </button>
+                                        )}
+                                        {movie.tmdbId && !movie.trailerKey && (
+                                            <button
+                                                className="btn-trailer"
+                                                onClick={() => handleUpdateTrailer(movie._id)}
+                                                style={{ marginRight: '0.5rem' }}
+                                                title="Fetch trailer from TMDb"
+                                            >
+                                                🎬 Get Trailer
                                             </button>
                                         )}
                                         <button
@@ -433,8 +521,8 @@ const AdminUpload = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

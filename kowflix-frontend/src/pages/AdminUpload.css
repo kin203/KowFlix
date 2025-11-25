@@ -1,6 +1,6 @@
 .admin-page {
     min-height: 100vh;
-    background-color: var(--background-black);
+    background-color: #000000;
     padding: 5rem 4%;
     color: white;
 }
@@ -13,19 +13,52 @@
 }
 
 .admin-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: #FFFFFF;
 }
 
 .admin-header p {
-    color: var(--text-dark-gray);
+    color: #888888;
+    margin: 0;
+}
+
+.btn-migrate {
+    padding: 0.75rem 1.5rem;
+    background: #FFD700;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-migrate:hover {
+    background: #FFC700;
+    transform: translateY(-2px);
+}
+
+.btn-migrate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .upload-section {
-    background-color: rgba(255, 255, 255, 0.05);
+    background: #1A1A1A;
+    border: 1px solid #333333;
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 3rem;
+}
+
+.upload-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #FFFFFF;
+    font-size: 1.5rem;
 }
 
 .upload-form {
@@ -46,22 +79,97 @@
 .form-field label {
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: #888888;
+    font-size: 0.9rem;
+}
+
+.auto-filled {
+    color: #FFD700;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
 }
 
 .form-field input,
 .form-field textarea,
 .form-field select {
     padding: 0.75rem;
-    background-color: var(--input-bg);
-    border: 1px solid #555;
-    border-radius: 4px;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
     color: white;
     font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: #FFD700;
 }
 
 .form-field textarea {
     resize: vertical;
     min-height: 100px;
+}
+
+/* Toggle Switch Styles */
+.checkbox-field {
+    flex-direction: row;
+    align-items: center;
+    grid-column: 1 / -1;
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    width: 100%;
+}
+
+/* Modern Toggle Switch */
+.checkbox-label input[type="checkbox"] {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    appearance: none;
+    background: #555;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background: #FFD700;
+}
+
+.checkbox-label input[type="checkbox"]:checked::before {
+    left: 26px;
+}
+
+.checkbox-label input[type="checkbox"]:hover {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
 .file-input-wrapper {
@@ -71,15 +179,17 @@
 .file-input-label {
     display: inline-block;
     padding: 0.75rem 1.5rem;
-    background-color: var(--input-bg);
-    border: 1px dashed #888;
-    border-radius: 4px;
+    background: #000000;
+    border: 1px dashed #333333;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    color: #888888;
 }
 
 .file-input-label:hover {
-    background-color: #454545;
+    border-color: #FFD700;
+    color: #FFFFFF;
 }
 
 .file-input-label input[type="file"] {
@@ -89,7 +199,36 @@
 .file-name {
     margin-top: 0.5rem;
     font-size: 0.9rem;
-    color: var(--text-dark-gray);
+    color: #888888;
+}
+
+.poster-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.poster-preview img {
+    max-width: 200px;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid #333333;
+}
+
+.btn-remove-poster {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid #E50914;
+    color: #E50914;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-remove-poster:hover {
+    background: #E50914;
+    color: #FFFFFF;
 }
 
 .form-actions {
@@ -99,52 +238,53 @@
 }
 
 .submit-btn {
-    padding: 1rem 2rem;
-    background-color: var(--primary-red);
-    color: white;
+    padding: 0.75rem 1.5rem;
+    background: #FFD700;
+    color: #000000;
     border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .submit-btn:hover {
-    background-color: #f40612;
+    background: #FFC700;
 }
 
 .submit-btn:disabled {
-    background-color: #666;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
 .cancel-btn {
-    padding: 1rem 2rem;
-    background-color: #666;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid #333333;
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .cancel-btn:hover {
-    background-color: #555;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .movies-section h2 {
-    font-size: 2rem;
+    font-size: 1.5rem;
     margin-bottom: 1.5rem;
+    color: #FFFFFF;
 }
 
 .movies-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
     overflow: hidden;
 }
 
@@ -152,75 +292,131 @@
 .movies-table td {
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #333333;
 }
 
 .movies-table th {
-    background-color: rgba(255, 255, 255, 0.1);
-    font-weight: bold;
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    color: #FFFFFF;
 }
 
-.movies-table tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+.movies-table tr:last-child td {
+    border-bottom: none;
+}
+
+.movies-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.movies-table tbody tr:hover {
+    background: rgba(255, 215, 0, 0.05);
 }
 
 .movie-poster-thumb {
     width: 60px;
     height: 90px;
     object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #333333;
+}
+
+/* Trailer Status Indicators */
+.trailer-status {
+    padding: 0.25rem 0.6rem;
     border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.trailer-status.has-trailer {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22C55E;
+    color: #22C55E;
+}
+
+.trailer-status.no-trailer {
+    background: rgba(156, 163, 175, 0.1);
+    border: 1px solid #9CA3AF;
+    color: #9CA3AF;
+}
+
+/* Trailer Button */
+.btn-trailer {
+    padding: 0.5rem 1rem;
+    background: rgba(147, 51, 234, 0.1);
+    border: 1px solid #9333EA;
+    color: #9333EA;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-trailer:hover {
+    background: #9333EA;
+    color: #FFFFFF;
 }
 
 .delete-btn {
     padding: 0.5rem 1rem;
-    background-color: #e50914;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid #E50914;
+    color: #E50914;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
 .delete-btn:hover {
-    background-color: #b20710;
+    background: #E50914;
+    color: #FFFFFF;
 }
 
 .btn-secondary {
     padding: 0.5rem 1rem;
-    background-color: #0080ff;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    color: #FFD700;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
 .btn-secondary:hover {
-    background-color: #0066cc;
+    background: #FFD700;
+    color: #000000;
 }
 
 .btn-secondary:disabled {
-    background-color: #666;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
 .message {
     padding: 1rem;
-    border-radius: 4px;
+    border-radius: 8px;
     margin-bottom: 1rem;
+    border: 1px solid;
 }
 
 .message.success {
-    background-color: rgba(0, 255, 0, 0.1);
-    border: 1px solid green;
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22C55E;
+    color: #22C55E;
 }
 
 .message.error {
-    background-color: rgba(255, 0, 0, 0.1);
-    border: 1px solid red;
+    background: rgba(229, 9, 20, 0.1);
+    border-color: #E50914;
+    color: #E50914;
 }
 
 .message.info {
-    background-color: rgba(0, 123, 255, 0.1);
-    border: 1px solid #007bff;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+    color: #3B82F6;
 }

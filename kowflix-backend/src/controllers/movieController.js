@@ -4,7 +4,7 @@ import path from "path";
 import slugify from "slugify";
 import Movie from "../models/Movie.js";
 import { uploadPoster, uploadVideo } from "../utils/remoteUpload.js";
-import { searchMovies, getMovieDetails } from "../utils/tmdb.js";
+import { searchMovies, getMovieDetails, getMovieTrailer } from "../utils/tmdb.js";
 import { triggerEncode } from "../utils/remoteEncode.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
@@ -105,13 +105,39 @@ export const createMovie = async (req, res) => {
     let videoPath = "";
 
     try {
-      // Upload poster to remote server
-      if (req.files?.poster?.[0]) {
+      // Handle poster: prioritize TMDb URL, fallback to file upload
+      if (req.body.posterUrl) {
+        // Use TMDb poster URL directly
+        posterPath = req.body.posterUrl;
+      } else if (req.files?.poster?.[0]) {
+        // Upload poster to remote server
         const localPosterPath = req.files.poster[0].path;
         posterPath = await uploadPoster(localPosterPath, movieId);
 
         // Delete local temp file
         await fs.unlink(localPosterPath);
+      }
+
+      // Handle backdrop URL from TMDb
+      if (req.body.backdropUrl) {
+        movie.backdrop = req.body.backdropUrl;
+      }
+
+      // Fetch trailer from TMDb if tmdbId is provided
+      if (req.body.tmdbId) {
+        console.log(`[DEBUG] Fetching trailer for TMDb ID: ${req.body.tmdbId}`);
+        const trailerKey = await getMovieTrailer(req.body.tmdbId);
+        if (trailerKey) {
+          console.log(`[DEBUG] Trailer found: ${trailerKey}`);
+          movie.trailerKey = trailerKey;
+        } else {
+          console.log(`[DEBUG] No trailer found for TMDb ID: ${req.body.tmdbId}`);
+        }
+      }
+
+      // Handle useTrailer toggle
+      if (req.body.useTrailer !== undefined) {
+        movie.useTrailer = req.body.useTrailer === 'true' || req.body.useTrailer === true;
       }
 
       // Upload video to remote server
@@ -202,8 +228,38 @@ export const updateMovie = async (req, res) => {
       payload.genres = payload.genres.split(",").map(s => s.trim());
     }
 
-    if (req.files?.poster?.[0]) {
+    // Handle useTrailer toggle
+    if (payload.useTrailer !== undefined) {
+      payload.useTrailer = payload.useTrailer === 'true' || payload.useTrailer === true;
+    }
+
+    // Handle poster: prioritize TMDb URL, fallback to file upload
+    if (payload.posterUrl) {
+      payload.poster = payload.posterUrl;
+      delete payload.posterUrl; // Remove from payload to avoid storing duplicate
+    } else if (req.files?.poster?.[0]) {
       payload.poster = `${mediaBase}/posters/${req.files.poster[0].filename}`;
+    }
+
+    // Handle backdrop URL from TMDb
+    if (payload.backdropUrl) {
+      payload.backdrop = payload.backdropUrl;
+      delete payload.backdropUrl; // Remove from payload to avoid storing duplicate
+    }
+
+    // Fetch trailer from TMDb if tmdbId is provided and no trailer exists
+    if (payload.tmdbId) {
+      const movie = await Movie.findById(req.params.id);
+      if (!movie.trailerKey) {
+        console.log(`[DEBUG] Fetching trailer for existing movie, TMDb ID: ${payload.tmdbId}`);
+        const trailerKey = await getMovieTrailer(payload.tmdbId);
+        if (trailerKey) {
+          console.log(`[DEBUG] Trailer found: ${trailerKey}`);
+          payload.trailerKey = trailerKey;
+        } else {
+          console.log(`[DEBUG] No trailer found for TMDb ID: ${payload.tmdbId}`);
+        }
+      }
     }
 
     if (req.files?.video?.[0]) {
@@ -325,6 +381,7 @@ export const playMovie = async (req, res) => {
         id: movie._id,
         title: movie.title,
         poster: movie.poster,
+        backdrop: movie.backdrop,
         description: movie.description,
         master: masterUrl,  // Add master URL for frontend compatibility
         qualities

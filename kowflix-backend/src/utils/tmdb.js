@@ -19,7 +19,7 @@ export async function searchMovies(query) {
             params: {
                 api_key: TMDB_API_KEY,
                 query: query,
-                language: 'en-US',
+                language: 'vi-VN',
                 page: 1
             }
         });
@@ -50,7 +50,7 @@ export async function getMovieDetails(tmdbId) {
     try {
         const [detailsRes, creditsRes] = await Promise.all([
             axios.get(`${TMDB_BASE_URL}/movie/${tmdbId}`, {
-                params: { api_key: TMDB_API_KEY, language: 'en-US' }
+                params: { api_key: TMDB_API_KEY, language: 'vi-VN' }
             }),
             axios.get(`${TMDB_BASE_URL}/movie/${tmdbId}/credits`, {
                 params: { api_key: TMDB_API_KEY }
@@ -113,3 +113,40 @@ export async function downloadImage(imageUrl) {
         throw new Error('Failed to download image');
     }
 }
+
+/**
+ * Get movie trailer from TMDb
+ * @param {number} tmdbId - TMDb movie ID
+ * @returns {Promise<string|null>} - YouTube video key or null
+ */
+export async function getMovieTrailer(tmdbId) {
+    try {
+        const response = await axios.get(`${TMDB_BASE_URL}/movie/${tmdbId}/videos`, {
+            params: {
+                api_key: TMDB_API_KEY,
+                language: 'vi-VN'
+            }
+        });
+
+        const videos = response.data.results;
+
+        // Find official trailer from YouTube
+        const trailer = videos.find(video =>
+            video.site === 'YouTube' &&
+            video.type === 'Trailer' &&
+            video.official === true
+        );
+
+        // If no official trailer, try to find any trailer
+        const anyTrailer = videos.find(video =>
+            video.site === 'YouTube' &&
+            video.type === 'Trailer'
+        );
+
+        return trailer?.key || anyTrailer?.key || null;
+    } catch (error) {
+        console.error('TMDb trailer fetch error:', error.message);
+        return null; // Return null instead of throwing to allow graceful fallback
+    }
+}
+

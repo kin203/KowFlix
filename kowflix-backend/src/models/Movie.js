@@ -61,6 +61,8 @@ const MovieSchema = new mongoose.Schema({
   voteAverage: { type: Number }, // TMDb vote average
   voteCount: { type: Number }, // TMDb vote count
   tagline: { type: String }, // Movie tagline
+  trailerKey: { type: String, default: "" }, // YouTube trailer key from TMDb
+  useTrailer: { type: Boolean, default: true }, // Toggle to enable/disable trailer
 
   // trạng thái encode
   status: { type: String, enum: ["draft", "processing", "ready", "error"], default: "draft" },

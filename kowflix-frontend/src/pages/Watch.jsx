@@ -85,7 +85,7 @@ const Watch = () => {
                 <div className="player-wrapper">
                     <VideoPlayer
                         src={hlsUrl}
-                        poster={movie.poster}
+                        poster={movie.backdrop || movie.poster}
                         onProgress={handleProgress}
                         initialTime={initialTime}
                         movieId={id}

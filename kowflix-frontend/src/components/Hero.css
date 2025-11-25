@@ -2,10 +2,40 @@
     height: 85vh;
     width: 100%;
     position: relative;
-    background-size: cover;
-    background-position: center;
     color: white;
     margin-bottom: 2rem;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.hero-video,
+.hero-background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+}
+
+/* Scale video to fill container */
+.hero-video {
+    width: 100vw;
+    height: 56.25vw;
+    /* 16:9 aspect ratio */
+    min-height: 100vh;
+    min-width: 177.77vh;
+    /* 16:9 aspect ratio */
+}
+
+.hero-background {
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+    height: 100%;
 }
 
 .hero-overlay {
@@ -14,8 +44,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to top, #141414 0%, transparent 60%),
-        linear-gradient(to right, #141414 0%, transparent 50%);
+    background:
+        linear-gradient(to top, #141414 0%, rgba(20, 20, 20, 0.8) 40%, transparent 70%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0.4) 50%, transparent 70%);
+    z-index: 1;
 }
 
 .hero-content {
@@ -91,6 +123,7 @@
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+    line-clamp: 3;
     overflow: hidden;
     color: #e0e0e0;
 }
@@ -159,8 +192,8 @@
 }
 
 .carousel-item {
-    width: 60px;
-    height: 90px;
+    width: 120px;
+    height: 68px;
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
@@ -194,6 +227,22 @@
     .hero-title {
         font-size: 3rem;
     }
+
+    .hero-description {
+        font-size: 1rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .btn-play {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+    }
+
+    .carousel-item {
+        width: 100px;
+        height: 56px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -202,31 +251,39 @@
     }
 
     .hero-content {
-        max-width: 90%;
-        top: 45%;
+        max-width: 85%;
+        top: 35%;
     }
 
     .hero-title {
-        font-size: 2.2rem;
+        font-size: 2rem;
     }
 
     .hero-description {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 
     .btn-play {
-        padding: 0.7rem 1.8rem;
-        font-size: 1rem;
+        padding: 0.65rem 1.5rem;
+        font-size: 0.95rem;
     }
 
     .btn-favorite,
     .btn-info {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
     }
 
     .hero-carousel {
-        display: none;
+        bottom: 20px;
+        right: 2%;
+        gap: 8px;
+    }
+
+    .carousel-item {
+        width: 80px;
+        height: 45px;
     }
 }
