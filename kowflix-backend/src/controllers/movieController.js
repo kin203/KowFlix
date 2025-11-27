@@ -641,3 +641,63 @@ export const getTMDbDetails = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ====================== STREAM MP4 WITH RANGE SUPPORT ======================
+export const streamMP4 = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movie = await Movie.findById(id);
+
+    if (!movie) {
+      return res.status(404).json({ success: false, message: "Movie not found" });
+    }
+
+    // Find MP4 file
+    const mp4File = movie.contentFiles.find(f => f.type === "mp4");
+    if (!mp4File) {
+      return res.status(404).json({ success: false, message: "MP4 file not found" });
+    }
+
+    // Construct file path
+    const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || "/media/DATA/kowflix";
+    const filePath = `${REMOTE_MEDIA_ROOT}${mp4File.path.replace('/media', '')}`;
+
+    // Check if file exists (using fs from 'fs/promises')
+    const fsSync = await import('fs');
+    const stat = await fs.stat(filePath);
+    const fileSize = stat.size;
+
+    // Parse Range header
+    const range = req.headers.range;
+
+    if (!range) {
+      // No range requested, send entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+      };
+      res.writeHead(200, head);
+      fsSync.default.createReadStream(filePath).pipe(res);
+    } else {
+      // Range requested
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mp4',
+      };
+
+      res.writeHead(206, head);
+      const stream = fsSync.default.createReadStream(filePath, { start, end });
+      stream.pipe(res);
+    }
+  } catch (error) {
+    console.error("Stream MP4 error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

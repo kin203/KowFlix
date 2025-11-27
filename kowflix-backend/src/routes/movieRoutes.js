@@ -9,7 +9,8 @@ import {
   playMovie,
   searchTMDb,
   getTMDbDetails,
-  migrateHlsPaths
+  migrateHlsPaths,
+  streamMP4
 } from "../controllers/movieController.js";
 
 import auth from "../middleware/auth.js";
@@ -26,6 +27,7 @@ router.get("/tmdb/:tmdbId", getTMDbDetails);
 router.get("/", listMovies);
 router.get("/:id", getMovie);
 router.get("/:id/play", playMovie);
+router.get("/:id/stream", streamMP4); // MP4 streaming with range support
 
 
 router.post(
