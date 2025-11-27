@@ -1,5 +1,5 @@
 .hero {
-    height: 85vh;
+    height: 90vh;
     width: 100%;
     position: relative;
     color: white;
@@ -25,10 +25,8 @@
 .hero-video {
     width: 100vw;
     height: 56.25vw;
-    /* 16:9 aspect ratio */
     min-height: 100vh;
     min-width: 177.77vh;
-    /* 16:9 aspect ratio */
 }
 
 .hero-background {
@@ -59,18 +57,22 @@
 }
 
 .hero-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 800;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
     line-height: 1.1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .hero-meta {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     flex-wrap: wrap;
 }
 
@@ -102,7 +104,7 @@
 .hero-genres {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     flex-wrap: wrap;
 }
 
@@ -116,14 +118,13 @@
 }
 
 .hero-description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-clamp: 3;
     overflow: hidden;
     color: #e0e0e0;
 }
@@ -157,7 +158,6 @@
     box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
 }
 
-.btn-favorite,
 .btn-info {
     background-color: rgba(42, 42, 42, 0.8);
     color: white;
@@ -172,8 +172,27 @@
     transition: all 0.3s ease;
 }
 
-.btn-favorite:hover,
 .btn-info:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.btn-favorite {
+    background-color: rgba(42, 42, 42, 0.8);
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-favorite:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
     transform: scale(1.1);
@@ -225,13 +244,11 @@
     }
 
     .hero-title {
-        font-size: 3rem;
+        font-size: 2.5rem;
     }
 
     .hero-description {
-        font-size: 1rem;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
+        font-size: 0.95rem;
     }
 
     .btn-play {
@@ -252,7 +269,7 @@
 
     .hero-content {
         max-width: 85%;
-        top: 35%;
+        top: 30%;
     }
 
     .hero-title {
@@ -261,8 +278,6 @@
 
     .hero-description {
         font-size: 0.9rem;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
     }
 
     .btn-play {
@@ -270,8 +285,8 @@
         font-size: 0.95rem;
     }
 
-    .btn-favorite,
-    .btn-info {
+    .btn-info,
+    .btn-favorite {
         width: 40px;
         height: 40px;
     }

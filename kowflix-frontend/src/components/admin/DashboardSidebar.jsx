@@ -8,6 +8,7 @@ import {
     Star,
     Image,
     Bell,
+    Briefcase,
     LogOut,
     Settings
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const DashboardSidebar = () => {
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/movies', icon: Film, label: 'Quản lý Phim' },
         { path: '/admin/categories', icon: Grid, label: 'Danh mục' },
+        { path: '/admin/jobs', icon: Briefcase, label: 'Công việc' },
         { path: '/admin/users', icon: Users, label: 'Người dùng' },
         { path: '/admin/reviews', icon: Star, label: 'Đánh giá' },
         { path: '/admin/hero', icon: Image, label: 'Hero Banner' },

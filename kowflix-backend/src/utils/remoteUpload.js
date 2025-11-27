@@ -77,3 +77,104 @@ export async function uploadVideo(localPath, movieId) {
         await sftp.end();
     }
 }
+
+/**
+ * Delete file from remote server
+ * @param {string} remotePath - Remote file path (e.g., /media/DATA/kowflix/uploads/xxx.mp4)
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteRemoteFile(remotePath) {
+    const sftp = new SftpClient();
+
+    try {
+        await sftp.connect({
+            host: REMOTE_HOST,
+            port: 22,
+            username: REMOTE_USER,
+            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+        });
+
+        const exists = await sftp.exists(remotePath);
+        if (exists) {
+            await sftp.delete(remotePath);
+            console.log(`✅ Deleted file: ${remotePath}`);
+            return true;
+        } else {
+            console.log(`⚠️ File not found: ${remotePath}`);
+            return false;
+        }
+    } catch (err) {
+        console.error('❌ File deletion failed:', err);
+        return false;
+    } finally {
+        await sftp.end();
+    }
+}
+
+/**
+ * Delete directory from remote server (recursive)
+ * @param {string} remotePath - Remote directory path
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteRemoteDirectory(remotePath) {
+    const sftp = new SftpClient();
+
+    try {
+        await sftp.connect({
+            host: REMOTE_HOST,
+            port: 22,
+            username: REMOTE_USER,
+            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+        });
+
+        const exists = await sftp.exists(remotePath);
+        if (exists) {
+            await sftp.rmdir(remotePath, true); // recursive delete
+            console.log(`✅ Deleted directory: ${remotePath}`);
+            return true;
+        } else {
+            console.log(`⚠️ Directory not found: ${remotePath}`);
+            return false;
+        }
+    } catch (err) {
+        console.error('❌ Directory deletion failed:', err);
+        return false;
+    } finally {
+        await sftp.end();
+    }
+}
+
+/**
+ * Delete all movie files (video, poster, HLS folder)
+ * @param {string} movieId - Movie ID
+ * @param {object} movie - Movie object with file paths
+ * @returns {Promise<void>}
+ */
+export async function deleteMovieFiles(movieId, movie) {
+    const deletionPromises = [];
+
+    // Delete video file
+    if (movie.contentFiles && movie.contentFiles.length > 0) {
+        const videoFile = movie.contentFiles.find(f => f.type === 'mp4');
+        if (videoFile && videoFile.path) {
+            const videoPath = `${REMOTE_MEDIA_ROOT}${videoFile.path.replace('/media', '')}`;
+            deletionPromises.push(deleteRemoteFile(videoPath));
+        }
+    }
+
+    // Delete poster (if not from TMDb)
+    if (movie.poster && !movie.poster.startsWith('http')) {
+        const posterPath = `${REMOTE_MEDIA_ROOT}${movie.poster.replace('/media', '')}`;
+        deletionPromises.push(deleteRemoteFile(posterPath));
+    }
+
+    // Delete HLS folder
+    if (movie.hlsFolder) {
+        const hlsPath = `${REMOTE_MEDIA_ROOT}${movie.hlsFolder.replace('/media', '')}`;
+        deletionPromises.push(deleteRemoteDirectory(hlsPath));
+    }
+
+    // Execute all deletions
+    await Promise.allSettled(deletionPromises);
+    console.log(`✅ Cleaned up files for movie: ${movieId}`);
+}

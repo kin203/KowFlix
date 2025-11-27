@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const mediaRoot = process.env.MEDIA_ROOT || path.join(__dirname, "..", "..", "media");
 const posterDir = process.env.POSTER_DIR || path.join(mediaRoot, "posters");
 const uploadDir = process.env.UPLOAD_DIR || path.join(mediaRoot, "uploads");
+const subtitleDir = process.env.SUBTITLE_DIR || path.join(mediaRoot, "subtitles");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -14,6 +15,9 @@ const storage = multer.diskStorage({
       cb(null, posterDir);
     } else if (file.fieldname === "video") {
       cb(null, uploadDir);
+    } else if (file.fieldname.startsWith("subtitle")) {
+      // subtitle_en, subtitle_vi, etc.
+      cb(null, subtitleDir);
     } else {
       cb(new Error("Invalid field name"), null);
     }

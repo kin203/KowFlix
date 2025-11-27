@@ -20,15 +20,12 @@
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE and Edge */
     padding: 0.5rem 0;
 }
 
 .category-slider::-webkit-scrollbar {
     display: none;
-    /* Chrome, Safari, Opera */
 }
 
 .category-card {
@@ -44,7 +41,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .category-card::before {
@@ -57,15 +54,27 @@
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
+    border-radius: 12px;
 }
 
 .category-card:hover::before {
     opacity: 1;
 }
 
+/* Glow effect on hover - giống Hero button */
 .category-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
+    box-shadow:
+        0 0 20px currentColor,
+        0 0 40px currentColor,
+        0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.category-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .category-name {
@@ -84,6 +93,12 @@
     opacity: 0.9;
     position: relative;
     z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover .category-link {
+    opacity: 1;
+    gap: 0.5rem;
 }
 
 /* Navigation Buttons */
@@ -170,6 +185,5 @@
 
     .category-nav-btn {
         display: none;
-        /* Hide navigation buttons on very small screens */
     }
 }

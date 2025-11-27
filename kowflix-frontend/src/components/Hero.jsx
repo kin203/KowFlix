@@ -104,11 +104,11 @@ const Hero = ({ movie, movies = [] }) => {
                             <Play fill="black" size={24} />
                             <span>Xem ngay</span>
                         </Link>
-                        <button className="btn-favorite">
-                            <Heart size={24} />
-                        </button>
                         <button className="btn-info" onClick={() => setShowModal(true)}>
                             <Info size={24} />
+                        </button>
+                        <button className="btn-favorite">
+                            <Heart size={24} />
                         </button>
                     </div>
                 </div>

@@ -45,6 +45,7 @@ const MovieSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, index: true },
   description: { type: String, default: "" },
   genres: { type: [String], default: [] },
+  categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   poster: { type: String, default: "" },
   backdrop: { type: String, default: "" }, // NEW: backdrop image
   duration: { type: Number, default: 0 },
@@ -70,6 +71,14 @@ const MovieSchema = new mongoose.Schema({
   thumbnails: { type: [String], default: [] },
 
   contentFiles: { type: [ContentFileSchema], default: [] },
+
+  // Subtitles
+  subtitles: [{
+    language: { type: String, required: true }, // 'en', 'vi', etc.
+    label: { type: String, required: true }, // 'English', 'Tiếng Việt'
+    path: { type: String, required: true }, // Path to .vtt file
+    default: { type: Boolean, default: false } // Default subtitle track
+  }],
 
   createdAt: { type: Date, default: Date.now }
 });

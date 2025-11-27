@@ -3,7 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 import slugify from "slugify";
 import Movie from "../models/Movie.js";
-import { uploadPoster, uploadVideo } from "../utils/remoteUpload.js";
+import Job from "../models/Job.js";
+import { uploadPoster, uploadVideo, deleteMovieFiles } from "../utils/remoteUpload.js";
 import { searchMovies, getMovieDetails, getMovieTrailer } from "../utils/tmdb.js";
 import { triggerEncode } from "../utils/remoteEncode.js";
 
@@ -104,6 +105,12 @@ export const createMovie = async (req, res) => {
     let posterPath = "";
     let videoPath = "";
 
+    // Debug logging
+    console.log('📝 [CREATE MOVIE] Request received');
+    console.log('📝 [CREATE MOVIE] Files:', req.files);
+    console.log('📝 [CREATE MOVIE] Has video?', !!req.files?.video?.[0]);
+    console.log('📝 [CREATE MOVIE] Has poster?', !!req.files?.poster?.[0]);
+
     try {
       // Handle poster: prioritize TMDb URL, fallback to file upload
       if (req.body.posterUrl) {
@@ -143,29 +150,118 @@ export const createMovie = async (req, res) => {
       // Upload video to remote server
       if (req.files?.video?.[0]) {
         const localVideoPath = req.files.video[0].path;
-        videoPath = await uploadVideo(localVideoPath, movieId);
+        const fileSize = `${(req.files.video[0].size / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 
-        // Delete local temp file
-        await fs.unlink(localVideoPath);
+        // Create upload job
+        const uploadJob = await Job.create({
+          type: 'upload',
+          movieId: movie._id,
+          movieTitle: movie.title,
+          status: 'uploading',
+          fileSize,
+          progress: 0
+        });
+
+        try {
+          videoPath = await uploadVideo(localVideoPath, movieId);
+
+          // Update upload job to completed
+          await Job.findByIdAndUpdate(uploadJob._id, {
+            status: 'completed',
+            progress: 100,
+            completedTime: new Date()
+          });
+
+          // Delete local temp file
+          await fs.unlink(localVideoPath);
+        } catch (uploadError) {
+          // Update upload job to failed
+          await Job.findByIdAndUpdate(uploadJob._id, {
+            status: 'failed',
+            error: uploadError.message,
+            completedTime: new Date()
+          });
+          throw uploadError;
+        }
       }
 
       // Update movie with remote paths
       movie.poster = posterPath;
       movie.contentFiles = videoPath ? [{ type: "mp4", path: videoPath, quality: "720p" }] : [];
 
+      // Handle subtitles
+      const subtitles = [];
+      if (req.files) {
+        // Check for subtitle files (subtitle_en, subtitle_vi, etc.)
+        Object.keys(req.files).forEach(fieldname => {
+          if (fieldname.startsWith('subtitle_')) {
+            const language = fieldname.replace('subtitle_', ''); // 'en', 'vi'
+            const file = req.files[fieldname][0];
+            const subtitlePath = `/media/subtitles/${file.filename}`;
+
+            // Determine label based on language code
+            const labels = {
+              'en': 'English',
+              'vi': 'Tiếng Việt',
+              'zh': '中文',
+              'ja': '日本語',
+              'ko': '한국어'
+            };
+
+            subtitles.push({
+              language: language,
+              label: labels[language] || language.toUpperCase(),
+              path: subtitlePath,
+              default: language === 'vi' // Vietnamese default for Vietnamese movies
+            });
+
+            console.log(`✅ Added subtitle: ${labels[language] || language} (${subtitlePath})`);
+          }
+        });
+      }
+
+      movie.subtitles = subtitles;
+
       // If video uploaded, trigger auto-encode
       if (videoPath) {
         movie.status = "processing";
         await movie.save();
+
+        // Create encode job
+        const encodeJob = await Job.create({
+          type: 'encode',
+          movieId: movie._id,
+          movieTitle: movie.title,
+          status: 'encoding',
+          progress: 0
+        });
 
         // Convert relative path to absolute path on remote server
         const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || "/media/DATA/kowflix";
         const absoluteVideoPath = `${REMOTE_MEDIA_ROOT}${videoPath.replace('/media', '')}`;
 
         // Trigger encode with movieId (server creates folder with movieId)
-        triggerEncode(absoluteVideoPath, movieId)
+        triggerEncode(absoluteVideoPath, movieId, async (progress) => {
+          // Update encode job progress in real-time
+          try {
+            await Job.findByIdAndUpdate(encodeJob._id, {
+              progress: progress,
+              status: progress >= 100 ? 'completed' : 'encoding'
+            });
+            console.log(`📊 Encode progress for ${movie.title}: ${progress}%`);
+          } catch (err) {
+            console.error('Failed to update job progress:', err);
+          }
+        })
           .then(async () => {
             console.log(`✅ Auto-encode completed for: ${movie.title} (${movieId})`);
+
+            // Update encode job to completed
+            await Job.findByIdAndUpdate(encodeJob._id, {
+              status: 'completed',
+              progress: 100,
+              completedTime: new Date()
+            });
 
             // Update movie with HLS paths (using movieId as folder name)
             const hlsBasePath = `/hls/${movieId}`;
@@ -182,8 +278,16 @@ export const createMovie = async (req, res) => {
             });
             console.log(`✅ Movie ready: ${movie.title} (${movieId})`);
           })
-          .catch((err) => {
+          .catch(async (err) => {
             console.error(`❌ Auto-encode failed for ${movie.title} (${movieId}):`, err);
+
+            // Update encode job to failed
+            await Job.findByIdAndUpdate(encodeJob._id, {
+              status: 'failed',
+              error: err.message,
+              completedTime: new Date()
+            });
+
             Movie.findByIdAndUpdate(movieId, { status: "error" }).catch(e => console.error(e));
           });
 
@@ -284,13 +388,20 @@ export const deleteMovie = async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ success: false, message: "Not found" });
 
-    // Delete poster
+    // Delete files from remote server
+    try {
+      console.log(`🗑️ Deleting remote files for movie: ${movie.title}`);
+      await deleteMovieFiles(req.params.id, movie);
+    } catch (remoteErr) {
+      console.error('Remote file deletion error:', remoteErr);
+      // Continue even if remote deletion fails
+    }
+
+    // Delete local files (if any)
     try {
       const mediaRoot = process.env.MEDIA_ROOT || path.join(process.cwd(), "media");
 
-      if (movie.poster) {
-        // movie.poster might be "/posters/xxx.jpg" or "/media/posters/xxx.jpg"
-        // We want to resolve it against MEDIA_ROOT
+      if (movie.poster && !movie.poster.startsWith('http')) {
         const rel = movie.poster.replace(/^\/media\//, "").replace(/^\//, "");
         await fs.rm(path.join(mediaRoot, rel), { force: true });
       }
@@ -300,10 +411,13 @@ export const deleteMovie = async (req, res) => {
         await fs.rm(path.join(mediaRoot, rel), { force: true });
       }
     } catch (e) {
-      console.warn("File delete warning:", e.message);
+      console.warn("Local file delete warning:", e.message);
     }
 
+    // Delete movie from database
     await movie.deleteOne();
+
+    console.log(`✅ Movie deleted: ${movie.title}`);
     res.json({ success: true, message: "Deleted" });
   } catch (err) {
     console.error(err);

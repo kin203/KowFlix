@@ -23,9 +23,12 @@ const AdminUpload = () => {
     });
     const [posterFile, setPosterFile] = useState(null);
     const [videoFile, setVideoFile] = useState(null);
+    const [subtitleEN, setSubtitleEN] = useState(null); // English subtitle
+    const [subtitleVI, setSubtitleVI] = useState(null); // Vietnamese subtitle
     const [movies, setMovies] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [encoding, setEncoding] = useState({});
     const [editingMovie, setEditingMovie] = useState(null); // Track which movie is being edited
     const [migrating, setMigrating] = useState(false);
@@ -107,7 +110,18 @@ const AdminUpload = () => {
             if (posterFile) data.append('poster', posterFile);
             if (videoFile) data.append('video', videoFile);
 
-            await movieAPI.create(data);
+            // Add subtitle files
+            if (subtitleEN) data.append('subtitle_en', subtitleEN);
+            if (subtitleVI) data.append('subtitle_vi', subtitleVI);
+
+            // Upload with progress tracking
+            await movieAPI.create(data, {
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                }
+            });
+
             setMessage({ type: 'success', text: 'Movie uploaded successfully!' });
 
             // Reset form
@@ -128,6 +142,8 @@ const AdminUpload = () => {
             });
             setPosterFile(null);
             setVideoFile(null);
+            setSubtitleEN(null);
+            setSubtitleVI(null);
 
             // Refresh movie list
             fetchMovies();
@@ -138,6 +154,7 @@ const AdminUpload = () => {
             });
         } finally {
             setUploading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -428,6 +445,60 @@ const AdminUpload = () => {
                                 {videoFile && <div className="file-name">{videoFile.name}</div>}
                             </div>
                         </div>
+
+                        {/* Subtitle Files */}
+                        <div className="form-row">
+                            <div className="form-field">
+                                <label>English Subtitle (.vtt or .srt)</label>
+                                <div className="file-input-wrapper">
+                                    <label className="file-input-label">
+                                        Choose File
+                                        <input
+                                            type="file"
+                                            accept=".vtt,.srt"
+                                            onChange={(e) => setSubtitleEN(e.target.files[0])}
+                                        />
+                                    </label>
+                                    {subtitleEN && <div className="file-name">{subtitleEN.name}</div>}
+                                </div>
+                            </div>
+
+                            <div className="form-field">
+                                <label>Vietnamese Subtitle (.vtt or .srt)</label>
+                                <div className="file-input-wrapper">
+                                    <label className="file-input-label">
+                                        Choose File
+                                        <input
+                                            type="file"
+                                            accept=".vtt,.srt"
+                                            onChange={(e) => setSubtitleVI(e.target.files[0])}
+                                        />
+                                    </label>
+                                    {subtitleVI && <div className="file-name">{subtitleVI.name}</div>}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Upload Progress Bar */}
+                        {uploading && uploadProgress > 0 && (
+                            <div className="upload-progress-container">
+                                <div className="progress-info">
+                                    <span>Uploading...</span>
+                                    <span>{uploadProgress}%</span>
+                                </div>
+                                <div className="progress-bar">
+                                    <div
+                                        className="progress-fill"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                                <div className="progress-message">
+                                    {uploadProgress < 100
+                                        ? 'Uploading files to server...'
+                                        : 'Processing... This may take a few minutes for large files.'}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="form-actions">
                             <button type="submit" className="submit-btn" disabled={uploading}>

@@ -17,6 +17,7 @@ import userRoutes from "./routes/userRoutes.js";
 import heroRoutes from "./routes/heroRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
 
 dotenv.config();
 
@@ -27,7 +28,8 @@ const dirs = [
   process.env.UPLOAD_DIR || path.join(MEDIA_ROOT, "uploads"),
   process.env.POSTER_DIR || path.join(MEDIA_ROOT, "posters"),
   process.env.HLS_DIR || path.join(MEDIA_ROOT, "hls"),
-  process.env.THUMB_DIR || path.join(MEDIA_ROOT, "thumbnails")
+  process.env.THUMB_DIR || path.join(MEDIA_ROOT, "thumbnails"),
+  process.env.SUBTITLE_DIR || path.join(MEDIA_ROOT, "subtitles")
 ];
 
 dirs.forEach(dir => {
@@ -61,6 +63,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/jobs", jobRoutes);
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

@@ -89,6 +89,7 @@ const Watch = () => {
                         onProgress={handleProgress}
                         initialTime={initialTime}
                         movieId={id}
+                        subtitles={movie.subtitles || []}
                     />
                     <div className="movie-info">
                         <h1>{movie.title}</h1>

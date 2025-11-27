@@ -7,10 +7,21 @@ const CategorySchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        default: ''
+    },
     color: {
         type: String,
         required: true,
-        default: '#FFD700' // Yellow default
+        default: '#FFD700'
     },
     link: {
         type: String,
@@ -19,7 +30,11 @@ const CategorySchema = new mongoose.Schema({
     },
     icon: {
         type: String,
-        default: '🎬' // Default emoji icon
+        default: '🎬'
+    },
+    backgroundImage: {
+        type: String,
+        default: ''
     },
     order: {
         type: Number,
@@ -35,7 +50,21 @@ const CategorySchema = new mongoose.Schema({
     }
 });
 
-// Index for sorting
+// Virtual for movie count
+CategorySchema.virtual('movieCount', {
+    ref: 'Movie',
+    localField: '_id',
+    foreignField: 'categories',
+    count: true
+});
+
+// Ensure virtuals are included in JSON
+CategorySchema.set('toJSON', { virtuals: true });
+CategorySchema.set('toObject', { virtuals: true });
+
+// Index for sorting and queries
 CategorySchema.index({ order: 1, createdAt: 1 });
+CategorySchema.index({ slug: 1 });
+CategorySchema.index({ isActive: 1 });
 
 export default mongoose.models.Category || mongoose.model('Category', CategorySchema);

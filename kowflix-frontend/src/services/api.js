@@ -41,12 +41,13 @@ export const movieAPI = {
     getAll: (params) => api.get('/movies', { params }),
     getOne: (id) => api.get(`/movies/${id}`),
     play: (id) => api.get(`/movies/${id}/play`),
-    create: (formData) => {
+    create: (formData, config = {}) => {
         return axios.post(`${API_URL}/movies`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
+            ...config
         });
     },
     update: (id, formData) => {
@@ -119,6 +120,15 @@ export const notificationAPI = {
     markAsRead: (id) => api.put(`/notifications/${id}/read`),
     delete: (id) => api.delete(`/notifications/${id}`),
     getStats: () => api.get('/notifications/stats'),
+};
+
+export const jobAPI = {
+    getAll: (params) => api.get('/jobs', { params }),
+    getOne: (id) => api.get(`/jobs/${id}`),
+    create: (data) => api.post('/jobs', data),
+    updateProgress: (id, data) => api.put(`/jobs/${id}/progress`, data),
+    delete: (id) => api.delete(`/jobs/${id}`),
+    cleanup: () => api.post('/jobs/cleanup'),
 };
 
 

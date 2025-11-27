@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
-import { categoryAPI } from '../services/api';
-import { Plus, Edit2, Trash2, X, Move } from 'lucide-react';
 import './CategoryManagement.css';
 
 const CategoryManagement = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+    const [showModal, setShowModal] = useState(false);
+    const [showIconPicker, setShowIconPicker] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
+        slug: '',
+        description: '',
         color: '#FFD700',
         link: '',
         icon: '🎬',
+        backgroundImage: '',
         order: 0,
         isActive: true
     });
+
+    const availableIcons = [
+        '🎬', '🎥', '🎞️', '📽️', '🎭', '🎪',
+        '💥', '😄', '💕', '👻', '🚀', '🎨',
+        '🦸', '📺', '🇻🇳', '⏰', '👘', '🇰🇷',
+        '🎌', '🔥', '⚡', '✨', '🌟', '💫',
+        '🎯', '🎮', '🎲', '🎰', '🏆', '🎖️',
+        '❤️', '💛', '💚', '💙', '💜', '🖤'
+    ];
 
     useEffect(() => {
         fetchCategories();
@@ -24,189 +37,338 @@ const CategoryManagement = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await categoryAPI.getAll();
-            if (response.data.success) {
-                setCategories(response.data.data);
-            }
+            const token = localStorage.getItem('token');
+            const { data } = await axios.get('http://localhost:5000/api/categories', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCategories(data.data || []);
         } catch (error) {
             console.error('Failed to fetch categories:', error);
+            setMessage({ type: 'error', text: 'Failed to load categories' });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleOpenModal = (category = null) => {
-        if (category) {
-            setEditingCategory(category);
-            setFormData({
-                name: category.name,
-                color: category.color,
-                link: category.link,
-                icon: category.icon,
-                order: category.order,
-                isActive: category.isActive
-            });
-        } else {
-            setEditingCategory(null);
-            setFormData({
-                name: '',
-                color: '#FFD700',
-                link: '',
-                icon: '🎬',
-                order: categories.length,
-                isActive: true
-            });
-        }
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingCategory(null);
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMessage({ type: '', text: '' });
+
         try {
+            const token = localStorage.getItem('token');
+
             if (editingCategory) {
-                await categoryAPI.update(editingCategory._id, formData);
+                await axios.put(
+                    `http://localhost:5000/api/categories/${editingCategory._id}`,
+                    formData,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setMessage({ type: 'success', text: 'Category updated successfully!' });
             } else {
-                await categoryAPI.create(formData);
+                await axios.post(
+                    'http://localhost:5000/api/categories',
+                    formData,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setMessage({ type: 'success', text: 'Category created successfully!' });
             }
+
             fetchCategories();
             handleCloseModal();
         } catch (error) {
-            console.error('Failed to save category:', error);
-            alert(error.response?.data?.message || 'Failed to save category');
+            setMessage({
+                type: 'error',
+                text: error.response?.data?.message || 'Operation failed'
+            });
         }
+    };
+
+    const handleEdit = (category) => {
+        setEditingCategory(category);
+        setFormData({
+            name: category.name || '',
+            slug: category.slug || '',
+            description: category.description || '',
+            color: category.color || '#FFD700',
+            link: category.link || '',
+            icon: category.icon || '🎬',
+            backgroundImage: category.backgroundImage || '',
+            order: category.order || 0,
+            isActive: category.isActive !== undefined ? category.isActive : true
+        });
+        setShowModal(true);
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this category?')) {
-            try {
-                await categoryAPI.delete(id);
-                fetchCategories();
-            } catch (error) {
-                console.error('Failed to delete category:', error);
-                alert('Failed to delete category');
-            }
+        if (!window.confirm('Are you sure you want to delete this category?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:5000/api/categories/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessage({ type: 'success', text: 'Category deleted successfully!' });
+            fetchCategories();
+        } catch (error) {
+            setMessage({
+                type: 'error',
+                text: error.response?.data?.message || 'Delete failed'
+            });
         }
     };
 
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingCategory(null);
+        setFormData({
+            name: '',
+            slug: '',
+            description: '',
+            color: '#FFD700',
+            link: '',
+            icon: '🎬',
+            backgroundImage: '',
+            order: 0,
+            isActive: true
+        });
+    };
+
+
+    const generateSlug = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    };
+
+    const handleNameChange = (e) => {
+        const name = e.target.value;
+        setFormData({
+            ...formData,
+            name,
+            slug: generateSlug(name)
+        });
+    };
+
     return (
-        <div className="category-management-container">
+        <div className="admin-dashboard-container">
             <DashboardSidebar />
-            <div className="category-content">
-                <div className="category-header">
-                    <h1>Quản lý Danh mục</h1>
-                    <button className="btn-add" onClick={() => handleOpenModal()}>
-                        <Plus size={20} />
-                        Thêm Danh mục
+            <div className="admin-dashboard-content">
+                <div className="admin-header">
+                    <div>
+                        <h1>Category Management</h1>
+                        <p>Manage movie categories</p>
+                    </div>
+                    <button className="btn-add" onClick={() => setShowModal(true)}>
+                        + Add Category
                     </button>
                 </div>
 
-                {loading ? (
-                    <div className="dashboard-loading">
-                        <div className="loading-spinner"></div>
-                        <p>Đang tải dữ liệu...</p>
-                    </div>
-                ) : (
-                    <div className="category-grid">
-                        {categories.map((category) => (
-                            <div key={category._id} className="category-card" style={{ borderLeft: `4px solid ${category.color}` }}>
-                                <div className="category-icon" style={{ color: category.color }}>
-                                    {category.icon}
-                                </div>
-                                <div className="category-info">
-                                    <h3>{category.name}</h3>
-                                    <p className="category-link">Link: {category.link}</p>
-                                </div>
-                                <div className="category-actions">
-                                    <button
-                                        className="btn-icon"
-                                        onClick={() => handleOpenModal(category)}
-                                        title="Edit"
-                                    >
-                                        <Edit2 size={18} />
-                                    </button>
-                                    <button
-                                        className="btn-icon delete"
-                                        onClick={() => handleDelete(category._id)}
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                {message.text && (
+                    <div className={`message ${message.type}`}>
+                        {message.text}
                     </div>
                 )}
 
-                {isModalOpen && (
-                    <div className="modal-overlay">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h2>{editingCategory ? 'Chỉnh sửa Danh mục' : 'Thêm Danh mục mới'}</h2>
-                                <button className="btn-close" onClick={handleCloseModal}>
-                                    <X size={24} />
-                                </button>
-                            </div>
+                {loading ? (
+                    <div className="loading">Loading categories...</div>
+                ) : (
+                    <div className="categories-section">
+                        <table className="categories-table">
+                            <thead>
+                                <tr>
+                                    <th>Icon</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Color</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {categories.map((category) => (
+                                    <tr key={category._id}>
+                                        <td className="category-icon">{category.icon}</td>
+                                        <td>{category.name}</td>
+                                        <td><code>{category.slug}</code></td>
+                                        <td>
+                                            <div className="color-preview" style={{ backgroundColor: category.color }}></div>
+                                        </td>
+                                        <td>{category.order}</td>
+                                        <td>
+                                            <span className={`status-badge ${category.isActive ? 'active' : 'inactive'}`}>
+                                                {category.isActive ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="btn-secondary"
+                                                onClick={() => handleEdit(category)}
+                                                style={{ marginRight: '0.5rem' }}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => handleDelete(category._id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {showModal && (
+                    <div className="modal-overlay" onClick={handleCloseModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h2>{editingCategory ? 'Edit Category' : 'Add New Category'}</h2>
                             <form onSubmit={handleSubmit}>
-                                <div className="form-group">
-                                    <label>Tên danh mục</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        required
-                                        placeholder="Ví dụ: Phim Hành Động"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Link (Slug)</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={formData.link}
-                                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                        required
-                                        placeholder="Ví dụ: action-movies"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Icon (Emoji)</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={formData.icon}
-                                        onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                                        placeholder="🎬"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Màu sắc</label>
-                                    <div className="color-picker-wrapper">
-                                        <input
-                                            type="color"
-                                            value={formData.color}
-                                            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                            className="color-preview"
-                                        />
+                                <div className="form-row">
+                                    <div className="form-field">
+                                        <label>Name *</label>
                                         <input
                                             type="text"
-                                            className="form-input"
-                                            value={formData.color}
-                                            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleNameChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Slug *</label>
+                                        <input
+                                            type="text"
+                                            name="slug"
+                                            value={formData.slug}
+                                            onChange={handleInputChange}
+                                            required
                                         />
                                     </div>
                                 </div>
-                                <div className="category-modal-actions">
-                                    <button type="button" className="btn-cancel" onClick={handleCloseModal}>
-                                        Hủy
+
+                                <div className="form-field">
+                                    <label>Description</label>
+                                    <textarea
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        rows="3"
+                                    />
+                                </div>
+
+                                <div className="form-field">
+                                    <label>Background Image URL</label>
+                                    <input
+                                        type="url"
+                                        name="backgroundImage"
+                                        value={formData.backgroundImage}
+                                        onChange={handleInputChange}
+                                        placeholder="https://example.com/image.jpg"
+                                    />
+                                    {formData.backgroundImage && (
+                                        <div className="image-preview">
+                                            <img src={formData.backgroundImage} alt="Background preview" />
+                                        </div>
+                                    )}
+                                    <small style={{ color: '#888', marginTop: '0.5rem', display: 'block' }}>
+                                        Paste image URL from Imgur, Google Drive, or any image hosting service
+                                    </small>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-field">
+                                        <label>Icon</label>
+                                        <div className="icon-picker-container">
+                                            <div
+                                                className="icon-display"
+                                                onClick={() => setShowIconPicker(!showIconPicker)}
+                                            >
+                                                <span className="selected-icon">{formData.icon}</span>
+                                                <span className="picker-arrow">▼</span>
+                                            </div>
+                                            {showIconPicker && (
+                                                <div className="icon-grid">
+                                                    {availableIcons.map((icon, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className={`icon-option ${formData.icon === icon ? 'selected' : ''}`}
+                                                            onClick={() => {
+                                                                setFormData({ ...formData, icon });
+                                                                setShowIconPicker(false);
+                                                            }}
+                                                        >
+                                                            {icon}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Color</label>
+                                        <input
+                                            type="color"
+                                            name="color"
+                                            value={formData.color}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-field">
+                                        <label>Link</label>
+                                        <input
+                                            type="text"
+                                            name="link"
+                                            value={formData.link}
+                                            onChange={handleInputChange}
+                                            placeholder="/category/action"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Order</label>
+                                        <input
+                                            type="number"
+                                            name="order"
+                                            value={formData.order}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-field checkbox-field">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            name="isActive"
+                                            checked={formData.isActive}
+                                            onChange={handleInputChange}
+                                        />
+                                        <span>Active</span>
+                                    </label>
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button type="submit" className="submit-btn">
+                                        {editingCategory ? 'Update' : 'Create'}
                                     </button>
-                                    <button type="submit" className="btn-submit">
-                                        {editingCategory ? 'Cập nhật' : 'Thêm mới'}
+                                    <button type="button" className="cancel-btn" onClick={handleCloseModal}>
+                                        Cancel
                                     </button>
                                 </div>
                             </form>

@@ -66,19 +66,23 @@ export const getCategory = async (req, res) => {
 // Create category
 export const createCategory = async (req, res) => {
     try {
-        const { name, color, link, icon, order, isActive } = req.body;
+        const { name, slug, description, color, link, icon, order, isActive } = req.body;
 
-        // Check if category name already exists
-        const existing = await Category.findOne({ name });
+        // Check if category name or slug already exists
+        const existing = await Category.findOne({
+            $or: [{ name }, { slug }]
+        });
         if (existing) {
             return res.status(400).json({
                 success: false,
-                message: 'Category name already exists'
+                message: 'Category name or slug already exists'
             });
         }
 
         const category = new Category({
             name,
+            slug,
+            description,
             color,
             link,
             icon,
@@ -105,25 +109,28 @@ export const createCategory = async (req, res) => {
 // Update category
 export const updateCategory = async (req, res) => {
     try {
-        const { name, color, link, icon, order, isActive } = req.body;
+        const { name, slug, description, color, link, icon, order, isActive } = req.body;
 
-        // Check if new name conflicts with existing category
-        if (name) {
+        // Check if new name or slug conflicts with existing category
+        if (name || slug) {
             const existing = await Category.findOne({
-                name,
-                _id: { $ne: req.params.id }
+                _id: { $ne: req.params.id },
+                $or: [
+                    ...(name ? [{ name }] : []),
+                    ...(slug ? [{ slug }] : [])
+                ]
             });
             if (existing) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Category name already exists'
+                    message: 'Category name or slug already exists'
                 });
             }
         }
 
         const category = await Category.findByIdAndUpdate(
             req.params.id,
-            { name, color, link, icon, order, isActive },
+            { name, slug, description, color, link, icon, order, isActive },
             { new: true, runValidators: true }
         );
 
@@ -193,6 +200,46 @@ export const reorderCategories = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to reorder categories'
+        });
+    }
+};
+
+// Get movies by category slug
+export const getCategoryMovies = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const category = await Category.findOne({ slug, isActive: true });
+
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        // Import Movie model dynamically to avoid circular dependency
+        const Movie = (await import('../models/Movie.js')).default;
+
+        const movies = await Movie.find({
+            categories: category._id,
+            status: 'ready'
+        })
+            .select('title poster backdrop releaseYear genres imdbRating')
+            .sort({ createdAt: -1 })
+            .limit(20);
+
+        res.json({
+            success: true,
+            data: {
+                category,
+                movies
+            }
+        });
+    } catch (error) {
+        console.error('getCategoryMovies error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch category movies'
         });
     }
 };

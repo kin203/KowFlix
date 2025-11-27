@@ -6,7 +6,8 @@ import {
     createCategory,
     updateCategory,
     deleteCategory,
-    reorderCategories
+    reorderCategories,
+    getCategoryMovies
 } from '../controllers/categoryController.js';
 import auth from '../middleware/auth.js';
 import isAdmin from '../middleware/admin.js';
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/active', getActiveCategories);
+router.get('/:slug/movies', getCategoryMovies);
 
 // Admin routes
 router.get('/', auth, isAdmin, getAllCategories);

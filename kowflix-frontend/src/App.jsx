@@ -7,6 +7,7 @@ import Watch from './pages/Watch';
 import AdminUpload from './pages/AdminUpload';
 import AdminDashboard from './pages/AdminDashboard';
 import CategoryManagement from './pages/CategoryManagement';
+import JobManagement from './pages/JobManagement';
 import UserManagement from './pages/UserManagement';
 import HeroManagement from './pages/HeroManagement';
 import ReviewManagement from './pages/ReviewManagement';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/movies" element={<AdminUpload />} />
         <Route path="/admin/categories" element={<CategoryManagement />} />
+        <Route path="/admin/jobs" element={<JobManagement />} />
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/hero" element={<HeroManagement />} />
         <Route path="/admin/reviews" element={<ReviewManagement />} />

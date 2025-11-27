@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import './VideoPlayer.css';
 
-const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
+const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtitles = [] }) => {
     const videoRef = useRef(null);
     const hlsRef = useRef(null);
     const progressIntervalRef = useRef(null);
@@ -24,6 +24,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
     const [buffered, setBuffered] = useState(0);
     const [isLoadingQuality, setIsLoadingQuality] = useState(false);
     const [hoverTime, setHoverTime] = useState(null);
+    const [currentSubtitle, setCurrentSubtitle] = useState(-1); // -1 = Off
 
     // Initialize HLS
     useEffect(() => {
@@ -340,7 +341,20 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onClick={togglePlay}
-            />
+                crossOrigin="anonymous"
+            >
+                {/* Add subtitle tracks */}
+                {subtitles && subtitles.map((subtitle, index) => (
+                    <track
+                        key={index}
+                        kind="subtitles"
+                        src={subtitle.path}
+                        srcLang={subtitle.language}
+                        label={subtitle.label}
+                        default={subtitle.default}
+                    />
+                ))}
+            </video>
 
             {/* Loading indicator during quality switch */}
             {isLoadingQuality && (
@@ -470,6 +484,44 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId }) => {
                                     onClick={() => changeAudioTrack(track.index)}
                                 >
                                     {track.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Subtitles Section */}
+                    {subtitles && subtitles.length > 0 && (
+                        <div className="settings-section">
+                            <h4>Subtitles</h4>
+                            <button
+                                className={currentSubtitle === -1 ? 'active' : ''}
+                                onClick={() => {
+                                    setCurrentSubtitle(-1);
+                                    // Disable all text tracks
+                                    if (videoRef.current) {
+                                        Array.from(videoRef.current.textTracks).forEach(track => {
+                                            track.mode = 'disabled';
+                                        });
+                                    }
+                                }}
+                            >
+                                Off
+                            </button>
+                            {subtitles.map((subtitle, index) => (
+                                <button
+                                    key={index}
+                                    className={currentSubtitle === index ? 'active' : ''}
+                                    onClick={() => {
+                                        setCurrentSubtitle(index);
+                                        // Enable selected track, disable others
+                                        if (videoRef.current) {
+                                            Array.from(videoRef.current.textTracks).forEach((track, i) => {
+                                                track.mode = i === index ? 'showing' : 'disabled';
+                                            });
+                                        }
+                                    }}
+                                >
+                                    {subtitle.label}
                                 </button>
                             ))}
                         </div>

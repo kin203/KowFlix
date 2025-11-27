@@ -2,21 +2,8 @@ import React, { useRef } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './CategoryCards.css';
 
-const CategoryCards = () => {
+const CategoryCards = ({ categories = [] }) => {
     const sliderRef = useRef(null);
-
-    const categories = [
-        { id: 1, name: 'Marvel', color: '#5865F2', link: '/category/marvel' },
-        { id: 2, name: '4K', color: '#57F287', link: '/category/4k' },
-        { id: 3, name: 'Sitcom', color: '#3BA55C', link: '/category/sitcom' },
-        { id: 4, name: 'Lồng Tiếng Việt', color: '#9B59B6', link: '/category/vietnamese-dub' },
-        { id: 5, name: 'Xuyên Không', color: '#F39C12', link: '/category/time-travel' },
-        { id: 6, name: 'Cổ Trang', color: '#E74C3C', link: '/category/historical' },
-        { id: 7, name: 'Hành Động', color: '#E67E22', link: '/category/action' },
-        { id: 8, name: 'Kinh Dị', color: '#34495E', link: '/category/horror' },
-        { id: 9, name: 'Hài Hước', color: '#F1C40F', link: '/category/comedy' },
-        { id: 10, name: 'Tình Cảm', color: '#E91E63', link: '/category/romance' },
-    ];
 
     const scroll = (direction) => {
         if (sliderRef.current) {
@@ -24,14 +11,13 @@ const CategoryCards = () => {
             const scrollAmount = containerWidth * 0.8;
             const start = sliderRef.current.scrollLeft;
             const target = direction === 'left' ? start - scrollAmount : start + scrollAmount;
-            const duration = 500; // 500ms animation
+            const duration = 500;
             const startTime = performance.now();
 
             const animateScroll = (currentTime) => {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
 
-                // Easing function for smooth animation
                 const easeInOutCubic = progress < 0.5
                     ? 4 * progress * progress * progress
                     : 1 - Math.pow(-2 * progress + 2, 3) / 2;
@@ -46,6 +32,10 @@ const CategoryCards = () => {
             requestAnimationFrame(animateScroll);
         }
     };
+
+    if (!categories || categories.length === 0) {
+        return null;
+    }
 
     return (
         <div className="category-section">
@@ -62,11 +52,19 @@ const CategoryCards = () => {
                 <div className="category-slider" ref={sliderRef}>
                     {categories.map((category) => (
                         <a
-                            key={category.id}
+                            key={category._id}
                             href={category.link}
                             className="category-card"
-                            style={{ backgroundColor: category.color }}
+                            style={{
+                                backgroundImage: category.backgroundImage
+                                    ? `linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%), url(${category.backgroundImage})`
+                                    : 'none',
+                                backgroundColor: category.backgroundImage ? 'transparent' : category.color,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
                         >
+                            <span className="category-icon">{category.icon}</span>
                             <span className="category-name">{category.name}</span>
                             <span className="category-link">
                                 Xem chi tiết <ChevronRight size={16} />
