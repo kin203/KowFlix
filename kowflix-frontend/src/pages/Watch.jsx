@@ -317,6 +317,7 @@ const Watch = () => {
                                             <textarea
                                                 value={comment}
                                                 onChange={(e) => setComment(e.target.value)}
+                                                onKeyDown={(e) => e.stopPropagation()} // Prevent VideoPlayer shortcuts
                                                 placeholder="Viết bình luận của bạn..."
                                                 rows={3}
                                                 maxLength={1000}
