@@ -36,7 +36,7 @@ import mongoose from "mongoose";
 const ContentFileSchema = new mongoose.Schema({
   type: { type: String, enum: ["hls", "mp4"], required: true },
   path: { type: String, required: true },
-  quality: { type: String, enum: ["1080p", "720p", "480p", "360p"], default: "720p" },
+  quality: { type: String, enum: ["1080p", "720p", "480p", "360p", "master"], default: "720p" },
   filesize: { type: Number, default: 0 }
 }, { _id: false });
 
