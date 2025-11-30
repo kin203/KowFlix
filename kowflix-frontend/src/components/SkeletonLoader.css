@@ -1,0 +1,171 @@
+/* src/components/SkeletonLoader.css */
+
+/* Base skeleton styles */
+.shimmer {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Movie Card Skeleton */
+.movie-card-skeleton {
+    flex: 0 0 auto;
+    width: 220px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.skeleton-poster {
+    width: 100%;
+    height: 330px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* Hero Skeleton */
+.hero-skeleton {
+    height: 90vh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-hero-content {
+    position: absolute;
+    bottom: 25%;
+    left: 4%;
+    max-width: 600px;
+    z-index: 2;
+}
+
+.skeleton-hero-title {
+    width: 80%;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-hero-desc {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 0.8rem;
+}
+
+.skeleton-hero-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.skeleton-btn {
+    width: 150px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Slider Title Skeleton */
+.skeleton-title {
+    width: 200px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 1.2rem;
+}
+
+/* Category Card Skeleton */
+.category-card-skeleton {
+    flex: 0 0 280px;
+    height: 120px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .movie-card-skeleton {
+        width: 200px;
+    }
+
+    .skeleton-poster {
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-skeleton {
+        height: 60vh;
+    }
+
+    .skeleton-hero-content {
+        max-width: 90%;
+    }
+
+    .skeleton-hero-title {
+        height: 40px;
+    }
+
+    .skeleton-hero-buttons {
+        flex-direction: column;
+    }
+
+    .skeleton-btn {
+        width: 100%;
+    }
+
+    .movie-card-skeleton {
+        width: 160px;
+    }
+
+    .skeleton-poster {
+        height: 240px;
+    }
+
+    .category-card-skeleton {
+        flex: 0 0 200px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-skeleton {
+        height: 50vh;
+    }
+
+    .movie-card-skeleton {
+        width: 140px;
+    }
+
+    .skeleton-poster {
+        height: 210px;
+    }
+
+    .category-card-skeleton {
+        flex: 0 0 160px;
+    }
+}

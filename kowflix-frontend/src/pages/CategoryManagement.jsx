@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
+import { categoryAPI } from '../services/api';
 import './CategoryManagement.css';
 
 const CategoryManagement = () => {
@@ -37,10 +37,7 @@ const CategoryManagement = () => {
 
     const fetchCategories = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const { data } = await axios.get('http://localhost:5000/api/categories', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await categoryAPI.getAll();
             setCategories(data.data || []);
         } catch (error) {
             console.error('Failed to fetch categories:', error);
@@ -63,21 +60,11 @@ const CategoryManagement = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            const token = localStorage.getItem('token');
-
             if (editingCategory) {
-                await axios.put(
-                    `http://localhost:5000/api/categories/${editingCategory._id}`,
-                    formData,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await categoryAPI.update(editingCategory._id, formData);
                 setMessage({ type: 'success', text: 'Category updated successfully!' });
             } else {
-                await axios.post(
-                    'http://localhost:5000/api/categories',
-                    formData,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await categoryAPI.create(formData);
                 setMessage({ type: 'success', text: 'Category created successfully!' });
             }
 
@@ -111,10 +98,7 @@ const CategoryManagement = () => {
         if (!window.confirm('Are you sure you want to delete this category?')) return;
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/categories/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await categoryAPI.delete(id);
             setMessage({ type: 'success', text: 'Category deleted successfully!' });
             fetchCategories();
         } catch (error) {

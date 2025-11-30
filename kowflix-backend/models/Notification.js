@@ -38,10 +38,6 @@ const notificationSchema = new mongoose.Schema({
     expiresAt: {
         type: Date
     },
-    batchId: {
-        type: String,
-        index: true
-    },
     createdAt: {
         type: Date,
         default: Date.now

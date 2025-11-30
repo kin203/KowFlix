@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
 import StatsCard from '../components/admin/StatsCard';
 import { Users, Film, Eye, TrendingUp, Clock } from 'lucide-react';
@@ -6,6 +7,7 @@ import { analyticsAPI } from '../services/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         totalUsers: 0,
         onlineUsers: 0,
@@ -15,6 +17,7 @@ const AdminDashboard = () => {
     });
     const [weeklyData, setWeeklyData] = useState([]);
     const [topMovies, setTopMovies] = useState([]);
+    const [topRatedMovies, setTopRatedMovies] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -26,10 +29,11 @@ const AdminDashboard = () => {
             setLoading(true);
 
             // Fetch all data in parallel
-            const [statsRes, weeklyRes, topMoviesRes] = await Promise.all([
+            const [statsRes, weeklyRes, topMoviesRes, topRatedRes] = await Promise.all([
                 analyticsAPI.getStats(),
                 analyticsAPI.getWeeklyViews(),
-                analyticsAPI.getTopMovies(5)
+                analyticsAPI.getTopMovies(5),
+                analyticsAPI.getTopRated(5)
             ]);
 
             if (statsRes.data.success) {
@@ -42,6 +46,10 @@ const AdminDashboard = () => {
 
             if (topMoviesRes.data.success) {
                 setTopMovies(topMoviesRes.data.data);
+            }
+
+            if (topRatedRes.data.success) {
+                setTopRatedMovies(topRatedRes.data.data);
             }
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
@@ -145,25 +153,59 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Top Movies Table */}
+                    {/* Top Viewed Movies */}
                     <div className="chart-card">
                         <div className="chart-header">
                             <h3>Top 5 phim được xem nhiều nhất</h3>
-                            <span className="chart-subtitle">Tháng này</span>
+                            <span className="chart-subtitle">Theo lượt xem</span>
                         </div>
                         <div className="top-movies-list">
-                            {topMovies.map((movie, index) => (
-                                <div key={movie._id} className="top-movie-item">
-                                    <div className="movie-rank">#{index + 1}</div>
-                                    <div className="movie-info">
-                                        <h4>{movie.title}</h4>
-                                        <p>{movie.views ? movie.views.toLocaleString() : 0} lượt xem</p>
+                            {topMovies.length > 0 ? (
+                                topMovies.map((movie, index) => (
+                                    <div key={movie._id} className="top-movie-item">
+                                        <div className="movie-rank">#{index + 1}</div>
+                                        <div className="movie-info">
+                                            <h4>{movie.title}</h4>
+                                            <p>{movie.views ? movie.views.toLocaleString() : 0} lượt xem</p>
+                                        </div>
                                     </div>
-                                    <div className="movie-rating">
-                                        ⭐ {movie.rating || 'N/A'}
-                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-data">
+                                    <p>Chưa có dữ liệu phim</p>
                                 </div>
-                            ))}
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Top Rated Movies */}
+                    <div className="chart-card">
+                        <div className="chart-header">
+                            <h3>Top 5 phim có đánh giá cao nhất</h3>
+                            <span className="chart-subtitle">Theo rating từ users</span>
+                        </div>
+                        <div className="top-movies-list">
+                            {topRatedMovies.length > 0 ? (
+                                topRatedMovies.map((movie, index) => (
+                                    <div key={movie._id} className="top-movie-item">
+                                        <div className="movie-rank">#{index + 1}</div>
+                                        <div className="movie-info">
+                                            <h4>{movie.title}</h4>
+                                            <p>{movie.views ? movie.views.toLocaleString() : 0} lượt xem</p>
+                                        </div>
+                                        <div className="movie-rating">
+                                            ⭐ {movie.rating}
+                                            <span style={{ fontSize: '0.8rem', color: '#888', marginLeft: '0.25rem' }}>
+                                                ({movie.reviewCount} đánh giá)
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-data">
+                                    <p>Chưa có dữ liệu phim</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -172,15 +214,15 @@ const AdminDashboard = () => {
                 <div className="quick-actions">
                     <h3>Thao tác nhanh</h3>
                     <div className="actions-grid">
-                        <button className="action-btn">
+                        <button className="action-btn" onClick={() => navigate('/admin/movies')}>
                             <Film size={20} />
                             <span>Thêm phim mới</span>
                         </button>
-                        <button className="action-btn">
+                        <button className="action-btn" onClick={() => navigate('/admin/users')}>
                             <Users size={20} />
                             <span>Quản lý người dùng</span>
                         </button>
-                        <button className="action-btn">
+                        <button className="action-btn" onClick={() => navigate('/admin/dashboard')}>
                             <TrendingUp size={20} />
                             <span>Xem báo cáo</span>
                         </button>

@@ -492,11 +492,27 @@ export const playMovie = async (req, res) => {
     res.json({
       success: true,
       data: {
+        _id: movie._id,
         id: movie._id,
         title: movie.title,
         poster: movie.poster,
         backdrop: movie.backdrop,
         description: movie.description,
+        genres: movie.genres || [],
+        imdbRating: movie.imdbRating,
+        imdbId: movie.imdbId,
+        tmdbId: movie.tmdbId,
+        releaseYear: movie.releaseYear,
+        releaseDate: movie.releaseDate,
+        runtime: movie.runtime,
+        cast: movie.cast || [],
+        director: movie.director,
+        voteAverage: movie.voteAverage,
+        voteCount: movie.voteCount,
+        tagline: movie.tagline,
+        trailerKey: movie.trailerKey,
+        useTrailer: movie.useTrailer,
+        subtitles: movie.subtitles || [],
         master: masterUrl,  // Add master URL for frontend compatibility
         qualities
       }

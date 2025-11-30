@@ -1,16 +1,14 @@
-import express from 'express';
-import {
+const express = require('express');
+const router = express.Router();
+const {
     getUserNotifications,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     createNotification,
-    getAllNotifications,
-    deleteNotificationAdmin
-} from '../controllers/notificationController.js';
-import { protect } from '../middleware/auth.js';
-
-const router = express.Router();
+    getAllNotifications
+} = require('../controllers/notificationController');
+const { protect } = require('../middleware/authMiddleware');
 
 // User routes (protected)
 router.get('/', protect, getUserNotifications);
@@ -21,7 +19,5 @@ router.delete('/:id', protect, deleteNotification);
 // Admin routes (protected + admin check can be added)
 router.get('/admin/all', protect, getAllNotifications);
 router.post('/', protect, createNotification);
-router.delete('/admin/:id', protect, deleteNotificationAdmin); // Add missing admin delete route
 
-export default router;
-
+module.exports = router;

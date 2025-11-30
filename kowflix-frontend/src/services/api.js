@@ -77,6 +77,7 @@ export const analyticsAPI = {
     getStats: () => api.get('/analytics/stats'),
     getWeeklyViews: () => api.get('/analytics/weekly-views'),
     getTopMovies: (limit = 5) => api.get('/analytics/top-movies', { params: { limit } }),
+    getTopRated: (limit = 5) => api.get('/analytics/top-rated', { params: { limit } }),
     getActiveUsers: (limit = 10) => api.get('/analytics/active-users', { params: { limit } }),
     getUserGrowth: () => api.get('/analytics/user-growth'),
 };
@@ -114,12 +115,13 @@ export const reviewAPI = {
 };
 
 export const notificationAPI = {
-    getAll: (params) => api.get('/notifications', { params }),
-    getUserNotifications: (userId) => api.get(`/notifications/user/${userId || ''}`),
-    create: (data) => api.post('/notifications', data),
+    getAll: () => api.get('/notifications'),
+    getAllAdmin: () => api.get('/notifications/admin/all'),
     markAsRead: (id) => api.put(`/notifications/${id}/read`),
+    markAllAsRead: () => api.put('/notifications/read-all'),
     delete: (id) => api.delete(`/notifications/${id}`),
-    getStats: () => api.get('/notifications/stats'),
+    deleteAdmin: (id) => api.delete(`/notifications/admin/${id}`),
+    create: (data) => api.post('/notifications', data),
 };
 
 export const jobAPI = {
@@ -129,6 +131,15 @@ export const jobAPI = {
     updateProgress: (id, data) => api.put(`/jobs/${id}/progress`, data),
     delete: (id) => api.delete(`/jobs/${id}`),
     cleanup: () => api.post('/jobs/cleanup'),
+};
+
+export const navMenuAPI = {
+    getAll: () => api.get('/nav-menu'),
+    getAllAdmin: () => api.get('/nav-menu/admin/all'),
+    create: (data) => api.post('/nav-menu', data),
+    update: (id, data) => api.put(`/nav-menu/${id}`, data),
+    delete: (id) => api.delete(`/nav-menu/${id}`),
+    reorder: (items) => api.post('/nav-menu/reorder', { items })
 };
 
 

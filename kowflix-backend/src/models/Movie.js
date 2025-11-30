@@ -47,6 +47,7 @@ const MovieSchema = new mongoose.Schema({
   genres: { type: [String], default: [] },
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   poster: { type: String, default: "" },
+  lqip: { type: String, default: "" }, // Low Quality Image Placeholder (blur, tiny)
   backdrop: { type: String, default: "" }, // NEW: backdrop image
   duration: { type: Number, default: 0 },
   releaseYear: { type: Number },

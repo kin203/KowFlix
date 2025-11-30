@@ -10,7 +10,8 @@ import {
     Bell,
     Briefcase,
     LogOut,
-    Settings
+    Settings,
+    Menu
 } from 'lucide-react';
 import './DashboardSidebar.css';
 
@@ -21,6 +22,7 @@ const DashboardSidebar = () => {
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/movies', icon: Film, label: 'Quản lý Phim' },
         { path: '/admin/categories', icon: Grid, label: 'Danh mục' },
+        { path: '/admin/nav-menu', icon: Menu, label: 'Nav Menu' },
         { path: '/admin/jobs', icon: Briefcase, label: 'Công việc' },
         { path: '/admin/users', icon: Users, label: 'Người dùng' },
         { path: '/admin/reviews', icon: Star, label: 'Đánh giá' },

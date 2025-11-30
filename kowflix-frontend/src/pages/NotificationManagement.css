@@ -23,11 +23,34 @@
     font-weight: 800;
     margin: 0;
     color: #FFFFFF;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #E50914;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #B20710;
+    transform: translateY(-2px);
 }
 
 .notification-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -39,28 +62,35 @@
     padding: 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: #555;
 }
 
 .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
 }
 
 .stat-info h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
     color: #FFFFFF;
 }
 
 .stat-info p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #888888;
 }
 
@@ -76,7 +106,7 @@
     border-bottom: 1px solid #333333;
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
     transition: all 0.2s ease;
 }
 
@@ -89,9 +119,9 @@
 }
 
 .notification-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -131,27 +161,29 @@
 
 .notification-title-row h4 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #FFFFFF;
 }
 
 .notification-time {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #888888;
 }
 
 .notification-message {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.9rem;
-    color: #BBBBBB;
-    line-height: 1.5;
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    color: #CCCCCC;
+    line-height: 1.6;
 }
 
 .notification-meta {
     display: flex;
-    gap: 1rem;
-    font-size: 0.8rem;
+    gap: 1.5rem;
+    font-size: 0.85rem;
     color: #666666;
+    align-items: center;
 }
 
 .notification-actions {
@@ -159,12 +191,134 @@
     align-items: center;
 }
 
+.btn-icon.delete {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-icon.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
 /* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #FFFFFF;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.2s;
+}
+
+.btn-close:hover {
+    color: #FFFFFF;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #BBBBBB;
+    font-size: 0.9rem;
+}
+
+.form-input {
+    width: 100%;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #FFFFFF;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #E50914;
+}
+
 .notification-modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 2rem;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid #333333;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #333333;
+}
+
+.btn-submit {
+    background: #E50914;
+    border: none;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover {
+    background: #B20710;
 }
 
 .type-selector {

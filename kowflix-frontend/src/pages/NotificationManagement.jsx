@@ -26,16 +26,11 @@ const NotificationManagement = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [listRes, statsRes] = await Promise.all([
-                notificationAPI.getAll(),
-                notificationAPI.getStats()
-            ]);
+            const response = await notificationAPI.getAllAdmin();
 
-            if (listRes.data.success) {
-                setNotifications(listRes.data.data);
-            }
-            if (statsRes.data.success) {
-                setStats(statsRes.data.data);
+            if (response.data.success) {
+                setNotifications(response.data.data || []);
+                setStats(response.data.stats || { total: 0, byType: {} });
             }
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
@@ -82,7 +77,7 @@ const NotificationManagement = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this notification?')) {
             try {
-                await notificationAPI.delete(id);
+                await notificationAPI.deleteAdmin(id);
                 fetchData();
             } catch (error) {
                 console.error('Failed to delete notification:', error);

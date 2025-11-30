@@ -97,6 +97,52 @@ export const getTopMovies = async (req, res) => {
     }
 };
 
+// Get top rated movies by average rating from reviews
+export const getTopRatedMovies = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5;
+        const Review = (await import('../models/Review.js')).default;
+
+        // Get all movies with at least one review
+        const allReviews = await Review.aggregate([
+            {
+                $group: {
+                    _id: '$movieId',
+                    avgRating: { $avg: '$rating' },
+                    reviewCount: { $sum: 1 }
+                }
+            },
+            { $sort: { avgRating: -1 } },
+            { $limit: limit }
+        ]);
+
+        // Get movie details for top rated movies
+        const topRatedMovies = await Promise.all(
+            allReviews.map(async (item) => {
+                const movie = await Movie.findById(item._id).select('title views');
+                return {
+                    _id: item._id,
+                    title: movie?.title || 'Unknown',
+                    views: movie?.views || 0,
+                    rating: item.avgRating.toFixed(1),
+                    reviewCount: item.reviewCount
+                };
+            })
+        );
+
+        res.json({
+            success: true,
+            data: topRatedMovies
+        });
+    } catch (error) {
+        console.error('getTopRatedMovies error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch top rated movies'
+        });
+    }
+};
+
 // Get most active users
 export const getActiveUsers = async (req, res) => {
     try {

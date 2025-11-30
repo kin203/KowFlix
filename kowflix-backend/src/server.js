@@ -18,6 +18,7 @@ import heroRoutes from "./routes/heroRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import navMenuRoutes from "./routes/navMenuRoutes.js";
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use("/api/hero", heroRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/nav-menu", navMenuRoutes);
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -76,3 +78,4 @@ app.get("/", (req, res) => res.send("KowFlix API running..."));
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`🚀 Server listening on port ${port}`));
+// Server updated

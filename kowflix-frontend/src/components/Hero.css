@@ -21,7 +21,6 @@
     z-index: 0;
 }
 
-/* Scale video to fill container */
 .hero-video {
     width: 100vw;
     height: 56.25vw;
@@ -50,55 +49,59 @@
 
 .hero-content {
     position: absolute;
-    top: 40%;
+    top: 60%;
     left: 4%;
-    max-width: 45%;
-    z-index: 10;
+    max-width: 650px;
+    z-index: 2;
 }
 
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
-    margin-bottom: 0.8rem;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
     line-height: 1.1;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    letter-spacing: -0.5px;
 }
 
 .hero-meta {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.8rem;
-    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: #e0e0e0;
 }
 
 .badge {
     padding: 0.3rem 0.7rem;
     border-radius: 4px;
-    font-size: 0.9rem;
     font-weight: 600;
-    display: inline-block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.badge-rating {
-    background-color: #f5c518;
-    color: #000;
-}
-
-.badge-year,
-.badge-duration {
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.badge-year {
+    background-color: rgba(255, 255, 255, 0.15);
     color: #fff;
+}
+
+.badge-duration {
+    background-color: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
 }
 
 .badge-quality {
     background-color: rgba(229, 9, 20, 0.8);
     color: #fff;
+}
+
+.badge-rating {
+    background-color: rgba(255, 193, 7, 0.25);
+    border: 1.5px solid #ffc107;
+    color: #ffc107;
+    font-weight: 700;
 }
 
 .hero-genres {
@@ -110,23 +113,11 @@
 
 .genre-tag {
     padding: 0.25rem 0.6rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 3px;
     font-size: 0.85rem;
-    color: #e0e0e0;
-}
-
-.hero-description {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.2rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    color: #e0e0e0;
+    color: #fff;
 }
 
 .hero-buttons {
@@ -158,26 +149,7 @@
     box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
 }
 
-.btn-info {
-    background-color: rgba(42, 42, 42, 0.8);
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-info:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.6);
-    transform: scale(1.1);
-}
-
+.btn-info,
 .btn-favorite {
     background-color: rgba(42, 42, 42, 0.8);
     color: white;
@@ -192,6 +164,7 @@
     transition: all 0.3s ease;
 }
 
+.btn-info:hover,
 .btn-favorite:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
@@ -300,5 +273,86 @@
     .carousel-item {
         width: 80px;
         height: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        height: 60vh;
+        margin-bottom: 1rem;
+    }
+
+    .hero-content {
+        max-width: 90%;
+        top: 25%;
+        padding: 1rem;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-description {
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .hero-meta {
+        font-size: 0.8rem;
+        gap: 0.5rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .hero-buttons {
+        flex-direction: row;
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    .btn-play {
+        flex: 1;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-info,
+    .btn-favorite {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+
+    .hero-carousel {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero {
+        height: 50vh;
+    }
+
+    .hero-title {
+        font-size: 1.3rem;
+    }
+
+    .hero-description {
+        font-size: 0.8rem;
+    }
+
+    .hero-meta {
+        font-size: 0.75rem;
+    }
+
+    .btn-play {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-info,
+    .btn-favorite {
+        width: 40px;
+        height: 40px;
     }
 }

@@ -15,6 +15,7 @@ import {
 
 import auth from "../middleware/auth.js";
 import isAdmin from "../middleware/admin.js";
+import { streamLimiter, streamStatsHandler } from "../middleware/streamLimiter.js";
 
 import { uploadMix } from "../utils/multer.js";
 
@@ -26,8 +27,11 @@ router.get("/tmdb/:tmdbId", getTMDbDetails);
 
 router.get("/", listMovies);
 router.get("/:id", getMovie);
-router.get("/:id/play", playMovie);
-router.get("/:id/stream", streamMP4); // MP4 streaming with range support
+router.get("/:id/play", streamLimiter, playMovie); // Apply stream limiter
+router.get("/:id/stream", streamLimiter, streamMP4); // Apply stream limiter
+
+// Admin: View stream statistics
+router.get("/admin/stream-stats", auth, isAdmin, streamStatsHandler);
 
 
 router.post(

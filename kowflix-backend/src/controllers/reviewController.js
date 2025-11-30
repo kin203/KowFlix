@@ -63,11 +63,10 @@ export const getMovieReviews = async (req, res) => {
     }
 };
 
-// Create review
 export const createReview = async (req, res) => {
     try {
         const { movieId, rating, comment } = req.body;
-        const userId = req.user.userId;
+        const userId = req.user.id; // Changed from req.user.userId to req.user.id
 
         // Check if user already reviewed this movie
         const existingReview = await Review.findOne({ userId, movieId });
@@ -117,7 +116,7 @@ export const deleteReview = async (req, res) => {
         }
 
         // Check permission: admin or owner
-        if (req.user.role !== 'admin' && review.userId.toString() !== req.user.userId) {
+        if (req.user.role !== 'admin' && review.userId.toString() !== req.user.id) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to delete this review'
