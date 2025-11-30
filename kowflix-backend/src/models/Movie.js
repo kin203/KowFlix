@@ -58,7 +58,10 @@ const MovieSchema = new mongoose.Schema({
   imdbRating: { type: Number }, // Vote average from TMDb (0-10)
   runtime: { type: Number }, // Runtime in minutes
   releaseDate: { type: Date }, // Full release date
-  cast: { type: [String], default: [] }, // Array of actor names
+  cast: [{
+    name: { type: String },
+    profile_path: { type: String } // TMDb profile image path
+  }],
   director: { type: String }, // Director name
   voteAverage: { type: Number }, // TMDb vote average
   voteCount: { type: Number }, // TMDb vote count

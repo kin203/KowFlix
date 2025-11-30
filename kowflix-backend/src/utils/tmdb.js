@@ -60,10 +60,13 @@ export async function getMovieDetails(tmdbId) {
         const details = detailsRes.data;
         const credits = creditsRes.data;
 
-        // Get top 5 cast members
+        // Get top 5 cast members with photos
         const cast = credits.cast
-            .slice(0, 5)
-            .map(actor => actor.name);
+            .slice(0, 6)
+            .map(actor => ({
+                name: actor.name,
+                profile_path: actor.profile_path ? `${TMDB_IMAGE_BASE_URL}/w185${actor.profile_path}` : null
+            }));
 
         // Get director
         const director = credits.crew

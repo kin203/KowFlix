@@ -332,6 +332,17 @@ export const updateMovie = async (req, res) => {
       payload.genres = payload.genres.split(",").map(s => s.trim());
     }
 
+    // Handle cast: if it's a string, try to parse it
+    if (typeof payload.cast === "string") {
+      try {
+        // Try to parse as JSON first
+        payload.cast = JSON.parse(payload.cast);
+      } catch (e) {
+        // If not JSON, split by comma (old format)
+        payload.cast = payload.cast.split(",").map(s => s.trim()).filter(Boolean);
+      }
+    }
+
     // Handle useTrailer toggle
     if (payload.useTrailer !== undefined) {
       payload.useTrailer = payload.useTrailer === 'true' || payload.useTrailer === true;

@@ -263,7 +263,11 @@ const Watch = () => {
                                         {movie.cast && movie.cast.length > 0 && (
                                             <div className="credit-item">
                                                 <span className="credit-label">Diễn viên:</span>
-                                                <span className="credit-value">{movie.cast.slice(0, 5).join(', ')}</span>
+                                                <span className="credit-value">
+                                                    {movie.cast.slice(0, 5).map(actor =>
+                                                        typeof actor === 'string' ? actor : actor.name
+                                                    ).join(', ')}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -275,14 +279,28 @@ const Watch = () => {
                                 <div className="content-block">
                                     <h3 className="block-title">Diễn viên</h3>
                                     <div className="cast-grid">
-                                        {movie.cast.slice(0, 6).map((actor, index) => (
-                                            <div key={index} className="cast-item">
-                                                <div className="cast-avatar">
-                                                    {actor.charAt(0).toUpperCase()}
+                                        {movie.cast.slice(0, 6).map((actor, index) => {
+                                            // Handle both old format (string) and new format (object)
+                                            const actorName = typeof actor === 'string' ? actor : actor.name;
+                                            const actorPhoto = typeof actor === 'object' ? actor.profile_path : null;
+
+                                            return (
+                                                <div key={index} className="cast-item">
+                                                    {actorPhoto ? (
+                                                        <img
+                                                            src={actorPhoto}
+                                                            alt={actorName}
+                                                            className="cast-photo"
+                                                        />
+                                                    ) : (
+                                                        <div className="cast-avatar">
+                                                            {actorName?.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <span className="cast-name">{actorName}</span>
                                                 </div>
-                                                <span className="cast-name">{actor}</span>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
