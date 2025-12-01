@@ -51,19 +51,34 @@ export const getCommentsByMovie = async (req, res) => {
     try {
         const { movieId } = req.params;
 
+        // Recursive function to get all nested replies
+        const getRepliesRecursive = async (parentId) => {
+            const replies = await Comment.find({ parentId })
+                .populate('userId', 'profile')
+                .sort({ createdAt: 1 })
+                .lean();
+            
+            // For each reply, get its nested replies and add counts
+            for (let reply of replies) {
+                reply.likeCount = reply.likes?.length || 0;
+                reply.dislikeCount = reply.dislikes?.length || 0;
+                reply.replies = await getRepliesRecursive(reply._id);
+            }
+            
+            return replies;
+        };
+
         // Get top-level comments (no parent)
         const comments = await Comment.find({ movieId, parentId: null })
             .populate('userId', 'profile')
             .sort({ createdAt: -1 })
             .lean();
 
-        // Get replies for each comment
+        // Get all nested replies recursively for each comment and add counts
         for (let comment of comments) {
-            const replies = await Comment.find({ parentId: comment._id })
-                .populate('userId', 'profile')
-                .sort({ createdAt: 1 })
-                .lean();
-            comment.replies = replies;
+            comment.likeCount = comment.likes?.length || 0;
+            comment.dislikeCount = comment.dislikes?.length || 0;
+            comment.replies = await getRepliesRecursive(comment._id);
         }
 
         res.status(200).json({

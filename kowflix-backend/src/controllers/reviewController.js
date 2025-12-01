@@ -15,7 +15,7 @@ export const getAllReviews = async (req, res) => {
         }
 
         const reviews = await Review.find(query)
-            .populate('userId', 'email profile.name profile.avatar')
+            .populate('userId', 'profile')
             .populate('movieId', 'title poster')
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -47,7 +47,7 @@ export const getMovieReviews = async (req, res) => {
     try {
         const { movieId } = req.params;
         const reviews = await Review.find({ movieId })
-            .populate('userId', 'profile.name profile.avatar')
+            .populate('userId', 'profile')
             .sort({ createdAt: -1 });
 
         res.json({
@@ -144,7 +144,7 @@ export const deleteReview = async (req, res) => {
 export const likeReview = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const review = await Review.findById(id);
         if (!review) {
@@ -190,7 +190,7 @@ export const likeReview = async (req, res) => {
 export const dislikeReview = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const review = await Review.findById(id);
         if (!review) {
