@@ -107,13 +107,6 @@ export const heroAPI = {
     reorder: (banners) => api.post('/hero/reorder', { banners }),
 };
 
-export const reviewAPI = {
-    getAll: (params) => api.get('/reviews', { params }),
-    getMovieReviews: (movieId) => api.get(`/reviews/movie/${movieId}`),
-    create: (data) => api.post('/reviews', data),
-    delete: (id) => api.delete(`/reviews/${id}`),
-};
-
 export const notificationAPI = {
     getAll: () => api.get('/notifications'),
     getAllAdmin: () => api.get('/notifications/admin/all'),
@@ -140,6 +133,27 @@ export const navMenuAPI = {
     update: (id, data) => api.put(`/nav-menu/${id}`, data),
     delete: (id) => api.delete(`/nav-menu/${id}`),
     reorder: (items) => api.post('/nav-menu/reorder', { items })
+};
+
+export const reviewAPI = {
+    getAll: (params) => api.get('/reviews', { params }),
+    getByMovie: (movieId) => api.get(`/reviews/movie/${movieId}`),
+    getMovieReviews: (movieId) => api.get(`/reviews/movie/${movieId}`), // Alias for compatibility
+    create: (data) => api.post('/reviews', data),
+    update: (id, data) => api.put(`/reviews/${id}`, data),
+    delete: (id) => api.delete(`/reviews/${id}`),
+    like: (id) => api.post(`/reviews/${id}/like`),
+    dislike: (id) => api.post(`/reviews/${id}/dislike`)
+};
+
+export const commentAPI = {
+    getByMovie: (movieId) => api.get(`/comments/movie/${movieId}`),
+    create: (data) => api.post('/comments', data),
+    update: (id, data) => api.put(`/comments/${id}`, data),
+    delete: (id) => api.delete(`/comments/${id}`),
+    like: (id) => api.post(`/comments/${id}/like`),
+    dislike: (id) => api.post(`/comments/${id}/dislike`),
+    report: (id, reason) => api.post(`/comments/${id}/report`, { reason })
 };
 
 

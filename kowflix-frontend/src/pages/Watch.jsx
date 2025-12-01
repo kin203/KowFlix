@@ -4,6 +4,8 @@ import { ArrowLeft, Heart, Bookmark, Share2, Star, Play } from 'lucide-react';
 import { movieAPI, progressAPI, reviewAPI } from '../services/api';
 import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
 import Navbar from '../components/Navbar';
+import CommentSection from '../components/CommentSection';
+import { getUserIdFromToken } from '../utils/authUtils';
 import './Watch.css';
 import './VideoError.css';
 
@@ -322,84 +324,12 @@ const Watch = () => {
                                 </div>
                             )}
 
-                            {/* Reviews Section */}
-                            <div className="content-block reviews-block">
-                                <h3 className="block-title">Bình luận ({reviews.length})</h3>
-
-                                {/* Review Form */}
-                                <div className="review-form-card">
-                                    <form onSubmit={handleSubmitReview}>
-                                        <div className="form-group">
-                                            <label>Đánh giá của bạn</label>
-                                            <div className="stars-input">
-                                                {Array.from({ length: 10 }, (_, i) => i + 1).map((star) => (
-                                                    <Star
-                                                        key={star}
-                                                        size={22}
-                                                        className="star-btn"
-                                                        fill={star <= (hoverRating || userRating) ? '#FFD700' : 'none'}
-                                                        stroke={star <= (hoverRating || userRating) ? '#FFD700' : '#666'}
-                                                        onClick={() => setUserRating(star)}
-                                                        onMouseEnter={() => setHoverRating(star)}
-                                                        onMouseLeave={() => setHoverRating(0)}
-                                                    />
-                                                ))}
-                                                {userRating > 0 && <span className="rating-value">{userRating}/10</span>}
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <textarea
-                                                value={comment}
-                                                onChange={(e) => setComment(e.target.value)}
-                                                onKeyDown={(e) => e.stopPropagation()} // Prevent VideoPlayer shortcuts
-                                                placeholder="Viết bình luận của bạn..."
-                                                rows={3}
-                                                maxLength={1000}
-                                            />
-                                            <div className="textarea-footer">
-                                                <span className="char-count">{comment.length}/1000</span>
-                                                <button type="submit" className="submit-btn" disabled={submitting}>
-                                                    {submitting ? 'Đang gửi...' : 'Gửi'}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {submitError && <div className="alert alert-error">{submitError}</div>}
-                                        {submitSuccess && <div className="alert alert-success">✓ Đã gửi!</div>}
-                                    </form>
-                                </div>
-
-                                {/* Reviews List */}
-                                <div className="reviews-list">
-                                    {reviews.length > 0 ? (
-                                        reviews.map((review) => (
-                                            <div key={review._id} className="review-card">
-                                                <div className="review-header">
-                                                    <div className="reviewer">
-                                                        <div className="reviewer-avatar">
-                                                            {review.userId?.username?.charAt(0).toUpperCase() || 'U'}
-                                                        </div>
-                                                        <div className="reviewer-info">
-                                                            <div className="reviewer-name">{review.userId?.username || 'Anonymous'}</div>
-                                                            <div className="review-date">
-                                                                {new Date(review.createdAt).toLocaleDateString('vi-VN')}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="review-score">
-                                                        <Star size={16} fill="#FFD700" stroke="#FFD700" />
-                                                        <span>{review.rating}/10</span>
-                                                    </div>
-                                                </div>
-                                                <p className="review-text">{review.comment}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-reviews">Chưa có bình luận nào</div>
-                                    )}
-                                </div>
-                            </div>
+                            {/* Comments & Reviews Section */}
+                            <CommentSection
+                                movieId={id}
+                                userId={getUserIdFromToken()}
+                                isAuthenticated={!!localStorage.getItem('token')}
+                            />
                         </div>
 
                         {/* Sidebar */}

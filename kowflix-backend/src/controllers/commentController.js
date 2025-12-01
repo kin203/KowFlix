@@ -7,7 +7,7 @@ import Movie from '../models/Movie.js';
 export const createComment = async (req, res) => {
     try {
         const { movieId, content, isAnonymous, parentId } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         // Validate movie exists
         const movie = await Movie.findById(movieId);
@@ -32,7 +32,7 @@ export const createComment = async (req, res) => {
         });
 
         // Populate user info
-        await comment.populate('userId', 'username avatar');
+        await comment.populate('userId', 'profile');
 
         res.status(201).json({
             success: true,
@@ -53,14 +53,14 @@ export const getCommentsByMovie = async (req, res) => {
 
         // Get top-level comments (no parent)
         const comments = await Comment.find({ movieId, parentId: null })
-            .populate('userId', 'username avatar')
+            .populate('userId', 'profile')
             .sort({ createdAt: -1 })
             .lean();
 
         // Get replies for each comment
         for (let comment of comments) {
             const replies = await Comment.find({ parentId: comment._id })
-                .populate('userId', 'username avatar')
+                .populate('userId', 'profile')
                 .sort({ createdAt: 1 })
                 .lean();
             comment.replies = replies;
@@ -83,7 +83,7 @@ export const getCommentsByMovie = async (req, res) => {
 export const likeComment = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const comment = await Comment.findById(id);
         if (!comment) {
@@ -129,7 +129,7 @@ export const likeComment = async (req, res) => {
 export const dislikeComment = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const comment = await Comment.findById(id);
         if (!comment) {
@@ -176,7 +176,7 @@ export const updateComment = async (req, res) => {
     try {
         const { id } = req.params;
         const { content } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const comment = await Comment.findById(id);
         if (!comment) {
@@ -191,7 +191,7 @@ export const updateComment = async (req, res) => {
         comment.content = content;
         await comment.save();
 
-        await comment.populate('userId', 'username avatar');
+        await comment.populate('userId', 'profile');
 
         res.status(200).json({
             success: true,
@@ -209,7 +209,7 @@ export const updateComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const comment = await Comment.findById(id);
         if (!comment) {
@@ -265,3 +265,5 @@ export const reportComment = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
