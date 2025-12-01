@@ -137,3 +137,96 @@ export const deleteReview = async (req, res) => {
         });
     }
 };
+
+// @desc    Like a review
+// @route   POST /api/reviews/:id/like
+// @access  Private
+export const likeReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+
+        const review = await Review.findById(id);
+        if (!review) {
+            return res.status(404).json({ message: 'Review not found' });
+        }
+
+        // Remove from dislikes if present
+        review.dislikes = review.dislikes.filter(
+            uid => uid.toString() !== userId.toString()
+        );
+
+        // Toggle like
+        const likeIndex = review.likes.findIndex(
+            uid => uid.toString() === userId.toString()
+        );
+
+        if (likeIndex > -1) {
+            // Unlike
+            review.likes.splice(likeIndex, 1);
+        } else {
+            // Like
+            review.likes.push(userId);
+        }
+
+        await review.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                likeCount: review.likes.length,
+                dislikeCount: review.dislikes.length
+            }
+        });
+    } catch (error) {
+        console.error('Error liking review:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Dislike a review
+// @route   POST /api/reviews/:id/dislike
+// @access  Private
+export const dislikeReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+
+        const review = await Review.findById(id);
+        if (!review) {
+            return res.status(404).json({ message: 'Review not found' });
+        }
+
+        // Remove from likes if present
+        review.likes = review.likes.filter(
+            uid => uid.toString() !== userId.toString()
+        );
+
+        // Toggle dislike
+        const dislikeIndex = review.dislikes.findIndex(
+            uid => uid.toString() === userId.toString()
+        );
+
+        if (dislikeIndex > -1) {
+            // Remove dislike
+            review.dislikes.splice(dislikeIndex, 1);
+        } else {
+            // Dislike
+            review.dislikes.push(userId);
+        }
+
+        await review.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                likeCount: review.likes.length,
+                dislikeCount: review.dislikes.length
+            }
+        });
+    } catch (error) {
+        console.error('Error disliking review:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
