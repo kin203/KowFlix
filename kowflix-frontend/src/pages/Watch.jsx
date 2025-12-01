@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Bookmark, Share2, Star, Play } from 'lucide-react';
 import { movieAPI, progressAPI, reviewAPI } from '../services/api';
-import VideoPlayer from '../components/VideoPlayer';
+import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
+import Navbar from '../components/Navbar';
 import './Watch.css';
+import './VideoError.css';
 
 const Watch = () => {
     const { id } = useParams();
@@ -29,15 +31,14 @@ const Watch = () => {
                 setLoading(true);
                 const { data } = await movieAPI.play(id);
 
-                if (data.success && data.data && data.data.master) {
+                // Always set movie data if available, even if video is missing
+                if (data.data) {
                     setMovie(data.data);
-                    setHlsUrl(data.data.master);
+                }
 
-                    // Debug: Check movie data
-                    console.log('🎬 Movie Full Data:', data.data);
-                    console.log('📊 Genres:', data.data.genres);
-                    console.log('⭐ IMDb Rating:', data.data.imdbRating);
-                    console.log('📅 Year:', data.data.releaseYear, data.data.releaseDate);
+                if (data.success && data.data && data.data.master) {
+                    setHlsUrl(data.data.master);
+                    setError(null);
 
                     try {
                         const progressRes = await progressAPI.get(id);
@@ -54,11 +55,18 @@ const Watch = () => {
                         fetchRecommendedMovies(data.data.genres[0]);
                     }
                 } else {
-                    setError(data.message || "Video chưa được encode!");
+                    // Specific error for missing encode
+                    setError({
+                        code: 'ERR_01',
+                        message: 'Video chưa được encode. Vui lòng quay lại sau!'
+                    });
                 }
             } catch (err) {
                 console.error("Play error", err);
-                setError(err.response?.data?.message || "Failed to load video");
+                setError({
+                    code: 'ERR_02',
+                    message: err.response?.data?.message || "Không thể tải dữ liệu phim"
+                });
             } finally {
                 setLoading(false);
             }
@@ -151,81 +159,89 @@ const Watch = () => {
 
     if (loading) {
         return (
-            <div className="watch-page">
-                <div className="loading">Đang tải...</div>
-            </div>
+            <>
+                <Navbar />
+                <div className="watch-page">
+                    <div className="loading">Đang tải...</div>
+                </div>
+            </>
         );
     }
 
-    if (error) {
-        return (
-            <div className="watch-page">
-                <Link to="/" className="back-button">
-                    <ArrowLeft size={24} /> Quay lại
-                </Link>
-                <div className="error-message">{error}</div>
-            </div>
-        );
-    }
-
-    const year = movie.releaseYear || (movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : '2024');
+    const year = movie?.releaseYear || (movie?.releaseDate ? new Date(movie.releaseDate).getFullYear() : '2024');
 
     return (
-        <div className="watch-page">
-            <Link to="/" className="back-button">
-                <ArrowLeft size={24} /> Quay lại
-            </Link>
+        <>
+            <Navbar />
+            <div className="watch-page">
+                {/* Back Button / Breadcrumb */}
+                <div className="watch-breadcrumb">
+                    <Link to="/" className="back-button">
+                        <ArrowLeft size={20} />
+                        <span>Xem phim {movie?.title || ''}</span>
+                    </Link>
+                </div>
 
-            {movie && hlsUrl && (
-                <>
-                    {/* Video Player */}
-                    <div className="video-wrapper">
-                        <VideoPlayer
+                {/* Video Player Area - Rendered independently of movie details */}
+                <div className="video-wrapper">
+                    {error ? (
+                        <div className="video-error-container">
+                            <div className="error-icon">⚠️</div>
+                            <div className="error-code">{error.code}</div>
+                            <div className="error-message">{error.message}</div>
+                        </div>
+                    ) : hlsUrl ? (
+                        <VideoPlayerWrapper
                             src={hlsUrl}
-                            poster={movie.backdrop || movie.poster}
+                            poster={movie?.backdrop || movie?.poster}
                             onProgress={handleProgress}
                             initialTime={initialTime}
                             movieId={id}
-                            subtitles={movie.subtitles || []}
+                            subtitles={Array.isArray(movie?.subtitles) ? movie.subtitles : []}
                         />
-
-                        {/* Action Buttons Under Video */}
-                        <div className="video-actions">
-                            <button className="action-btn">
-                                <Heart size={18} /> Thích
-                            </button>
-                            <button className="action-btn">
-                                <Bookmark size={18} /> Lưu
-                            </button>
-                            <button className="action-btn">
-                                <Share2 size={18} /> Chia sẻ
-                            </button>
+                    ) : (
+                        <div className="video-placeholder">
+                            <div className="loading-spinner"></div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Main Content Area */}
+                    {/* Action Buttons Under Video */}
+                    <div className="video-actions">
+                        <button className="action-btn">
+                            <Heart size={18} /> Thích
+                        </button>
+                        <button className="action-btn">
+                            <Bookmark size={18} /> Lưu
+                        </button>
+                        <button className="action-btn">
+                            <Share2 size={18} /> Chia sẻ
+                        </button>
+                    </div>
+                </div>
+
+                {movie && (
                     <div className="content-wrapper">
                         <div className="main-section">
                             {/* Movie Header with Poster */}
                             <div className="movie-header-section">
                                 <img
-                                    src={movie.poster}
-                                    alt={movie.title}
+                                    src={movie?.poster || ''}
+                                    alt={movie?.title || 'Movie Poster'}
                                     className="movie-poster-thumb"
                                 />
                                 <div className="movie-header-info">
-                                    <h1 className="movie-title">{movie.title}</h1>
+                                    <h1 className="movie-title">{movie?.title}</h1>
                                     <div className="movie-meta-badges">
                                         <span className="meta-badge year">{year}</span>
-                                        {movie.runtime && (
+                                        {movie?.runtime && (
                                             <span className="meta-badge duration">
                                                 {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
                                             </span>
                                         )}
-                                        {movie.imdbRating && (
+                                        {movie?.imdbRating && !isNaN(parseFloat(movie.imdbRating)) && (
                                             <span className="meta-badge imdb">
                                                 <Star size={14} fill="#F5C518" stroke="#F5C518" />
-                                                {movie.imdbRating.toFixed(1)}
+                                                {Number(movie.imdbRating).toFixed(1)}
                                             </span>
                                         )}
                                         {avgRating && (
@@ -236,7 +252,7 @@ const Watch = () => {
                                     </div>
 
                                     {/* Genre Tags */}
-                                    {movie.genres && movie.genres.length > 0 && (
+                                    {Array.isArray(movie?.genres) && movie.genres.length > 0 && (
                                         <div className="genre-tags">
                                             {movie.genres.map((genre, index) => (
                                                 <span key={index} className="genre-tag">{genre}</span>
@@ -247,26 +263,27 @@ const Watch = () => {
                             </div>
 
                             {/* Movie Description */}
-                            {movie.description && (
+                            {movie?.description && (
                                 <div className="content-block">
                                     <h3 className="block-title">Nội dung phim</h3>
                                     <p className="movie-description">{movie.description}</p>
 
                                     {/* Director and Cast Info */}
                                     <div className="movie-credits">
-                                        {movie.director && (
+                                        {movie?.director && (
                                             <div className="credit-item">
                                                 <span className="credit-label">Đạo diễn:</span>
                                                 <span className="credit-value">{movie.director}</span>
                                             </div>
                                         )}
-                                        {movie.cast && movie.cast.length > 0 && (
+                                        {Array.isArray(movie?.cast) && movie.cast.length > 0 && (
                                             <div className="credit-item">
                                                 <span className="credit-label">Diễn viên:</span>
                                                 <span className="credit-value">
-                                                    {movie.cast.slice(0, 5).map(actor =>
-                                                        typeof actor === 'string' ? actor : actor.name
-                                                    ).join(', ')}
+                                                    {movie.cast.slice(0, 5).map(actor => {
+                                                        if (!actor) return '';
+                                                        return typeof actor === 'string' ? actor : (actor.name || '');
+                                                    }).filter(Boolean).join(', ')}
                                                 </span>
                                             </div>
                                         )}
@@ -425,9 +442,9 @@ const Watch = () => {
                             </div>
                         </aside>
                     </div>
-                </>
-            )}
-        </div>
+                )}
+            </div>
+        </>
     );
 };
 

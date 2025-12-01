@@ -162,7 +162,9 @@ const MovieInfoModal = ({ movie, onClose }) => {
                     <div className="modal-secondary-info">
                         <div className="modal-info-row">
                             <span className="modal-label">Cast:</span>
-                            <span className="modal-value">{movie.cast?.join(', ') || 'N/A'}</span>
+                            <span className="modal-value">
+                                {movie.cast?.map(c => typeof c === 'string' ? c : c.name).join(', ') || 'N/A'}
+                            </span>
                         </div>
                         <div className="modal-info-row">
                             <span className="modal-label">Genres:</span>

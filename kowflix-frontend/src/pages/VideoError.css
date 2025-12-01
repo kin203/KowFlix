@@ -1,0 +1,60 @@
+/* Video Error Display */
+.video-error-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    gap: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.error-code {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ff4d4f;
+    letter-spacing: 1px;
+}
+
+.video-error-container .error-message {
+    font-size: 1.1rem;
+    color: #ccc;
+    max-width: 80%;
+    text-align: center;
+}
+
+/* Video Placeholder (Loading) */
+.video-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -628,12 +628,241 @@
 
     .cast-avatar,
     .cast-photo {
-        width: 70px;
-        height: 70px;
-        font-size: 1.5rem;
+        align-items: center;
+        gap: 0.5rem;
+        color: #FFD700;
+        font-weight: 600;
+    }
+
+    .review-text {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .empty-reviews {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Sidebar */
+    .sidebar-section {
+        position: sticky;
+        top: 2rem;
+        height: fit-content;
+    }
+
+    .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 1.25rem 0;
     }
 
     .recommended-list {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
     }
-}
+
+    .recommended-card {
+        display: flex;
+        gap: 1rem;
+        padding: 0.875rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .recommended-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+
+    .rec-poster-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .rec-poster {
+        width: 90px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .recommended-card:hover .play-icon {
+        opacity: 1;
+    }
+
+    .rec-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .rec-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .rec-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .rec-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #FFD700;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .content-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-section {
+            position: static;
+        }
+
+        .recommended-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .recommended-card {
+            flex-direction: column;
+        }
+
+        .rec-poster {
+            width: 100%;
+            height: 280px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .content-wrapper {
+            padding: 0 1rem;
+        }
+
+        .video-actions {
+            padding: 1rem;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .movie-header-section {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .movie-poster-thumb {
+            width: 180px;
+            height: 260px;
+        }
+
+        .movie-title {
+            font-size: 1.5rem;
+        }
+
+        .movie-meta-badges {
+            justify-content: center;
+        }
+
+        .genre-tags {
+            justify-content: center;
+        }
+
+        .cast-grid {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 1rem;
+        }
+
+        .cast-avatar,
+        .cast-photo {
+            width: 70px;
+            height: 70px;
+            font-size: 1.5rem;
+        }
+
+        .recommended-list {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Video Error Display */
+    .video-error-container {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        gap: 1rem;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .error-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .error-code {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ff4d4f;
+        letter-spacing: 1px;
+    }
+
+    .video-error-container .error-message {
+        font-size: 1.1rem;
+        color: #ccc;
+        max-width: 80%;
+        text-align: center;
+    }

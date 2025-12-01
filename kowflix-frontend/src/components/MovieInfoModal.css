@@ -106,7 +106,9 @@
     display: flex;
     gap: 1rem;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-start !important;
+    /* Force left alignment */
+    width: 100%;
 }
 
 /* Golden Play Button - matching Hero */
