@@ -250,9 +250,17 @@
 
 .comment-header-info {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
@@ -435,6 +443,61 @@
 
 .replies-list .comment-item {
     background: #1f1f1f;
+}
+
+/* Menu Button */
+.comment-menu-container {
+    position: relative;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.menu-btn:hover {
+    color: white;
+}
+
+/* Dropdown Menu */
+.menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 100px;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.menu-dropdown button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.menu-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 /* Responsive */

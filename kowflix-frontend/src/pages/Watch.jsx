@@ -48,7 +48,7 @@ const Watch = () => {
                             setInitialTime(progressRes.data.data.currentTime || 0);
                         }
                     } catch (err) {
-                        console.log('No previous progress found');
+                        // console.log('No previous progress found');
                     }
 
                     fetchReviews();

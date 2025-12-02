@@ -9,6 +9,8 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(item.content || item.comment);
     const [submitting, setSubmitting] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+
 
     const isOwner = userId && item.userId?._id === userId;
     const displayName = item.isAnonymous ? 'Ẩn danh' : (item.userId?.username || item.userId?.profile?.name || 'User');
@@ -130,11 +132,37 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
 
             <div className="comment-content">
                 <div className="comment-header-info">
-                    <span className="comment-author">{displayName}</span>
-                    {type === 'review' && item.rating && (
-                        <span className="comment-rating">⭐ {item.rating}/10</span>
+                    <div className="header-left">
+                        <span className="comment-author">{displayName}</span>
+                        {type === 'review' && item.rating && (
+                            <span className="comment-rating">⭐ {item.rating}/10</span>
+                        )}
+                        <span className="comment-time">{getTimeAgo(item.createdAt)}</span>
+                    </div>
+
+                    {isOwner && (
+                        <div className="comment-menu-container">
+                            <button
+                                className="menu-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMenu(!showMenu);
+                                }}
+                            >
+                                ⋮
+                            </button>
+                            {showMenu && (
+                                <div className="menu-dropdown">
+                                    <button onClick={() => { setIsEditing(true); setShowMenu(false); }}>
+                                        ✏️ Sửa
+                                    </button>
+                                    <button onClick={() => { handleDelete(); setShowMenu(false); }}>
+                                        🗑️ Xóa
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
-                    <span className="comment-time">{getTimeAgo(item.createdAt)}</span>
                 </div>
 
                 {isEditing ? (
@@ -165,17 +193,6 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
                             💬 Trả lời
                         </button>
                     )}
-                    {isOwner && (
-                        <>
-                            <button className="action-btn" onClick={() => setIsEditing(true)}>
-                                ✏️ Sửa
-                            </button>
-                            <button className="action-btn" onClick={handleDelete}>
-                                🗑️ Xóa
-                            </button>
-                        </>
-                    )}
-                    <button className="action-btn more-btn">⋯ Thêm</button>
                 </div>
 
                 {/* Reply form */}

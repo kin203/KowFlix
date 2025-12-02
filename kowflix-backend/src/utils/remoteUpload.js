@@ -9,7 +9,7 @@ const REMOTE_USER = process.env.REMOTE_USER || 'kowflix';
 const REMOTE_SSH_KEY = 'C:\\Users\\Admin\\.ssh\\kowflix_backend_key_nopass';
 const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || '/media/DATA/kowflix';
 
-console.log('🔑 SSH Key Path:', REMOTE_SSH_KEY);
+// console.log('SSH Key Path:', REMOTE_SSH_KEY);
 
 /**
  * Upload poster to remote server

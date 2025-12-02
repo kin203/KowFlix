@@ -27,7 +27,7 @@ export const listMovies = async (req, res) => {
       .limit(Number(limit));
 
     // Add PUBLIC_MEDIA_URL to poster paths
-    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || "https://nk203.id.vn/media";
+    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
     const moviesWithFullUrls = movies.map(movie => {
       const movieObj = movie.toObject();
       if (movieObj.poster && movieObj.poster.startsWith('/media/')) {
@@ -53,7 +53,7 @@ export const getMovie = async (req, res) => {
     if (!movie) return res.status(404).json({ success: false, message: "Not found" });
 
     // Add PUBLIC_MEDIA_URL to poster paths
-    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || "https://nk203.id.vn/media";
+    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
     const movieObj = movie.toObject();
     if (movieObj.poster && movieObj.poster.startsWith('/media/')) {
       movieObj.poster = `${PUBLIC_MEDIA_URL}${movieObj.poster.replace('/media', '')}`;
@@ -106,10 +106,10 @@ export const createMovie = async (req, res) => {
     let videoPath = "";
 
     // Debug logging
-    console.log('📝 [CREATE MOVIE] Request received');
-    console.log('📝 [CREATE MOVIE] Files:', req.files);
-    console.log('📝 [CREATE MOVIE] Has video?', !!req.files?.video?.[0]);
-    console.log('📝 [CREATE MOVIE] Has poster?', !!req.files?.poster?.[0]);
+    // console.log('📝 [CREATE MOVIE] Request received');
+    // console.log('📝 [CREATE MOVIE] Files:', req.files);
+    // console.log('📝 [CREATE MOVIE] Has video?', !!req.files?.video?.[0]);
+    // console.log('📝 [CREATE MOVIE] Has poster?', !!req.files?.poster?.[0]);
 
     try {
       // Handle poster: prioritize TMDb URL, fallback to file upload
@@ -441,7 +441,7 @@ export const playMovie = async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ success: false, message: "Not found" });
 
-    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || "";
+    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
 
     // Get all HLS content files
     const hlsFiles = movie.contentFiles.filter(f => f.type === "hls");

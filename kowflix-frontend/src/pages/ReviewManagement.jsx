@@ -11,6 +11,7 @@ const ReviewManagement = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [error, setError] = useState(null);
 
     // Debounce search
     useEffect(() => {
@@ -28,6 +29,7 @@ const ReviewManagement = () => {
     const fetchReviews = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await reviewAPI.getAll({
                 page,
                 limit: 10,
@@ -40,6 +42,7 @@ const ReviewManagement = () => {
             }
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
+            setError('Không thể tải danh sách đánh giá. Vui lòng thử lại.');
         } finally {
             setLoading(false);
         }
@@ -85,6 +88,12 @@ const ReviewManagement = () => {
                     </div>
                 </div>
 
+                {error && (
+                    <div className="error-message" style={{ color: '#ff4444', marginBottom: '1rem', padding: '1rem', background: 'rgba(255, 68, 68, 0.1)', borderRadius: '8px' }}>
+                        {error}
+                    </div>
+                )}
+
                 {loading ? (
                     <div className="dashboard-loading">
                         <div className="loading-spinner"></div>
@@ -92,79 +101,85 @@ const ReviewManagement = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="review-table-container">
-                            <table className="review-table">
-                                <thead>
-                                    <tr>
-                                        <th>Người dùng</th>
-                                        <th>Phim</th>
-                                        <th>Đánh giá</th>
-                                        <th>Ngày đăng</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reviews.map((review) => (
-                                        <tr key={review._id}>
-                                            <td>
-                                                <div className="review-user-info">
-                                                    {review.userId?.profile?.avatar ? (
-                                                        <img
-                                                            src={review.userId.profile.avatar}
-                                                            alt={review.userId.profile.name}
-                                                            className="review-avatar"
-                                                        />
-                                                    ) : (
-                                                        <div className="review-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            <UserIcon size={16} color="#888" />
-                                                        </div>
-                                                    )}
-                                                    <div className="review-user-details">
-                                                        <h4>{review.userId?.profile?.name || 'Unknown User'}</h4>
-                                                        <p>{review.userId?.email}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="review-movie-info">
-                                                    {review.movieId?.poster && (
-                                                        <img
-                                                            src={review.movieId.poster}
-                                                            alt={review.movieId.title}
-                                                            className="review-poster"
-                                                        />
-                                                    )}
-                                                    <span className="review-movie-title">
-                                                        {review.movieId?.title || 'Unknown Movie'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="review-rating">
-                                                    <Star size={16} fill="#FFD700" />
-                                                    <span>{review.rating}/10</span>
-                                                </div>
-                                                <p className="review-comment">{review.comment}</p>
-                                            </td>
-                                            <td>
-                                                <span className="review-date">
-                                                    {formatDate(review.createdAt)}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="action-btn delete"
-                                                    onClick={() => handleDelete(review._id)}
-                                                    title="Delete Review"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </td>
+                        {reviews.length === 0 ? (
+                            <div className="empty-state">
+                                <p>Không tìm thấy đánh giá nào.</p>
+                            </div>
+                        ) : (
+                            <div className="review-table-container">
+                                <table className="review-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Người dùng</th>
+                                            <th>Phim</th>
+                                            <th>Đánh giá</th>
+                                            <th>Ngày đăng</th>
+                                            <th>Thao tác</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        {reviews.map((review) => (
+                                            <tr key={review._id}>
+                                                <td>
+                                                    <div className="review-user-info">
+                                                        {review.userId?.profile?.avatar ? (
+                                                            <img
+                                                                src={review.userId.profile.avatar}
+                                                                alt={review.userId.profile.name}
+                                                                className="review-avatar"
+                                                            />
+                                                        ) : (
+                                                            <div className="review-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <UserIcon size={16} color="#888" />
+                                                            </div>
+                                                        )}
+                                                        <div className="review-user-details">
+                                                            <h4>{review.userId?.profile?.name || 'Unknown User'}</h4>
+                                                            <p>{review.userId?.email}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="review-movie-info">
+                                                        {review.movieId?.poster && (
+                                                            <img
+                                                                src={review.movieId.poster}
+                                                                alt={review.movieId.title}
+                                                                className="review-poster"
+                                                            />
+                                                        )}
+                                                        <span className="review-movie-title">
+                                                            {review.movieId?.title || 'Unknown Movie'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="review-rating">
+                                                        <Star size={16} fill="#FFD700" />
+                                                        <span>{review.rating}/10</span>
+                                                    </div>
+                                                    <p className="review-comment">{review.comment}</p>
+                                                </td>
+                                                <td>
+                                                    <span className="review-date">
+                                                        {formatDate(review.createdAt)}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="action-btn delete"
+                                                        onClick={() => handleDelete(review._id)}
+                                                        title="Delete Review"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
 
                         {totalPages > 1 && (
                             <div className="pagination">

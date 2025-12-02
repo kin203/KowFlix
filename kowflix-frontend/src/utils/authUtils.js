@@ -8,7 +8,7 @@ export const getUserIdFromToken = () => {
         const payload = JSON.parse(atob(token.split('.')[1]));
         return payload.id || payload.userId || payload._id;
     } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Error decoding token');
         return null;
     }
 };
