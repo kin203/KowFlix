@@ -10,6 +10,18 @@
     top: 0;
     left: 0;
     z-index: 10000;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Shrinking animation state */
+.patriotic-loader-screen.shrinking {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.patriotic-loader-screen.shrinking .loader-content {
+    transform: scale(0.5);
+    opacity: 0;
 }
 
 .loader-content {
@@ -18,6 +30,7 @@
     align-items: center;
     gap: 2rem;
     animation: fadeInUp 0.8s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 @keyframes fadeInUp {

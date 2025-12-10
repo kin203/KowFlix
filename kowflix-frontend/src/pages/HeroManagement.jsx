@@ -99,7 +99,8 @@ const HeroManagement = () => {
             movieId: movie._id,
             title: formData.title || movie.title,
             description: formData.description || movie.description,
-            imageUrl: formData.imageUrl || movie.poster
+            // Use backdrop for better quality hero images
+            imageUrl: formData.imageUrl || movie.backdrop || movie.poster
         });
     };
 

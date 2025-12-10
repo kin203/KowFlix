@@ -76,16 +76,16 @@
     gap: 1.5rem;
 }
 
-.movie-card {
+.search-page .movie-card {
     cursor: pointer;
     transition: transform 0.3s ease;
 }
 
-.movie-card:hover {
+.search-page .movie-card:hover {
     transform: scale(1.05);
 }
 
-.movie-poster {
+.search-page .movie-poster {
     position: relative;
     width: 100%;
     padding-bottom: 150%;
@@ -118,11 +118,11 @@
     transition: opacity 0.3s ease;
 }
 
-.movie-card:hover .movie-overlay {
+.search-page .movie-card:hover .movie-overlay {
     opacity: 1;
 }
 
-.play-btn {
+.search-page .play-btn {
     color: white;
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
 }

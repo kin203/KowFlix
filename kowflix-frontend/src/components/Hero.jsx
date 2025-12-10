@@ -4,17 +4,26 @@ import { Link } from 'react-router-dom';
 import MovieInfoModal from './MovieInfoModal';
 import './Hero.css';
 
-const Hero = ({ movie, movies = [] }) => {
+const Hero = ({ heroBanners = [] }) => {
     const [showModal, setShowModal] = useState(false);
-    const [activeMovie, setActiveMovie] = useState(movie);
+    const [activeBanner, setActiveBanner] = useState(null);
 
     useEffect(() => {
-        if (movie) setActiveMovie(movie);
-    }, [movie]);
+        if (heroBanners.length > 0 && !activeBanner) {
+            setActiveBanner(heroBanners[0]);
+        }
+    }, [heroBanners, activeBanner]);
 
-    if (!activeMovie) return null;
+    if (!activeBanner || !activeBanner.movieId) return null;
 
-    const year = activeMovie.releaseYear || (activeMovie.releaseDate ? new Date(activeMovie.releaseDate).getFullYear() : '2024');
+    // Extract movie data from populated movieId
+    const movie = activeBanner.movieId;
+    const title = activeBanner.title || movie.title;
+    const description = activeBanner.description || movie.description;
+    // Prioritize backdrop for better quality, then custom imageUrl, then poster as fallback
+    const imageUrl = movie.backdrop || activeBanner.imageUrl || movie.poster;
+
+    const year = movie.releaseYear || (movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : '2024');
 
     const formatRuntime = (minutes) => {
         if (!minutes) return null;
@@ -23,15 +32,13 @@ const Hero = ({ movie, movies = [] }) => {
         return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     };
 
-    const carouselMovies = movies.slice(0, 6);
-
     // YouTube embed URL for trailer
     const getTrailerUrl = (trailerKey) => {
         if (!trailerKey) return null;
         return `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&loop=1&playlist=${trailerKey}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`;
     };
 
-    const trailerUrl = (activeMovie.useTrailer !== false) ? getTrailerUrl(activeMovie.trailerKey) : null;
+    const trailerUrl = (movie.useTrailer !== false) ? getTrailerUrl(movie.trailerKey) : null;
 
     return (
         <>
@@ -50,19 +57,20 @@ const Hero = ({ movie, movies = [] }) => {
                     <div
                         className="hero-background"
                         style={{
-                            backgroundImage: `url(${activeMovie.backdrop || activeMovie.background || activeMovie.poster || ''})`
+                            backgroundImage: `url(${imageUrl})`
                         }}
                     />
                 )}
 
-                {/* Preload trailers for carousel movies */}
-                {carouselMovies.map((m) => {
-                    if (m._id === activeMovie._id || !m.trailerKey || m.useTrailer === false) return null;
+                {/* Preload trailers for carousel banners */}
+                {heroBanners.map((banner) => {
+                    const m = banner.movieId;
+                    if (!m || banner._id === activeBanner._id || !m.trailerKey || m.useTrailer === false) return null;
                     return (
                         <iframe
-                            key={m._id}
+                            key={banner._id}
                             src={getTrailerUrl(m.trailerKey)}
-                            title={`Preload ${m.title}`}
+                            title={`Preload ${banner.title}`}
                             style={{ display: 'none' }}
                             frameBorder="0"
                         />
@@ -72,35 +80,35 @@ const Hero = ({ movie, movies = [] }) => {
                 <div className="hero-overlay"></div>
 
                 <div className="hero-content">
-                    <h1 className="hero-title">{activeMovie.title}</h1>
+                    <h1 className="hero-title">{title}</h1>
 
                     <div className="hero-meta">
-                        {activeMovie.imdbRating && (
+                        {movie.imdbRating && (
                             <span className="badge badge-rating">
-                                IMDb {activeMovie.imdbRating.toFixed(1)}
+                                IMDb {movie.imdbRating.toFixed(1)}
                             </span>
                         )}
                         <span className="badge badge-year">{year}</span>
-                        {activeMovie.runtime && (
+                        {movie.runtime && (
                             <span className="badge badge-duration">
-                                {formatRuntime(activeMovie.runtime)}
+                                {formatRuntime(movie.runtime)}
                             </span>
                         )}
                         <span className="badge badge-quality">HD</span>
                     </div>
 
-                    {activeMovie.genres && activeMovie.genres.length > 0 && (
+                    {movie.genres && movie.genres.length > 0 && (
                         <div className="hero-genres">
-                            {activeMovie.genres.slice(0, 4).map((genre, index) => (
+                            {movie.genres.slice(0, 4).map((genre, index) => (
                                 <span key={index} className="genre-tag">{genre}</span>
                             ))}
                         </div>
                     )}
 
-                    <p className="hero-description">{activeMovie.description}</p>
+                    <p className="hero-description">{description}</p>
 
                     <div className="hero-buttons">
-                        <Link to={`/watch/${activeMovie._id}`} className="btn-play">
+                        <Link to={`/watch/${movie._id}`} className="btn-play">
                             <Play fill="black" size={24} />
                             <span>Xem ngay</span>
                         </Link>
@@ -114,13 +122,13 @@ const Hero = ({ movie, movies = [] }) => {
                 </div>
 
                 <div className="hero-carousel">
-                    {carouselMovies.map((item) => (
+                    {heroBanners.map((banner) => (
                         <div
-                            key={item._id}
-                            className={`carousel-item ${activeMovie._id === item._id ? 'active' : ''}`}
-                            onClick={() => setActiveMovie(item)}
+                            key={banner._id}
+                            className={`carousel-item ${activeBanner._id === banner._id ? 'active' : ''}`}
+                            onClick={() => setActiveBanner(banner)}
                         >
-                            <img src={item.backdrop || item.poster} alt={item.title} />
+                            <img src={banner.movieId?.backdrop || banner.imageUrl || banner.movieId?.poster} alt={banner.title} />
                         </div>
                     ))}
                 </div>
@@ -128,7 +136,7 @@ const Hero = ({ movie, movies = [] }) => {
 
             {showModal && (
                 <MovieInfoModal
-                    movie={activeMovie}
+                    movie={movie}
                     onClose={() => setShowModal(false)}
                 />
             )}

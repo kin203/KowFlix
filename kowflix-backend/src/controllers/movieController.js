@@ -5,7 +5,7 @@ import slugify from "slugify";
 import Movie from "../models/Movie.js";
 import Job from "../models/Job.js";
 import { uploadPoster, uploadVideo, deleteMovieFiles } from "../utils/remoteUpload.js";
-import { searchMovies, getMovieDetails, getMovieTrailer } from "../utils/tmdb.js";
+import { searchMovies, getMovieDetails, getMovieTrailer, downloadImage } from "../utils/tmdb.js";
 import { triggerEncode } from "../utils/remoteEncode.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
@@ -94,10 +94,11 @@ export const createMovie = async (req, res) => {
       tmdbId: req.body.tmdbId ? Number(req.body.tmdbId) : undefined,
       imdbId: req.body.imdbId || undefined,
       runtime: req.body.runtime ? Number(req.body.runtime) : undefined,
-      cast: req.body.cast ? (typeof req.body.cast === "string" ? req.body.cast.split(",").map(s => s.trim()) : req.body.cast) : undefined,
+      cast: req.body.cast ? (typeof req.body.cast === "string" ? req.body.cast.split(",").map(s => ({ name: s.trim() })) : req.body.cast) : undefined,
       director: req.body.director || undefined,
       imdbRating: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
       voteAverage: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
+      categories: req.body.categories ? JSON.parse(req.body.categories) : [],
       status: "draft"
     });
 
@@ -120,7 +121,6 @@ export const createMovie = async (req, res) => {
         // Upload poster to remote server
         const localPosterPath = req.files.poster[0].path;
         posterPath = await uploadPoster(localPosterPath, movieId);
-
         // Delete local temp file
         await fs.unlink(localPosterPath);
       }
@@ -294,6 +294,7 @@ export const createMovie = async (req, res) => {
         res.status(201).json({
           success: true,
           data: movie,
+          jobId: encodeJob._id,
           message: "Movie uploaded successfully. Encoding started automatically."
         });
       } else {
@@ -338,8 +339,17 @@ export const updateMovie = async (req, res) => {
         // Try to parse as JSON first
         payload.cast = JSON.parse(payload.cast);
       } catch (e) {
-        // If not JSON, split by comma (old format)
-        payload.cast = payload.cast.split(",").map(s => s.trim()).filter(Boolean);
+        payload.cast = payload.cast.split(",").map(s => ({ name: s.trim() })).filter(c => c.name);
+      }
+    }
+
+    // Handle categories
+    if (payload.categories) {
+      try {
+        payload.categories = JSON.parse(payload.categories);
+      } catch (e) {
+        console.error("Error parsing categories:", e);
+        payload.categories = [];
       }
     }
 
@@ -350,10 +360,15 @@ export const updateMovie = async (req, res) => {
 
     // Handle poster: prioritize TMDb URL, fallback to file upload
     if (payload.posterUrl) {
+      // Use TMDb poster URL directly
       payload.poster = payload.posterUrl;
       delete payload.posterUrl; // Remove from payload to avoid storing duplicate
     } else if (req.files?.poster?.[0]) {
-      payload.poster = `${mediaBase}/posters/${req.files.poster[0].filename}`;
+      // Upload poster to remote server
+      const localPosterPath = req.files.poster[0].path;
+      payload.poster = await uploadPoster(localPosterPath, req.params.id);
+      // Delete local temp file
+      await fs.unlink(localPosterPath);
     }
 
     // Handle backdrop URL from TMDb

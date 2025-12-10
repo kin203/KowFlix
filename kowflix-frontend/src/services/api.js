@@ -90,6 +90,7 @@ export const categoryAPI = {
     update: (id, data) => api.put(`/categories/${id}`, data),
     delete: (id) => api.delete(`/categories/${id}`),
     reorder: (categories) => api.post('/categories/reorder', { categories }),
+    getMoviesBySlug: (slug) => api.get(`/categories/${slug}/movies`),
 };
 
 export const userAPI = {

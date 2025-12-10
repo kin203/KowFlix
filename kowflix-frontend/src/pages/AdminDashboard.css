@@ -93,6 +93,10 @@
     margin-bottom: 2rem;
 }
 
+.chart-full-width {
+    grid-column: 1 / -1;
+}
+
 .chart-card {
     background: #1A1A1A;
     border: 1px solid #333333;

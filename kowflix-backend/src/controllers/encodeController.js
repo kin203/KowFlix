@@ -25,17 +25,18 @@ export const startEncode = async (req, res) => {
         await movie.save();
 
         // Trigger encode on remote server (non-blocking)
-        triggerEncode(videoPath, movie.slug)
+        // Use movieId for folder name to ensure uniqueness and consistency
+        triggerEncode(videoPath, movieId)
             .then(async () => {
-                console.log(`✅ Encode completed for: ${movie.slug}`);
+                console.log(`✅ Encode completed for: ${movie.title} (${movieId})`);
 
                 // Update movie with HLS paths (store relative paths, not full URLs)
-                // Structure: /hls/<slug>/master.m3u8 and /hls/<slug>/<quality>/index.m3u8
-                const hlsBasePath = `/hls/${movie.slug}`;
+                // Structure: /hls/<movieId>/master.m3u8 and /hls/<movieId>/<quality>/index.m3u8
+                const hlsBasePath = `/hls/${movieId}`;
 
                 const updatedMovie = await Movie.findByIdAndUpdate(movieId, {
                     status: "ready",
-                    hlsFolder: `/hls/${movie.slug}`,
+                    hlsFolder: `/hls/${movieId}`,
                     contentFiles: [
                         ...movie.contentFiles.filter(f => f.type !== "hls"),
                         { type: "hls", path: `${hlsBasePath}/master.m3u8`, quality: "master" },
@@ -45,10 +46,10 @@ export const startEncode = async (req, res) => {
                     ]
                 }, { new: true });
 
-                console.log(`✅ Movie updated with HLS URLs:`, updatedMovie.slug);
+                console.log(`✅ Movie updated with HLS URLs:`, updatedMovie.title);
             })
             .catch((err) => {
-                console.error(`❌ Encode failed for ${movie.slug}:`, err);
+                console.error(`❌ Encode failed for ${movie.title}:`, err);
                 Movie.findByIdAndUpdate(movieId, { status: "error" }).catch(e => console.error(e));
             });
 

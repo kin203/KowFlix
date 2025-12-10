@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { movieAPI } from '../services/api';
+import { movieAPI, jobAPI, categoryAPI } from '../services/api';
 import TMDbSearch from '../components/TMDbSearch';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
 import './AdminUpload.css';
+import './CategoryChips.css';
 
 const AdminUpload = () => {
     const [formData, setFormData] = useState({
@@ -33,8 +34,13 @@ const AdminUpload = () => {
     const [editingMovie, setEditingMovie] = useState(null); // Track which movie is being edited
     const [migrating, setMigrating] = useState(false);
 
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
     useEffect(() => {
         fetchMovies();
+        fetchCategories();
     }, []);
 
     const fetchMovies = async () => {
@@ -44,6 +50,27 @@ const AdminUpload = () => {
         } catch (err) {
             console.error('Failed to fetch movies', err);
         }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const { data } = await categoryAPI.getAll();
+            if (data.success) {
+                setCategories(data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch categories', err);
+        }
+    };
+
+    const handleCategoryToggle = (categoryId) => {
+        setSelectedCategories(prev => {
+            if (prev.includes(categoryId)) {
+                return prev.filter(id => id !== categoryId);
+            } else {
+                return [...prev, categoryId];
+            }
+        });
     };
 
     const handleInputChange = (e) => {
@@ -88,6 +115,7 @@ const AdminUpload = () => {
         e.preventDefault();
         setMessage({ type: '', text: '' });
         setUploading(true);
+        setUploadProgress(0);
 
         try {
             const data = new FormData();
@@ -106,6 +134,7 @@ const AdminUpload = () => {
             if (formData.posterUrl) data.append('posterUrl', formData.posterUrl);
             if (formData.backdropUrl) data.append('backdropUrl', formData.backdropUrl);
             data.append('useTrailer', formData.useTrailer);
+            data.append('categories', JSON.stringify(selectedCategories));
 
             if (posterFile) data.append('poster', posterFile);
             if (videoFile) data.append('video', videoFile);
@@ -114,48 +143,87 @@ const AdminUpload = () => {
             if (subtitleEN) data.append('subtitle_en', subtitleEN);
             if (subtitleVI) data.append('subtitle_vi', subtitleVI);
 
-            // Upload with progress tracking
-            await movieAPI.create(data, {
+            // Upload with progress tracking (0-50%)
+            const response = await movieAPI.create(data, {
                 onUploadProgress: (progressEvent) => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(percentCompleted);
+                    // Map 0-100 upload progress to 0-50 total progress
+                    setUploadProgress(Math.round(percentCompleted / 2));
                 }
             });
 
-            setMessage({ type: 'success', text: 'Movie uploaded successfully!' });
+            // If video was uploaded, start polling for encode progress (50-100%)
+            if (videoFile && response.data.jobId) {
+                const jobId = response.data.jobId;
+                setMessage({ type: 'info', text: 'Upload complete. Encoding in progress...' });
 
-            // Reset form
-            setFormData({
-                title: '',
-                description: '',
-                releaseYear: '',
-                genres: '',
-                tmdbId: '',
-                imdbId: '',
-                runtime: '',
-                cast: '',
-                director: '',
-                imdbRating: '',
-                posterUrl: '',
-                backdropUrl: '',
-                useTrailer: true,
-            });
-            setPosterFile(null);
-            setVideoFile(null);
-            setSubtitleEN(null);
-            setSubtitleVI(null);
+                // Poll for encode progress
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const jobResponse = await jobAPI.getOne(jobId);
+                        const job = jobResponse.data.data;
 
-            // Refresh movie list
-            fetchMovies();
+                        if (job.status === 'completed') {
+                            clearInterval(pollInterval);
+                            setUploadProgress(100);
+                            setMessage({ type: 'success', text: 'Movie uploaded and encoded successfully!' });
+                            setUploading(false);
+                            fetchMovies();
+                            resetForm();
+                        } else if (job.status === 'failed') {
+                            clearInterval(pollInterval);
+                            setUploading(false);
+                            setMessage({ type: 'error', text: `Encoding failed: ${job.error}` });
+                        } else {
+                            // Map 0-100 encode progress to 50-100 total progress
+                            const encodeProgress = job.progress || 0;
+                            setUploadProgress(50 + Math.round(encodeProgress / 2));
+                        }
+                    } catch (err) {
+                        console.error('Error polling job:', err);
+                        // Don't stop polling on transient errors
+                    }
+                }, 2000);
+            } else {
+                // No video or no auto-encode
+                setUploadProgress(100);
+                setMessage({ type: 'success', text: 'Movie uploaded successfully!' });
+                setUploading(false);
+                fetchMovies();
+                resetForm();
+            }
+
         } catch (err) {
+            setUploading(false);
             setMessage({
                 type: 'error',
                 text: err.response?.data?.message || 'Upload failed'
             });
-        } finally {
-            setUploading(false);
-            setUploadProgress(0);
         }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            title: '',
+            description: '',
+            releaseYear: '',
+            genres: '',
+            tmdbId: '',
+            imdbId: '',
+            runtime: '',
+            cast: '',
+            director: '',
+            imdbRating: '',
+            posterUrl: '',
+            backdropUrl: '',
+            useTrailer: true,
+        });
+        setPosterFile(null);
+        setVideoFile(null);
+        setSelectedCategories([]);
+        setSubtitleEN(null);
+        setSubtitleVI(null);
+        setSelectedCategories([]);
     };
 
     const handleEdit = (movie) => {
@@ -169,13 +237,14 @@ const AdminUpload = () => {
             tmdbId: movie.tmdbId?.toString() || '',
             imdbId: movie.imdbId || '',
             runtime: movie.runtime?.toString() || '',
-            cast: movie.cast?.join(', ') || '',
+            cast: movie.cast?.map(c => c.name || c).join(', ') || '',
             director: movie.director || '',
             imdbRating: movie.imdbRating?.toString() || '',
             posterUrl: movie.poster || '',
             backdropUrl: movie.backdrop || '',
             useTrailer: movie.useTrailer !== undefined ? movie.useTrailer : true,
         });
+        setSelectedCategories(movie.categories || []);
         setMessage({ type: 'info', text: `Editing: ${movie.title}` });
         // Scroll to form
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -205,6 +274,7 @@ const AdminUpload = () => {
             if (formData.posterUrl) data.append('posterUrl', formData.posterUrl);
             if (formData.backdropUrl) data.append('backdropUrl', formData.backdropUrl);
             data.append('useTrailer', formData.useTrailer);
+            data.append('categories', JSON.stringify(selectedCategories));
 
             if (posterFile) data.append('poster', posterFile);
             if (videoFile) data.append('video', videoFile);
@@ -280,10 +350,14 @@ const AdminUpload = () => {
         }
     };
 
-    const handleUpdateTrailer = async (movieId) => {
+    const handleUpdateTrailer = async (movie) => {
         try {
             setMessage({ type: 'info', text: 'Fetching trailer...' });
-            await movieAPI.update(movieId, {});
+
+            const data = new FormData();
+            data.append('tmdbId', movie.tmdbId);
+
+            await movieAPI.update(movie._id, data);
             setMessage({ type: 'success', text: 'Trailer updated successfully!' });
             fetchMovies();
         } catch (err) {
@@ -389,6 +463,36 @@ const AdminUpload = () => {
                                 onChange={handleInputChange}
                                 placeholder="Action, Drama, Sci-Fi"
                             />
+                        </div>
+
+                        <div className="form-field full-width">
+                            <label>Danh mục (Categories)</label>
+                            <p className="field-hint">Chọn các danh mục phân loại cho phim này</p>
+                            <div className="category-chips-container">
+                                {categories.length === 0 ? (
+                                    <p className="no-categories-message">
+                                        Chưa có danh mục nào. Vui lòng tạo danh mục trong <a href="/admin/categories">Category Management</a>
+                                    </p>
+                                ) : (
+                                    categories.map(cat => (
+                                        <button
+                                            key={cat._id}
+                                            type="button"
+                                            className={`category-chip ${selectedCategories.includes(cat._id) ? 'selected' : ''}`}
+                                            onClick={() => handleCategoryToggle(cat._id)}
+                                        >
+                                            <span className="chip-icon">{selectedCategories.includes(cat._id) ? '✓' : '+'}</span>
+                                            <span className="chip-name">{cat.name}</span>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                            {selectedCategories.length > 0 && (
+                                <div className="selected-categories-summary">
+                                    <span className="summary-label">Đã chọn:</span>
+                                    <span className="summary-count">{selectedCategories.length} danh mục</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-field checkbox-field" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
@@ -553,20 +657,10 @@ const AdminUpload = () => {
                                     </td>
                                     <td>{movie.status || 'pending'}</td>
                                     <td>
-                                        {movie.status !== 'ready' && (
-                                            <button
-                                                className="btn-secondary"
-                                                onClick={() => handleEncode(movie._id)}
-                                                disabled={encoding[movie._id]}
-                                                style={{ marginRight: '0.5rem' }}
-                                            >
-                                                {encoding[movie._id] ? 'Encoding...' : 'Encode'}
-                                            </button>
-                                        )}
                                         {movie.tmdbId && !movie.trailerKey && (
                                             <button
                                                 className="btn-trailer"
-                                                onClick={() => handleUpdateTrailer(movie._id)}
+                                                onClick={() => handleUpdateTrailer(movie)}
                                                 style={{ marginRight: '0.5rem' }}
                                                 title="Fetch trailer from TMDb"
                                             >

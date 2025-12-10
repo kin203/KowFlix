@@ -163,7 +163,15 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         <div className="modal-info-row">
                             <span className="modal-label">Cast:</span>
                             <span className="modal-value">
-                                {movie.cast?.map(c => typeof c === 'string' ? c : c.name).join(', ') || 'N/A'}
+                                {(() => {
+                                    console.log('🎭 Cast data:', movie.cast);
+                                    console.log('🎭 First cast item:', movie.cast?.[0]);
+                                    return movie.cast?.map(c => {
+                                        if (typeof c === 'string') return c;
+                                        if (c && typeof c === 'object') return c.name || JSON.stringify(c);
+                                        return 'Unknown';
+                                    }).filter(Boolean).join(', ') || 'N/A';
+                                })()}
                             </span>
                         </div>
                         <div className="modal-info-row">

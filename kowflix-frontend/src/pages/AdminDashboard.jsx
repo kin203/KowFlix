@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
 import StatsCard from '../components/admin/StatsCard';
+import EngagementChart from '../components/admin/EngagementChart';
 import { Users, Film, Eye, TrendingUp, Clock } from 'lucide-react';
 import { analyticsAPI } from '../services/api';
 import './AdminDashboard.css';
@@ -132,25 +133,13 @@ const AdminDashboard = () => {
 
                 {/* Charts Section */}
                 <div className="charts-grid">
-                    {/* Weekly Views Chart */}
-                    <div className="chart-card">
-                        <div className="chart-header">
-                            <h3>Lượt xem theo tuần</h3>
-                            <span className="chart-subtitle">7 ngày qua</span>
-                        </div>
-                        <div className="simple-bar-chart">
-                            {weeklyData.map((item, index) => (
-                                <div key={index} className="bar-item">
-                                    <div
-                                        className="bar"
-                                        style={{ height: `${(item.views / 800) * 100}%` }}
-                                    >
-                                        <span className="bar-value">{item.views}</span>
-                                    </div>
-                                    <span className="bar-label">{item.day}</span>
-                                </div>
-                            ))}
-                        </div>
+                    {/* Engagement Trends Chart */}
+                    <div className="chart-full-width">
+                        <EngagementChart
+                            data={weeklyData}
+                            title="Engagement Trends"
+                            subtitle="Lượt xem theo tuần - 7 ngày qua"
+                        />
                     </div>
 
                     {/* Top Viewed Movies */}

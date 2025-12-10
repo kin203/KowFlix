@@ -22,6 +22,11 @@ const MovieSlider = ({ title, movies }) => {
                                 src={movie.poster || "https://via.placeholder.com/200x300?text=No+Poster"}
                                 alt={movie.title}
                                 className="movie-poster"
+                                onLoad={() => console.log('✅ Image loaded:', movie.title)}
+                                onError={(e) => {
+                                    console.error('❌ Image failed:', movie.title, e.target.src);
+                                    e.target.src = "https://via.placeholder.com/200x300?text=Error";
+                                }}
                             />
                         </div>
                     ))}
