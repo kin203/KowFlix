@@ -328,7 +328,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
 
     return (
         <div
-            className="video-player-container"
+            className={`video-player-container ${!showControls ? 'hide-cursor' : ''}`}
             onMouseMove={() => setShowControls(true)}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >

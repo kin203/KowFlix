@@ -34,13 +34,16 @@ router.get("/:id/stream", streamLimiter, streamMP4); // Apply stream limiter
 router.get("/admin/stream-stats", auth, isAdmin, streamStatsHandler);
 
 
+// Admin routes with file upload (poster, video, subtitles)
 router.post(
   "/",
   auth,
   isAdmin,
   uploadMix.fields([
     { name: "poster", maxCount: 1 },
-    { name: "video", maxCount: 1 }
+    { name: "video", maxCount: 1 },
+    { name: "subtitle_en", maxCount: 1 },
+    { name: "subtitle_vi", maxCount: 1 }
   ]),
   createMovie
 );
@@ -51,7 +54,9 @@ router.put(
   isAdmin,
   uploadMix.fields([
     { name: "poster", maxCount: 1 },
-    { name: "video", maxCount: 1 }
+    { name: "video", maxCount: 1 },
+    { name: "subtitle_en", maxCount: 1 },
+    { name: "subtitle_vi", maxCount: 1 }
   ]),
   updateMovie
 );

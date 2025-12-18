@@ -15,6 +15,12 @@
     cursor: pointer;
 }
 
+/* Hide cursor when controls are hidden */
+.video-player-container.hide-cursor,
+.video-player-container.hide-cursor * {
+    cursor: none !important;
+}
+
 /* Controls Overlay */
 .video-controls {
     position: absolute;

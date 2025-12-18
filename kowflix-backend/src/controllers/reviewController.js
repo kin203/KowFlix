@@ -47,7 +47,7 @@ export const getMovieReviews = async (req, res) => {
     try {
         const { movieId } = req.params;
         const reviews = await Review.find({ movieId })
-            .populate('userId', 'profile')
+            .populate('userId', 'username email profile')
             .sort({ createdAt: -1 });
 
         res.json({

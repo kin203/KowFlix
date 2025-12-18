@@ -164,13 +164,18 @@ const MovieInfoModal = ({ movie, onClose }) => {
                             <span className="modal-label">Cast:</span>
                             <span className="modal-value">
                                 {(() => {
-                                    console.log('🎭 Cast data:', movie.cast);
-                                    console.log('🎭 First cast item:', movie.cast?.[0]);
-                                    return movie.cast?.map(c => {
-                                        if (typeof c === 'string') return c;
-                                        if (c && typeof c === 'object') return c.name || JSON.stringify(c);
-                                        return 'Unknown';
-                                    }).filter(Boolean).join(', ') || 'N/A';
+                                    if (!movie.cast || movie.cast.length === 0) return 'N/A';
+
+                                    return movie.cast.map(c => {
+                                        // Handle string format
+                                        if (typeof c === 'string') return c.trim();
+                                        // Handle object format with name property
+                                        if (c && typeof c === 'object' && c.name) return c.name.trim();
+                                        // Skip invalid entries
+                                        return null;
+                                    })
+                                        .filter(Boolean) // Remove null/undefined/empty
+                                        .join(', ') || 'N/A';
                                 })()}
                             </span>
                         </div>
@@ -243,28 +248,43 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         {loading ? (
                             <div className="reviews-loading">Đang tải đánh giá...</div>
                         ) : reviews.length > 0 ? (
-                            reviews.map((review) => (
-                                <div key={review._id} className="review-item">
-                                    <div className="review-header">
-                                        <div className="review-user">
-                                            <div className="user-avatar">
-                                                {review.userId?.username?.charAt(0).toUpperCase() || 'U'}
+                            reviews.map((review) => {
+                                const displayName = review.userId?.profile?.name || review.userId?.username || 'User';
+                                const avatarInitial = displayName.charAt(0).toUpperCase();
+
+                                return (
+                                    <div key={review._id} className="review-item">
+                                        <div className="review-header">
+                                            <div className="review-user">
+                                                <div className="user-avatar">
+                                                    {review.userId?.profile?.avatar ? (
+                                                        <img
+                                                            src={review.userId.profile.avatar}
+                                                            alt={displayName}
+                                                            className="avatar-img"
+                                                        />
+                                                    ) : (
+                                                        avatarInitial
+                                                    )}
+                                                </div>
+                                                <div className="user-info">
+                                                    <span className="user-name">
+                                                        {displayName}
+                                                    </span>
+                                                    <span className="review-date">
+                                                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="user-info">
-                                                <span className="user-name">{review.userId?.username || 'Anonymous'}</span>
-                                                <span className="review-date">
-                                                    {new Date(review.createdAt).toLocaleDateString('vi-VN')}
-                                                </span>
+                                            <div className="review-rating">
+                                                {renderStars(review.rating)}
+                                                <span className="rating-text">{review.rating}/10</span>
                                             </div>
                                         </div>
-                                        <div className="review-rating">
-                                            {renderStars(review.rating)}
-                                            <span className="rating-text">{review.rating}/10</span>
-                                        </div>
+                                        <p className="review-comment">{review.comment}</p>
                                     </div>
-                                    <p className="review-comment">{review.comment}</p>
-                                </div>
-                            ))
+                                );
+                            })
                         ) : (
                             <div className="no-reviews">
                                 <p>Chưa có đánh giá nào cho phim này</p>

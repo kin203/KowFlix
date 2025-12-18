@@ -195,7 +195,7 @@ const Watch = () => {
                     ) : hlsUrl ? (
                         <VideoPlayerWrapper
                             src={hlsUrl}
-                            poster={movie?.backdrop || movie?.poster}
+                            poster={movie?.backdrop || movie?.background || ''}
                             onProgress={handleProgress}
                             initialTime={initialTime}
                             movieId={id}

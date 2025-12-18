@@ -70,11 +70,29 @@
     display: block;
     transition: transform 0.3s ease;
     opacity: 1 !important;
-z-index: 1 !important;
+    z-index: 1 !important;
 }
 
 .movie-card:hover .movie-poster {
     transform: scale(1.05);
+}
+
+/* Watch Progress Bar */
+.movie-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.movie-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 
 /* Responsive */

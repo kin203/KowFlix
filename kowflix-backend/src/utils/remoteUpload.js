@@ -5,11 +5,25 @@ import path from 'path';
 
 const REMOTE_HOST = process.env.REMOTE_HOST || '192.168.100.52';
 const REMOTE_USER = process.env.REMOTE_USER || 'kowflix';
-// Temporarily hardcoded to bypass .env issue
-const REMOTE_SSH_KEY = 'C:\\Users\\Admin\\.ssh\\kowflix_backend_key_nopass';
 const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || '/media/DATA/kowflix';
 
-// console.log('SSH Key Path:', REMOTE_SSH_KEY);
+/**
+ * Get SSH private key from environment variable or file path
+ * Priority: REMOTE_SSH_KEY (direct key) > REMOTE_SSH_KEY_PATH (file path)
+ */
+const getSSHKey = () => {
+    // Priority 1: Direct key from env (Render deployment)
+    if (process.env.REMOTE_SSH_KEY) {
+        return process.env.REMOTE_SSH_KEY;
+    }
+
+    // Priority 2: Key file path (local development)
+    if (process.env.REMOTE_SSH_KEY_PATH) {
+        return fs.readFileSync(process.env.REMOTE_SSH_KEY_PATH, 'utf8');
+    }
+
+    throw new Error('SSH key not configured. Set REMOTE_SSH_KEY or REMOTE_SSH_KEY_PATH environment variable.');
+};
 
 /**
  * Upload poster to remote server
@@ -25,7 +39,7 @@ export async function uploadPoster(localPath, movieId) {
             host: REMOTE_HOST,
             port: 22,
             username: REMOTE_USER,
-            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+            privateKey: getSSHKey()
         });
 
         const ext = path.extname(localPath);
@@ -58,7 +72,7 @@ export async function uploadVideo(localPath, movieId) {
             host: REMOTE_HOST,
             port: 22,
             username: REMOTE_USER,
-            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+            privateKey: getSSHKey()
         });
 
         const ext = path.extname(localPath);
@@ -91,7 +105,7 @@ export async function deleteRemoteFile(remotePath) {
             host: REMOTE_HOST,
             port: 22,
             username: REMOTE_USER,
-            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+            privateKey: getSSHKey()
         });
 
         const exists = await sftp.exists(remotePath);
@@ -124,7 +138,7 @@ export async function deleteRemoteDirectory(remotePath) {
             host: REMOTE_HOST,
             port: 22,
             username: REMOTE_USER,
-            privateKey: fs.readFileSync(REMOTE_SSH_KEY)
+            privateKey: getSSHKey()
         });
 
         const exists = await sftp.exists(remotePath);
@@ -178,3 +192,4 @@ export async function deleteMovieFiles(movieId, movie) {
     await Promise.allSettled(deletionPromises);
     console.log(`✅ Cleaned up files for movie: ${movieId}`);
 }
+

@@ -1,5 +1,6 @@
 import Job from '../models/Job.js';
 import Movie from '../models/Movie.js';
+import * as jobQueue from '../services/jobQueue.js';
 
 // Get all jobs
 export const getAllJobs = async (req, res) => {
@@ -164,6 +165,121 @@ export const cleanupOldJobs = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to cleanup jobs'
+        });
+    }
+};
+
+// Get encoding queue status
+export const getQueueStatus = async (req, res) => {
+    try {
+        const queueStatus = await jobQueue.getQueueStatus();
+
+        res.json({
+            success: true,
+            data: queueStatus
+        });
+    } catch (error) {
+        console.error('getQueueStatus error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get queue status'
+        });
+    }
+};
+
+// Cancel a stuck job and process next in queue
+export const cancelJob = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const job = await Job.findById(id);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found'
+            });
+        }
+
+        // Mark job as failed
+        await Job.findByIdAndUpdate(id, {
+            status: 'failed',
+            error: 'Cancelled by admin',
+            completedTime: new Date()
+        });
+
+        // Update movie status to error
+        if (job.movieId) {
+            await Movie.findByIdAndUpdate(job.movieId, {
+                status: 'error'
+            });
+        }
+
+        console.log(`❌ Job cancelled: ${job.movieTitle} (${id})`);
+
+        // Trigger next job in queue
+        await jobQueue.processQueue();
+
+        res.json({
+            success: true,
+            message: 'Job cancelled and next job started'
+        });
+    } catch (error) {
+        console.error('cancelJob error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to cancel job'
+        });
+    }
+};
+
+// Cancel all jobs (encoding + pending)
+export const cancelAllJobs = async (req, res) => {
+    try {
+        // Find all encoding and pending jobs
+        const jobs = await Job.find({
+            type: 'encode',
+            status: { $in: ['encoding', 'pending'] }
+        });
+
+        if (jobs.length === 0) {
+            return res.json({
+                success: true,
+                message: 'No jobs to cancel',
+                cancelledCount: 0
+            });
+        }
+
+        // Cancel all jobs
+        const cancelledIds = [];
+        for (const job of jobs) {
+            await Job.findByIdAndUpdate(job._id, {
+                status: 'failed',
+                error: 'Cancelled by admin (bulk cancel)',
+                completedTime: new Date()
+            });
+
+            // Update movie status
+            if (job.movieId) {
+                await Movie.findByIdAndUpdate(job.movieId, {
+                    status: 'error'
+                });
+            }
+
+            cancelledIds.push(job._id);
+            console.log(`❌ Job cancelled: ${job.movieTitle} (${job._id})`);
+        }
+
+        res.json({
+            success: true,
+            message: `Cancelled ${jobs.length} job(s)`,
+            cancelledCount: jobs.length,
+            cancelledIds: cancelledIds
+        });
+    } catch (error) {
+        console.error('cancelAllJobs error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to cancel jobs'
         });
     }
 };

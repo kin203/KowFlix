@@ -1,9 +1,12 @@
 import express from "express";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
-import fs from "fs";
-import path from "path";
+
+// Configuration
+import config from "./config/config.js";
+
+// Middleware
+import errorHandler, { notFoundHandler } from "./middleware/errorHandler.js";
 
 // Routes
 import movieRoutes from "./routes/movieRoutes.js";
@@ -21,39 +24,17 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import navMenuRoutes from "./routes/navMenuRoutes.js";
 
-dotenv.config();
-
-// Ensure media directories exist
-const MEDIA_ROOT = process.env.MEDIA_ROOT || path.join(process.cwd(), "media");
-const dirs = [
-  MEDIA_ROOT,
-  process.env.UPLOAD_DIR || path.join(MEDIA_ROOT, "uploads"),
-  process.env.POSTER_DIR || path.join(MEDIA_ROOT, "posters"),
-  process.env.HLS_DIR || path.join(MEDIA_ROOT, "hls"),
-  process.env.THUMB_DIR || path.join(MEDIA_ROOT, "thumbnails"),
-  process.env.SUBTITLE_DIR || path.join(MEDIA_ROOT, "subtitles")
-];
-
-dirs.forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-      console.log(`Created directory: ${dir}`);
-    } catch (err) {
-      console.error(`Failed to create directory ${dir}:`, err.message);
-    }
-  }
-});
-
 const app = express();
 
-app.use(cors());
+// Middleware
+app.use(cors(config.cors));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Serve static media files
-app.use('/media', express.static(MEDIA_ROOT));
+// Note: Media files are now served directly from nk203.id.vn via Cloudflare Tunnel
+// No local static file serving needed
 
-// Routes
+// API Routes
 app.use("/api/movies", movieRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", encodeRoutes);
@@ -69,15 +50,63 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/nav-menu", navMenuRoutes);
 
-// Connect MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("MongoDB error:", err));
+// Health check route
+app.get("/", (req, res) => res.json({
+  status: "success",
+  message: "KowFlix API running...",
+  version: "1.0.0",
+  environment: config.server.env
+}));
 
-// Sample route
-app.get("/", (req, res) => res.send("KowFlix API running..."));
+// 404 Handler - Must be after all routes
+app.use(notFoundHandler);
+
+// Error Handler - Must be last
+app.use(errorHandler);
+
+// Connect to MongoDB
+mongoose.connect(config.database.uri)
+  .then(() => {
+    console.log("✅ MongoDB connected successfully");
+    console.log(`📊 Database: ${mongoose.connection.name}`);
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  });
 
 // Start server
-const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`🚀 Server listening on port ${port}`));
-// Server updated
+const server = app.listen(config.server.port, () => {
+  console.log(`🚀 Server running on port ${config.server.port}`);
+  console.log(`🌍 Environment: ${config.server.env}`);
+  console.log(`📁 Media URL: ${config.media.publicUrl}`);
+
+  // Log enabled features
+  if (config.cloudinary.enabled) console.log("☁️  Cloudinary: enabled");
+  if (config.remote.enabled) console.log("🔗 Remote server: enabled");
+  if (config.tmdb.enabled) console.log("🎬 TMDb API: enabled");
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('👋 SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+});
+

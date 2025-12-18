@@ -7,6 +7,7 @@ import Job from "../models/Job.js";
 import { uploadPoster, uploadVideo, deleteMovieFiles } from "../utils/remoteUpload.js";
 import { searchMovies, getMovieDetails, getMovieTrailer, downloadImage } from "../utils/tmdb.js";
 import { triggerEncode } from "../utils/remoteEncode.js";
+import * as jobQueue from "../services/jobQueue.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
 
@@ -94,7 +95,16 @@ export const createMovie = async (req, res) => {
       tmdbId: req.body.tmdbId ? Number(req.body.tmdbId) : undefined,
       imdbId: req.body.imdbId || undefined,
       runtime: req.body.runtime ? Number(req.body.runtime) : undefined,
-      cast: req.body.cast ? (typeof req.body.cast === "string" ? req.body.cast.split(",").map(s => ({ name: s.trim() })) : req.body.cast) : undefined,
+      cast: req.body.cast ? (() => {
+        try {
+          // Try to parse as JSON first (new format with profile_path)
+          const parsed = JSON.parse(req.body.cast);
+          return Array.isArray(parsed) ? parsed : undefined;
+        } catch (e) {
+          // Fallback: parse as comma-separated string (old format)
+          return req.body.cast.split(",").map(s => ({ name: s.trim() }));
+        }
+      })() : undefined,
       director: req.body.director || undefined,
       imdbRating: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
       voteAverage: req.body.imdbRating ? Number(req.body.imdbRating) : undefined,
@@ -106,19 +116,16 @@ export const createMovie = async (req, res) => {
     let posterPath = "";
     let videoPath = "";
 
-    // Debug logging
-    // console.log('📝 [CREATE MOVIE] Request received');
-    // console.log('📝 [CREATE MOVIE] Files:', req.files);
-    // console.log('📝 [CREATE MOVIE] Has video?', !!req.files?.video?.[0]);
-    // console.log('📝 [CREATE MOVIE] Has poster?', !!req.files?.poster?.[0]);
-
     try {
-      // Handle poster: prioritize TMDb URL, fallback to file upload
+      // Handle poster: prioritize TMDb URL, then Cloudinary URL, fallback to file upload
       if (req.body.posterUrl) {
         // Use TMDb poster URL directly
         posterPath = req.body.posterUrl;
+      } else if (req.body.customPosterUrl) {
+        // Use Cloudinary URL (uploaded via Cloudinary Upload Widget)
+        posterPath = req.body.customPosterUrl;
       } else if (req.files?.poster?.[0]) {
-        // Upload poster to remote server
+        // Fallback: Upload poster to remote server (legacy support)
         const localPosterPath = req.files.poster[0].path;
         posterPath = await uploadPoster(localPosterPath, movieId);
         // Delete local temp file
@@ -147,8 +154,17 @@ export const createMovie = async (req, res) => {
         movie.useTrailer = req.body.useTrailer === 'true' || req.body.useTrailer === true;
       }
 
-      // Upload video to remote server
-      if (req.files?.video?.[0]) {
+      // Handle video: accept videoPath from client (already uploaded to nk203.id.vn)
+      if (req.body.videoPath) {
+        // Validate path (security check)
+        if (!req.body.videoPath.startsWith('/media/uploads/')) {
+          throw new Error('Invalid video path. Must start with /media/uploads/');
+        }
+        videoPath = req.body.videoPath;
+        console.log(`✅ Using pre-uploaded video: ${videoPath}`);
+      }
+      // Fallback: support legacy file upload (for backward compatibility during transition)
+      else if (req.files?.video?.[0]) {
         const localVideoPath = req.files.video[0].path;
         const fileSize = `${(req.files.video[0].size / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 
@@ -222,80 +238,35 @@ export const createMovie = async (req, res) => {
 
       movie.subtitles = subtitles;
 
-      // If video uploaded, trigger auto-encode
+      // If video uploaded, add to encoding queue
       if (videoPath) {
         movie.status = "processing";
         await movie.save();
-
-        // Create encode job
-        const encodeJob = await Job.create({
-          type: 'encode',
-          movieId: movie._id,
-          movieTitle: movie.title,
-          status: 'encoding',
-          progress: 0
-        });
 
         // Convert relative path to absolute path on remote server
         const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || "/media/DATA/kowflix";
         const absoluteVideoPath = `${REMOTE_MEDIA_ROOT}${videoPath.replace('/media', '')}`;
 
-        // Trigger encode with movieId (server creates folder with movieId)
-        triggerEncode(absoluteVideoPath, movieId, async (progress) => {
-          // Update encode job progress in real-time
-          try {
-            await Job.findByIdAndUpdate(encodeJob._id, {
-              progress: progress,
-              status: progress >= 100 ? 'completed' : 'encoding'
-            });
-            console.log(`📊 Encode progress for ${movie.title}: ${progress}%`);
-          } catch (err) {
-            console.error('Failed to update job progress:', err);
+        // Create encode job with 'pending' status (will be processed by queue)
+        const encodeJob = await Job.create({
+          type: 'encode',
+          movieId: movie._id,
+          movieTitle: movie.title,
+          status: 'pending', // ✅ Start as pending, queue will process it
+          progress: 0,
+          metadata: {
+            videoPath: absoluteVideoPath
           }
-        })
-          .then(async () => {
-            console.log(`✅ Auto-encode completed for: ${movie.title} (${movieId})`);
+        });
 
-            // Update encode job to completed
-            await Job.findByIdAndUpdate(encodeJob._id, {
-              status: 'completed',
-              progress: 100,
-              completedTime: new Date()
-            });
-
-            // Update movie with HLS paths (using movieId as folder name)
-            const hlsBasePath = `/hls/${movieId}`;
-            await Movie.findByIdAndUpdate(movieId, {
-              status: "ready",
-              hlsFolder: `/hls/${movieId}`,
-              contentFiles: [
-                ...movie.contentFiles.filter(f => f.type !== "hls"),
-                { type: "hls", path: `${hlsBasePath}/master.m3u8`, quality: "master" },
-                { type: "hls", path: `${hlsBasePath}/1080p/index.m3u8`, quality: "1080p" },
-                { type: "hls", path: `${hlsBasePath}/720p/index.m3u8`, quality: "720p" },
-                { type: "hls", path: `${hlsBasePath}/480p/index.m3u8`, quality: "480p" }
-              ]
-            });
-            console.log(`✅ Movie ready: ${movie.title} (${movieId})`);
-          })
-          .catch(async (err) => {
-            console.error(`❌ Auto-encode failed for ${movie.title} (${movieId}):`, err);
-
-            // Update encode job to failed
-            await Job.findByIdAndUpdate(encodeJob._id, {
-              status: 'failed',
-              error: err.message,
-              completedTime: new Date()
-            });
-
-            Movie.findByIdAndUpdate(movieId, { status: "error" }).catch(e => console.error(e));
-          });
+        // Add job to queue (will start when ready)
+        await jobQueue.addJob(encodeJob._id);
 
         res.status(201).json({
           success: true,
           data: movie,
           jobId: encodeJob._id,
-          message: "Movie uploaded successfully. Encoding started automatically."
+          message: "Movie uploaded successfully. Encoding queued."
         });
       } else {
         await movie.save();
