@@ -31,8 +31,15 @@ app.use(cors(config.cors));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Note: Media files are now served directly from nk203.id.vn via Cloudflare Tunnel
-// No local static file serving needed
+// However, for local development uploads, we still need to serve the uploads folder
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API Routes
 app.use("/api/movies", movieRoutes);

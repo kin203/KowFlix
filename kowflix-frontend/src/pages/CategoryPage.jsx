@@ -89,8 +89,6 @@ const CategoryPage = () => {
                                     <div className="movie-overlay">
                                         <PlayCircle size={48} className="play-icon" />
                                     </div>
-                                    {/* Optional: Add episode count or quality badge here if available */}
-                                    {/* <span className="episode-badge">Tập 12</span> */}
                                 </div>
                                 <div className="movie-info">
                                     <h3 className="movie-title">{movie.title}</h3>
