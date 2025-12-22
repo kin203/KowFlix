@@ -1,0 +1,111 @@
+.engagement-chart-card {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.engagement-chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.engagement-chart-card .chart-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.engagement-chart-card .chart-header h3::before {
+    content: '📈';
+    font-size: 1.5rem;
+}
+
+.engagement-chart-card .chart-subtitle {
+    font-size: 0.85rem;
+    color: #888888;
+}
+
+.chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 20px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    color: #FFD700;
+    font-weight: 600;
+}
+
+.chart-container {
+    margin-top: 1rem;
+}
+
+/* Custom Tooltip Styles */
+.custom-tooltip {
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid #FFD700;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip-label {
+    font-size: 0.85rem;
+    color: #888888;
+    margin: 0 0 0.25rem 0;
+    font-weight: 500;
+}
+
+.tooltip-value {
+    font-size: 1rem;
+    color: #FFD700;
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tooltip-dot {
+    width: 8px;
+    height: 8px;
+    background: #FFD700;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .engagement-chart-card {
+        padding: 1rem;
+    }
+
+    .engagement-chart-card .chart-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chart-legend {
+        align-self: flex-start;
+    }
+}

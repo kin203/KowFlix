@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 
 const ProfileSchema = new mongoose.Schema({
   name: { type: String, default: "" },
-  avatar: { type: String, default: "" }
+  avatar: { type: String, default: "" },
+  avatarPublicId: { type: String, default: "" }, // For Cloudinary deletion
+  bio: { type: String, default: "" }
 }, { _id: false });
 
 const UserSchema = new mongoose.Schema({
@@ -11,6 +13,9 @@ const UserSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   profile: { type: ProfileSchema, default: () => ({}) },
+  lastActive: { type: Date, default: Date.now },
+  loginCount: { type: Number, default: 0 },
+  totalWatchTime: { type: Number, default: 0 }, // in minutes
   createdAt: { type: Date, default: Date.now }
 });
 

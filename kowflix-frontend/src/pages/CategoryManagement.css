@@ -1,0 +1,475 @@
+.admin-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #000000;
+}
+
+.admin-dashboard-content {
+    flex: 1;
+    padding: 2rem 4%;
+    color: white;
+}
+
+.admin-header {
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: #FFFFFF;
+}
+
+.admin-header p {
+    color: #888888;
+    margin: 0;
+}
+
+.btn-add {
+    padding: 0.75rem 1.5rem;
+    background: #FFD700;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #FFC700;
+    transform: translateY(-2px);
+}
+
+.categories-section {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.categories-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.categories-table th,
+.categories-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #333333;
+}
+
+.categories-table th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.categories-table tr:last-child td {
+    border-bottom: none;
+}
+
+.categories-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.categories-table tbody tr:hover {
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.category-icon {
+    font-size: 1.5rem;
+}
+
+.categories-table code {
+    background: rgba(255, 215, 0, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #FFD700;
+}
+
+.color-preview {
+    width: 40px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #333333;
+}
+
+.status-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22C55E;
+    color: #22C55E;
+}
+
+.status-badge.inactive {
+    background: rgba(156, 163, 175, 0.1);
+    border: 1px solid #9CA3AF;
+    color: #9CA3AF;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #FFFFFF;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.form-field label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #888888;
+    font-size: 0.9rem;
+}
+
+.form-field input,
+.form-field textarea {
+    padding: 0.75rem;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: #FFD700;
+}
+
+.form-field textarea {
+    resize: vertical;
+}
+
+.form-field input[type="color"] {
+    height: 45px;
+    cursor: pointer;
+}
+
+.checkbox-field {
+    flex-direction: row;
+    align-items: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    appearance: none;
+    background: #555;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background: #FFD700;
+}
+
+.checkbox-label input[type="checkbox"]:checked::before {
+    left: 26px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.submit-btn {
+    padding: 0.75rem 1.5rem;
+    background: #FFD700;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: #FFC700;
+}
+
+.cancel-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid #333333;
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    color: #FFD700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+    background: #FFD700;
+    color: #000000;
+}
+
+.delete-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid #E50914;
+    color: #E50914;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background: #E50914;
+    color: #FFFFFF;
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+
+.message.success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22C55E;
+    color: #22C55E;
+}
+
+.message.error {
+    background: rgba(229, 9, 20, 0.1);
+    border-color: #E50914;
+    color: #E50914;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: #888888;
+    font-size: 1.1rem;
+}
+
+/* Icon Picker Styles */
+.icon-picker-container {
+    position: relative;
+}
+
+.icon-display {
+    padding: 0.75rem;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-display:hover {
+    border-color: #FFD700;
+}
+
+.selected-icon {
+    font-size: 1.5rem;
+}
+
+.picker-arrow {
+    color: #888888;
+    font-size: 0.8rem;
+}
+
+.icon-grid {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.icon-option {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.icon-option:hover {
+    background: rgba(255, 215, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.icon-option.selected {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+/* Image Upload Styles */
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.upload-label {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    color: #FFD700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-weight: 600;
+    display: inline-block;
+    width: fit-content;
+}
+
+.upload-label:hover {
+    background: #FFD700;
+    color: #000000;
+}
+
+.image-preview {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333333;
+}
+
+.image-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    background: rgba(229, 9, 20, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-image-btn:hover {
+    background: #E50914;
+    transform: scale(1.1);
+}

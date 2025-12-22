@@ -1,0 +1,126 @@
+.movie-slider {
+    margin-bottom: 3rem;
+    padding: 0 4%;
+}
+
+.slider-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #e5e5e5;
+    transition: color 0.2s;
+}
+
+.slider-title:hover {
+    color: white;
+}
+
+.slider-container {
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 1.5rem;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.slider-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.slider-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.slider-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.slider-container:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Movie Card */
+.movie-card {
+    flex: 0 0 auto;
+    width: 220px;
+    height: 330px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: #1a1a1a;
+}
+
+.movie-card:hover {
+    transform: scale(1.08);
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.movie-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+    opacity: 1 !important;
+    z-index: 1 !important;
+}
+
+.movie-card:hover .movie-poster {
+    transform: scale(1.05);
+}
+
+/* Watch Progress Bar */
+.movie-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.movie-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .movie-card {
+        width: 200px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .slider-title {
+        font-size: 1.3rem;
+    }
+
+    .movie-card {
+        width: 160px;
+        height: 240px;
+    }
+
+    .slider-container {
+        gap: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .movie-card {
+        width: 140px;
+        height: 210px;
+    }
+}

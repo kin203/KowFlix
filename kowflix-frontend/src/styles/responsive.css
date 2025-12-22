@@ -1,0 +1,588 @@
+/* src/styles/responsive.css */
+/* Comprehensive Responsive Styles for KowFlix */
+
+/* ============================================
+   GLOBAL RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Container padding adjustments */
+@media (max-width: 1400px) {
+
+    .hero,
+    .movie-slider,
+    .category-section {
+        padding-left: 3%;
+        padding-right: 3%;
+    }
+}
+
+@media (max-width: 1024px) {
+
+    .hero,
+    .movie-slider,
+    .category-section {
+        padding-left: 2%;
+        padding-right: 2%;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .hero,
+    .movie-slider,
+    .category-section {
+        padding-left: 4%;
+        padding-right: 4%;
+    }
+}
+
+/* ============================================
+   HERO SECTION RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .hero {
+        height: 70vh;
+    }
+
+    .hero-content {
+        max-width: 90%;
+    }
+
+    .hero-title {
+        font-size: 2.5rem !important;
+    }
+
+    .hero-description {
+        font-size: 1rem !important;
+        max-width: 500px !important;
+    }
+
+    .hero-buttons {
+        flex-direction: row;
+        gap: 0.8rem;
+    }
+
+    .hero-btn {
+        padding: 0.7rem 1.5rem !important;
+        font-size: 0.95rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        height: 60vh;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-content {
+        max-width: 95%;
+        padding: 1rem;
+    }
+
+    .hero-title {
+        font-size: 2rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+
+    .hero-description {
+        font-size: 0.9rem !important;
+        max-width: 100% !important;
+        margin-bottom: 1.2rem !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-meta {
+        font-size: 0.85rem !important;
+        gap: 0.8rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.6rem;
+    }
+
+    .hero-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        height: 50vh;
+    }
+
+    .hero-title {
+        font-size: 1.5rem !important;
+    }
+
+    .hero-description {
+        font-size: 0.85rem !important;
+        -webkit-line-clamp: 2;
+    }
+
+    .hero-meta {
+        flex-wrap: wrap;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ============================================
+   NAVBAR RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.8rem 4% !important;
+    }
+
+    .navbar-logo {
+        font-size: 1.3rem !important;
+    }
+
+    .navbar-links {
+        gap: 1rem;
+    }
+
+    .navbar-link {
+        font-size: 0.9rem !important;
+    }
+
+    .user-menu-btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.6rem 3% !important;
+    }
+
+    .navbar-logo {
+        font-size: 1.1rem !important;
+    }
+
+    .navbar-links {
+        display: none;
+        /* Hide on very small screens */
+    }
+
+    .user-menu-btn {
+        padding: 0.3rem 0.6rem !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ============================================
+   MOVIE CARDS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1400px) {
+    .movie-card {
+        width: 200px !important;
+    }
+
+    .movie-poster {
+        height: 300px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .movie-card {
+        width: 180px !important;
+    }
+
+    .movie-poster {
+        height: 270px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .movie-slider {
+        margin-bottom: 2rem;
+    }
+
+    .slider-title {
+        font-size: 1.2rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .movie-card {
+        width: 150px !important;
+    }
+
+    .movie-poster {
+        height: 225px !important;
+    }
+
+    .slider-container {
+        gap: 0.5rem !important;
+        padding-bottom: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .movie-card {
+        width: 130px !important;
+    }
+
+    .movie-poster {
+        height: 195px !important;
+    }
+
+    .slider-title {
+        font-size: 1.1rem !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .movie-card {
+        width: 110px !important;
+    }
+
+    .movie-poster {
+        height: 165px !important;
+    }
+}
+
+/* ============================================
+   CATEGORY CARDS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .category-section {
+        padding: 1.5rem 3%;
+        margin-bottom: 1.5rem;
+    }
+
+    .category-title {
+        font-size: 1.4rem !important;
+    }
+
+    .category-card {
+        flex: 0 0 220px !important;
+        min-height: 110px !important;
+        padding: 1.3rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .category-section {
+        padding: 1rem 4%;
+    }
+
+    .category-title {
+        font-size: 1.2rem !important;
+    }
+
+    .category-card {
+        flex: 0 0 180px !important;
+        min-height: 100px !important;
+        padding: 1rem !important;
+    }
+
+    .category-name {
+        font-size: 0.95rem !important;
+    }
+
+    .category-link {
+        font-size: 0.8rem !important;
+    }
+
+    .category-nav-btn {
+        width: 35px !important;
+        height: 35px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-card {
+        flex: 0 0 150px !important;
+        min-height: 90px !important;
+        padding: 0.9rem !important;
+    }
+
+    .category-name {
+        font-size: 0.9rem !important;
+    }
+
+    .category-nav-btn {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   VIDEO PLAYER RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .video-player-container {
+        border-radius: 8px;
+    }
+
+    .controls-bottom {
+        padding: 0.8rem 1rem !important;
+    }
+
+    .control-btn {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .time-display {
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .video-player-container {
+        border-radius: 0;
+    }
+
+    .controls-bottom {
+        padding: 0.6rem 0.8rem !important;
+        flex-wrap: wrap;
+    }
+
+    .control-btn {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .volume-control {
+        display: none !important;
+        /* Hide volume slider on mobile */
+    }
+
+    .time-display {
+        font-size: 0.8rem !important;
+    }
+
+    .settings-menu {
+        bottom: 60px !important;
+        right: 10px !important;
+        max-width: 200px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-bar-container {
+        height: 6px !important;
+    }
+
+    .controls-bottom {
+        padding: 0.5rem !important;
+    }
+
+    .control-btn {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .time-display {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* ============================================
+   MODAL RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .modal-content {
+        width: 85% !important;
+        max-width: 700px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95% !important;
+        max-height: 90vh !important;
+        padding: 1.5rem !important;
+    }
+
+    .modal-header h2 {
+        font-size: 1.3rem !important;
+    }
+
+    .modal-body {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 1rem !important;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem !important;
+    }
+
+    .close-btn {
+        width: 30px !important;
+        height: 30px !important;
+    }
+}
+
+/* ============================================
+   FOOTER RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .footer {
+        padding: 2rem 4% !important;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+}
+
+/* ============================================
+   SEARCH BAR RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .search-bar {
+        max-width: 100% !important;
+        margin: 0 1rem 1.5rem !important;
+    }
+
+    .search-input-wrapper {
+        padding: 0.6rem 1rem !important;
+    }
+
+    .search-input {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        margin: 0 0.5rem 1rem !important;
+    }
+
+    .search-input-wrapper {
+        padding: 0.5rem 0.8rem !important;
+    }
+
+    .search-input {
+        font-size: 0.85rem !important;
+    }
+
+    .search-icon {
+        width: 18px !important;
+        height: 18px !important;
+    }
+}
+
+/* ============================================
+   TOUCH OPTIMIZATIONS
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+
+    /* Touch devices */
+    .movie-card:hover {
+        transform: none !important;
+    }
+
+    .movie-card:active {
+        transform: scale(0.98) !important;
+    }
+
+    .hero-btn:hover {
+        transform: none !important;
+    }
+
+    .hero-btn:active {
+        transform: scale(0.98) !important;
+    }
+
+    /* Larger touch targets */
+    .control-btn {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+
+    .navbar-link {
+        padding: 0.8rem 1rem !important;
+    }
+}
+
+/* ============================================
+   LANDSCAPE MOBILE OPTIMIZATION
+   ============================================ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        height: 100vh !important;
+    }
+
+    .hero-content {
+        padding: 0.5rem !important;
+    }
+
+    .hero-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .hero-description {
+        display: none !important;
+    }
+
+    .hero-meta {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .hero-buttons {
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+    }
+
+    .hero-btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+
+    .navbar,
+    .hero-buttons,
+    .video-controls,
+    .footer {
+        display: none !important;
+    }
+
+    .hero {
+        height: auto !important;
+        page-break-after: always;
+    }
+}

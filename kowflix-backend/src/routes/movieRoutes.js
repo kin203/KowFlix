@@ -1,27 +1,70 @@
+// src/routes/movieRoutes.js
 import express from "express";
-import Movie from "../models/Movie.js";
+import {
+  listMovies,
+  getMovie,
+  createMovie,
+  updateMovie,
+  deleteMovie,
+  playMovie,
+  searchTMDb,
+  getTMDbDetails,
+  migrateHlsPaths,
+  streamMP4
+} from "../controllers/movieController.js";
+
+import auth from "../middleware/auth.js";
+import isAdmin from "../middleware/admin.js";
+import { streamLimiter, streamStatsHandler } from "../middleware/streamLimiter.js";
+
+import { uploadMix } from "../utils/multer.js";
 
 const router = express.Router();
 
-// [GET] /api/movies — danh sách phim
-router.get("/", async (req, res) => {
-  try {
-    const { q, genre, page = 1, limit = 10 } = req.query;
-    const query = {};
+// TMDb routes (no auth required for search)
+router.get("/search-tmdb", searchTMDb);
+router.get("/tmdb/:tmdbId", getTMDbDetails);
 
-    if (q) query.$text = { $search: q };
-    if (genre) query.genres = genre;
+router.get("/", listMovies);
+router.get("/:id", getMovie);
+router.get("/:id/play", streamLimiter, playMovie); // Apply stream limiter
+router.get("/:id/stream", streamLimiter, streamMP4); // Apply stream limiter
 
-    const movies = await Movie.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+// Admin: View stream statistics
+router.get("/admin/stream-stats", auth, isAdmin, streamStatsHandler);
 
-    res.json({ success: true, count: movies.length, data: movies });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+
+// Admin routes with file upload (poster, video, subtitles)
+router.post(
+  "/",
+  auth,
+  isAdmin,
+  uploadMix.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+    { name: "subtitle_en", maxCount: 1 },
+    { name: "subtitle_vi", maxCount: 1 }
+  ]),
+  createMovie
+);
+
+router.put(
+  "/:id",
+  auth,
+  isAdmin,
+  uploadMix.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+    { name: "subtitle_en", maxCount: 1 },
+    { name: "subtitle_vi", maxCount: 1 }
+  ]),
+  updateMovie
+);
+
+
+router.delete("/:id", auth, isAdmin, deleteMovie);
+
+// Migration route (admin only)
+router.post("/migrate-hls-paths", auth, isAdmin, migrateHlsPaths);
 
 export default router;

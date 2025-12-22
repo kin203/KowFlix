@@ -1,0 +1,153 @@
+.review-management-container {
+    display: flex;
+    min-height: 100vh;
+    background: #000000;
+}
+
+.review-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: 2rem;
+    color: #FFFFFF;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.review-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    color: #FFFFFF;
+}
+
+/* Review Table */
+.review-table-container {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.review-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.review-table th,
+.review-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #333333;
+    vertical-align: top;
+}
+
+.review-table th {
+    background: #222222;
+    color: #888888;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.review-table tr:last-child td {
+    border-bottom: none;
+}
+
+.review-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.review-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.review-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333333;
+}
+
+.review-user-details h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #FFFFFF;
+}
+
+.review-user-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #888888;
+}
+
+.review-movie-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.review-poster {
+    width: 30px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.review-movie-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #FFD700;
+    font-weight: 600;
+}
+
+.review-comment {
+    font-size: 0.9rem;
+    color: #CCCCCC;
+    line-height: 1.5;
+    max-width: 400px;
+}
+
+.review-date {
+    font-size: 0.85rem;
+    color: #888888;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+
+    .review-table th:nth-child(4),
+    .review-table td:nth-child(4) {
+        display: none;
+        /* Hide date on tablet */
+    }
+}
+
+@media (max-width: 768px) {
+    .review-content {
+        margin-left: 70px;
+        padding: 1.5rem;
+    }
+
+    .review-table th:nth-child(2),
+    .review-table td:nth-child(2) {
+        display: none;
+        /* Hide movie info on mobile */
+    }
+}

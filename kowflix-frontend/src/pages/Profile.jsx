@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Camera, X, LogOut, Save, ArrowLeft } from 'lucide-react';
+import { authAPI } from '../services/api';
+import './Profile.css';
+
+const Profile = () => {
+    const navigate = useNavigate();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [editing, setEditing] = useState(false);
+    const [formData, setFormData] = useState({ name: '', bio: '' });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const { data } = await authAPI.getProfile();
+            setProfile(data.data);
+            setFormData({
+                name: data.data.profile?.name || '',
+                bio: data.data.profile?.bio || ''
+            });
+        } catch (error) {
+            console.error('Failed to fetch profile:', error);
+            setMessage({ type: 'error', text: 'Không thể tải profile' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                setMessage({ type: 'error', text: 'Kích thước file phải nhỏ hơn 5MB' });
+                return;
+            }
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleUploadAvatar = async () => {
+        if (!avatarFile) return;
+
+        setUploading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            const data = new FormData();
+            data.append('avatar', avatarFile);
+
+            await authAPI.uploadAvatar(data);
+            setMessage({ type: 'success', text: 'Cập nhật avatar thành công!' });
+            setAvatarFile(null);
+            setAvatarPreview(null);
+            fetchProfile();
+        } catch (error) {
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Upload thất bại' });
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteAvatar = async () => {
+        if (!window.confirm('Bạn có chắc muốn xóa avatar?')) return;
+
+        try {
+            await authAPI.deleteAvatar();
+            setMessage({ type: 'success', text: 'Đã xóa avatar!' });
+            fetchProfile();
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Không thể xóa avatar' });
+        }
+    };
+
+    const handleUpdateProfile = async () => {
+        setMessage({ type: '', text: '' });
+
+        try {
+            await authAPI.updateProfile(formData);
+            setMessage({ type: 'success', text: 'Cập nhật profile thành công!' });
+            setEditing(false);
+            fetchProfile();
+        } catch (error) {
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Cập nhật thất bại' });
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
+
+    if (loading) {
+        return (
+            <div className="profile-loading">
+                <div className="loading-spinner"></div>
+                <p>Đang tải profile...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="profile-page">
+            {/* Floating Back Button */}
+            <button className="floating-back-btn" onClick={() => navigate('/')}>
+                <ArrowLeft size={20} />
+                <span>Trang chủ</span>
+            </button>
+
+            <div className="profile-content">
+                {message.text && (
+                    <div className={`message ${message.type}`}>
+                        {message.text}
+                    </div>
+                )}
+
+                {/* Avatar Section with Info */}
+                <div className="avatar-section">
+                    <div className="avatar-box">
+                        {avatarPreview ? (
+                            <img src={avatarPreview} alt="Preview" className="avatar" />
+                        ) : profile?.profile?.avatar ? (
+                            <img src={profile.profile.avatar} alt="Avatar" className="avatar" />
+                        ) : (
+                            <div className="avatar-placeholder">
+                                <User size={60} />
+                            </div>
+                        )}
+                        <label className="avatar-upload">
+                            <Camera size={18} />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                                hidden
+                            />
+                        </label>
+                    </div>
+
+                    <div className="avatar-info">
+                        <h2>{formData.name || profile?.email?.split('@')[0] || 'User'}</h2>
+                        <p className="email">{profile?.email}</p>
+                        <p className="member-date">
+                            Thành viên từ {new Date(profile?.createdAt).toLocaleDateString('vi-VN')}
+                        </p>
+                        <button className="logout-btn" onClick={handleLogout}>
+                            <LogOut size={18} />
+                            <span>Đăng xuất</span>
+                        </button>
+                    </div>
+                </div>
+
+                {avatarPreview && (
+                    <div className="avatar-actions">
+                        <button className="btn-primary" onClick={handleUploadAvatar} disabled={uploading}>
+                            {uploading ? 'Đang upload...' : 'Lưu Avatar'}
+                        </button>
+                        <button className="btn-secondary" onClick={() => {
+                            setAvatarFile(null);
+                            setAvatarPreview(null);
+                        }}>
+                            Hủy
+                        </button>
+                    </div>
+                )}
+
+                {/* Profile Info */}
+                <div className="info-card">
+                    <div className="info-header">
+                        <h2>Thông tin cá nhân</h2>
+                        {!editing && (
+                            <button className="btn-edit" onClick={() => setEditing(true)}>
+                                Chỉnh sửa
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="info-body">
+                        <div className="field">
+                            <label>Tên hiển thị</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                disabled={!editing}
+                                placeholder="Nhập tên của bạn"
+                            />
+                        </div>
+
+                        <div className="field">
+                            <label>Giới thiệu</label>
+                            <textarea
+                                name="bio"
+                                value={formData.bio}
+                                onChange={handleInputChange}
+                                disabled={!editing}
+                                placeholder="Giới thiệu về bạn..."
+                                rows={4}
+                            />
+                        </div>
+
+                        {editing && (
+                            <div className="actions">
+                                <button className="btn-primary" onClick={handleUpdateProfile}>
+                                    <Save size={18} />
+                                    Lưu thay đổi
+                                </button>
+                                <button className="btn-secondary" onClick={() => {
+                                    setEditing(false);
+                                    setFormData({
+                                        name: profile?.profile?.name || '',
+                                        bio: profile?.profile?.bio || ''
+                                    });
+                                }}>
+                                    Hủy
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

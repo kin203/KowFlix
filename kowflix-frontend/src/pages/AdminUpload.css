@@ -1,0 +1,775 @@
+/* Admin Upload Page - Clean & Modern Design */
+
+/* ==================== BASE STYLES ==================== */
+.admin-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+    padding: 5rem 4%;
+    color: white;
+}
+
+/* ==================== HEADER ==================== */
+.admin-header {
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-header p {
+    color: #888888;
+    margin: 0;
+}
+
+.btn-migrate {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-migrate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.btn-migrate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== UPLOAD SECTION ==================== */
+.upload-section {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2.5rem;
+    border-radius: 16px;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.upload-section h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: #FFFFFF;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.upload-section h2::before {
+    content: '📤';
+    font-size: 1.5rem;
+}
+
+/* ==================== FORM LAYOUT ==================== */
+.upload-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-field label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+}
+
+.auto-filled {
+    color: #FFD700;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+/* ==================== FORM INPUTS ==================== */
+.form-field input,
+.form-field textarea,
+.form-field select {
+    padding: 0.875rem 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+/* ==================== TOGGLE SWITCH ==================== */
+.checkbox-field {
+    flex-direction: row;
+    align-items: center;
+    grid-column: 1 / -1;
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 1.25rem;
+    border-radius: 12px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    width: 100%;
+}
+
+.checkbox-label input[type="checkbox"] {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    appearance: none;
+    background: #555;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background: #FFD700;
+}
+
+.checkbox-label input[type="checkbox"]:checked::before {
+    left: 26px;
+}
+
+.checkbox-label input[type="checkbox"]:hover {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* ==================== FILE UPLOAD ==================== */
+.file-input-wrapper {
+    position: relative;
+}
+
+.file-input-label {
+    display: block;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px dashed rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.file-input-label:hover {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+    color: #FFD700;
+}
+
+.file-input-label input[type="file"] {
+    display: none;
+}
+
+.file-name {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: #FFD700;
+    font-weight: 500;
+}
+
+/* ==================== POSTER PREVIEW ==================== */
+.poster-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.poster-preview img {
+    max-width: 200px;
+    max-height: 300px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.btn-remove-poster {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid #E50914;
+    color: #E50914;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.btn-remove-poster:hover {
+    background: #E50914;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+/* ==================== FORM ACTIONS ==================== */
+.form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.submit-btn {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000000;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    padding: 0.875rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== MESSAGES ==================== */
+.message {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22C55E;
+    color: #22C55E;
+}
+
+.message.error {
+    background: rgba(229, 9, 20, 0.1);
+    border-color: #E50914;
+    color: #E50914;
+}
+
+.message.info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+/* ==================== UPLOAD PROGRESS ==================== */
+.upload-progress-container {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 12px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    color: #FFD700;
+    font-weight: 600;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.progress-message {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+/* ==================== MOVIES TABLE ==================== */
+.movies-section {
+    margin-top: 3rem;
+}
+
+.movies-section h2 {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    color: #FFFFFF;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.movies-section h2::before {
+    content: '🎬';
+    font-size: 1.5rem;
+}
+
+.movies-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.movies-table th,
+.movies-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movies-table th {
+    background: rgba(255, 215, 0, 0.1);
+    font-weight: 600;
+    color: #FFD700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.movies-table tr:last-child td {
+    border-bottom: none;
+}
+
+.movies-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.movies-table tbody tr:hover {
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.movie-poster-thumb {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ==================== STATUS INDICATORS ==================== */
+.trailer-status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.trailer-status.has-trailer {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22C55E;
+    color: #22C55E;
+}
+
+.trailer-status.no-trailer {
+    background: rgba(156, 163, 175, 0.1);
+    border: 1px solid #9CA3AF;
+    color: #9CA3AF;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.btn-trailer,
+.btn-secondary,
+.delete-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.btn-trailer {
+    background: rgba(147, 51, 234, 0.1);
+    border-color: #9333EA;
+    color: #9333EA;
+}
+
+.btn-trailer:hover {
+    background: #9333EA;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: #FFD700;
+    color: #FFD700;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #FFD700;
+    color: #000000;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.delete-btn {
+    background: rgba(229, 9, 20, 0.1);
+    border-color: #E50914;
+    color: #E50914;
+}
+
+.delete-btn:hover {
+    background: #E50914;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+/* ==================== CATEGORY DROPDOWN ==================== */
+.category-dropdown-container {
+    position: relative;
+    width: 100%;
+}
+
+.category-dropdown-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.category-dropdown-btn:hover {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.category-dropdown-btn .arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.category-dropdown-btn .arrow.up {
+    transform: rotate(180deg);
+}
+
+.category-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(26, 26, 26, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.category-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.7);
+    user-select: none;
+}
+
+.category-checkbox-item:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: white;
+}
+
+.category-checkbox-item input[type="checkbox"] {
+    accent-color: #FFD700;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* ==================== COLLAPSIBLE FORM ==================== */
+.section-header-with-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.btn-toggle-form {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #FFD700;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.btn-toggle-form:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #FFD700;
+    transform: translateY(-2px);
+}
+
+/* ==================== SEARCH BAR ==================== */
+.movies-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.search-bar {
+    flex: 0 0 auto;
+    min-width: 300px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== PAGINATION ==================== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+}
+
+.page-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    color: #FFD700;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #FFD700;
+    transform: translateY(-2px);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+    .upload-form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-field.full-width {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-page {
+        padding: 3rem 2%;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .upload-section {
+        padding: 1.5rem;
+    }
+
+    .section-header-with-toggle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .btn-toggle-form {
+        width: 100%;
+    }
+
+    .movies-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .search-bar {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .movies-table {
+        font-size: 0.9rem;
+    }
+
+    .movies-table th,
+    .movies-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
