@@ -80,26 +80,22 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const handleMoviePress = (movie) => {
-        // Navigate to WatchScreen (TODO: Implement WatchScreen)
-        console.log('Movie pressed:', movie.title);
-        // navigation.navigate('Watch', { movieId: movie._id });
+        navigation.navigate('MovieDetail', { movieId: movie._id, movie });
     };
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
-        // TODO: Filter movies or navigate to CategoryScreen
-        console.log('Category selected:', category.name);
         navigation.navigate('Search', { categoryId: category._id, categoryName: category.name });
     };
 
     const handlePlayPress = (movie) => {
-        console.log('Play pressed:', movie.title);
-        // navigation.navigate('Watch', { movieId: movie._id });
+        // Direct play or go to detail then play?
+        // User asked for detail screen flow usually
+        navigation.navigate('MovieDetail', { movieId: movie._id, movie });
     };
 
     const handleInfoPress = (movie) => {
-        console.log('Info pressed:', movie.title);
-        // Show modal or navigate to details
+        navigation.navigate('MovieDetail', { movieId: movie._id, movie });
     };
 
     if (loading) {
