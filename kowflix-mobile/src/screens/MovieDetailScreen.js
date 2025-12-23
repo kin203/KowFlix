@@ -69,18 +69,21 @@ const MovieDetailScreen = ({ route, navigation }) => {
 
     const backdropUrl = getImageUrl(movie.backdrop || movie.poster);
     const posterUrl = getImageUrl(movie.poster);
-    // Mock trailer ID for demo if not in DB, logic to extract ID from youtube URL needed
-    // Assuming movie.trailerUrl exists
-    const hasTrailer = !!movie.trailerUrl;
+
+    // Check for trailer key (Youtube ID) based on user DB schema
+    const hasTrailer = movie.useTrailer && movie.trailerKey;
+    const trailerUrl = hasTrailer ? `https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&modestbranding=1&rel=0` : null;
 
     const renderHeader = () => {
-        if (playingTrailer && hasTrailer) {
+        if (playingTrailer && hasTrailer && trailerUrl) {
             return (
                 <View style={styles.videoContainer}>
                     <WebView
                         style={styles.webView}
                         javaScriptEnabled={true}
-                        source={{ uri: movie.trailerUrl }} // Need to transform to embed URL
+                        source={{ uri: trailerUrl }}
+                        scalesPageToFit={true}
+                        allowsFullscreenVideo={true}
                     />
                     <TouchableOpacity
                         style={styles.closeTrailerButton}
