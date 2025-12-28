@@ -27,6 +27,7 @@ export { reviewAPI } from './api/reviewAPI.js';
 export { commentAPI } from './api/commentAPI.js';
 export { jobAPI } from './api/jobAPI.js';
 export { navMenuAPI } from './api/navMenuAPI.js';
+export { wishlistAPI } from './api/wishlistAPI.js';
 
 // Export base axios instance as default
 export default api;

@@ -65,3 +65,8 @@ api.interceptors.response.use(
 
 export default api;
 export { API_URL };
+
+// Export individual API modules
+export { authAPI } from './authAPI.js';
+export { progressAPI } from './progressAPI.js';
+export { wishlistAPI } from './wishlistAPI.js';

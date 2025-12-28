@@ -185,6 +185,18 @@
     transform: scale(1.1);
 }
 
+.btn-favorite.active {
+    background-color: rgba(229, 9, 20, 0.3);
+    border-color: #E50914;
+    color: #E50914;
+}
+
+.btn-favorite.active:hover {
+    background-color: rgba(229, 9, 20, 0.4);
+    border-color: #ff1a1a;
+    color: #ff1a1a;
+}
+
 .hero-carousel {
     position: absolute;
     bottom: 40px;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { X, Play, Plus, ThumbsUp, Star } from 'lucide-react';
+import { X, Play, Heart, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { reviewAPI } from '../services/api';
+import { reviewAPI, wishlistAPI } from '../services/api';
 import './MovieInfoModal.css';
 import './MovieInfoModalReviews.css';
 
@@ -16,10 +16,13 @@ const MovieInfoModal = ({ movie, onClose }) => {
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [inWishlist, setInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         fetchReviews();
+        checkWishlist();
 
         return () => {
             document.body.style.overflow = 'unset';
@@ -43,6 +46,34 @@ const MovieInfoModal = ({ movie, onClose }) => {
             console.error('Failed to fetch reviews:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkWishlist = async () => {
+        try {
+            const { data } = await wishlistAPI.check(movie._id);
+            setInWishlist(data.data.inWishlist);
+        } catch (error) {
+            console.error('Error checking wishlist:', error);
+        }
+    };
+
+    const handleToggleWishlist = async () => {
+        if (wishlistLoading) return;
+        setWishlistLoading(true);
+        try {
+            if (inWishlist) {
+                await wishlistAPI.remove(movie._id);
+                setInWishlist(false);
+            } else {
+                await wishlistAPI.add(movie._id);
+                setInWishlist(true);
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            alert(error.response?.data?.message || 'Vui lòng đăng nhập để thêm vào yêu thích');
+        } finally {
+            setWishlistLoading(false);
         }
     };
 
@@ -130,11 +161,12 @@ const MovieInfoModal = ({ movie, onClose }) => {
                                     <Play size={24} fill="black" />
                                     Xem ngay
                                 </button>
-                                <button className="modal-icon-btn">
-                                    <Plus size={24} />
-                                </button>
-                                <button className="modal-icon-btn">
-                                    <ThumbsUp size={24} />
+                                <button
+                                    className={`modal-icon-btn ${inWishlist ? 'active' : ''}`}
+                                    onClick={handleToggleWishlist}
+                                    disabled={wishlistLoading}
+                                >
+                                    <Heart size={24} fill={inWishlist ? 'currentColor' : 'none'} />
                                 </button>
                             </div>
                         </div>

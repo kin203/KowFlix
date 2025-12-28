@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Info, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { wishlistAPI } from '../services/api';
 import MovieInfoModal from './MovieInfoModal';
 import './Hero.css';
 
 const Hero = ({ heroBanners = [] }) => {
     const [showModal, setShowModal] = useState(false);
     const [activeBanner, setActiveBanner] = useState(null);
+    const [inWishlist, setInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     useEffect(() => {
         if (heroBanners.length > 0 && !activeBanner) {
@@ -14,7 +17,40 @@ const Hero = ({ heroBanners = [] }) => {
         }
     }, [heroBanners, activeBanner]);
 
+    // Check if movie is in wishlist
+    useEffect(() => {
+        const checkWishlist = async () => {
+            if (!activeBanner?.movieId?._id) return;
+            try {
+                const { data } = await wishlistAPI.check(activeBanner.movieId._id);
+                setInWishlist(data.data.inWishlist);
+            } catch (error) {
+                console.error('Error checking wishlist:', error);
+            }
+        };
+        checkWishlist();
+    }, [activeBanner]);
+
     if (!activeBanner || !activeBanner.movieId) return null;
+
+    const handleToggleWishlist = async () => {
+        if (wishlistLoading) return;
+        setWishlistLoading(true);
+        try {
+            if (inWishlist) {
+                await wishlistAPI.remove(movie._id);
+                setInWishlist(false);
+            } else {
+                await wishlistAPI.add(movie._id);
+                setInWishlist(true);
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            alert(error.response?.data?.message || 'Vui lòng đăng nhập để thêm vào yêu thích');
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
 
     // Extract movie data from populated movieId
     const movie = activeBanner.movieId;
@@ -115,8 +151,12 @@ const Hero = ({ heroBanners = [] }) => {
                         <button className="btn-info" onClick={() => setShowModal(true)}>
                             <Info size={24} />
                         </button>
-                        <button className="btn-favorite">
-                            <Heart size={24} />
+                        <button
+                            className={`btn-favorite ${inWishlist ? 'active' : ''}`}
+                            onClick={handleToggleWishlist}
+                            disabled={wishlistLoading}
+                        >
+                            <Heart size={24} fill={inWishlist ? 'currentColor' : 'none'} />
                         </button>
                     </div>
                 </div>
