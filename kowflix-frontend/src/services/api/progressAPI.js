@@ -32,4 +32,10 @@ export const progressAPI = {
      * @returns {Promise} Deletion confirmation
      */
     delete: (movieId) => api.delete(`/progress/${movieId}`),
+
+    /**
+     * Get watch history (all watched movies including completed)
+     * @returns {Promise} List of all watched movies with progress
+     */
+    getHistory: () => api.get('/progress/history'),
 };

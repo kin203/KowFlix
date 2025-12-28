@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, X, LogOut, Save, ArrowLeft } from 'lucide-react';
-import { authAPI } from '../services/api';
+import { User, Camera, X, LogOut, Save, ArrowLeft, Clock, Play } from 'lucide-react';
+import { authAPI, progressAPI } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -14,9 +14,12 @@ const Profile = () => {
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [watchHistory, setWatchHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     useEffect(() => {
         fetchProfile();
+        fetchWatchHistory();
     }, []);
 
     const fetchProfile = async () => {
@@ -96,6 +99,37 @@ const Profile = () => {
         } catch (error) {
             setMessage({ type: 'error', text: error.response?.data?.message || 'Cập nhật thất bại' });
         }
+    };
+
+    const fetchWatchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+            const { data } = await progressAPI.getHistory();
+            setWatchHistory(data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch watch history:', error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    const formatTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        if (hrs > 0) return `${hrs}h ${mins}m`;
+        return `${mins}m`;
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'Hôm nay';
+        if (diffDays === 1) return 'Hôm qua';
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        return date.toLocaleDateString('vi-VN');
     };
 
     const handleLogout = () => {
@@ -228,6 +262,75 @@ const Profile = () => {
                                 }}>
                                     Hủy
                                 </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Watch History Section */}
+                <div className="info-card history-section">
+                    <div className="info-header">
+                        <h2>
+                            <Clock size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                            Lịch sử xem
+                        </h2>
+                    </div>
+
+                    <div className="history-body">
+                        {loadingHistory ? (
+                            <div className="history-loading">
+                                <div className="loading-spinner"></div>
+                                <p>Đang tải lịch sử...</p>
+                            </div>
+                        ) : watchHistory.length === 0 ? (
+                            <div className="history-empty">
+                                <Play size={48} />
+                                <p>Bạn chưa xem phim nào</p>
+                            </div>
+                        ) : (
+                            <div className="history-grid">
+                                {watchHistory.map((item) => (
+                                    <div
+                                        key={item._id}
+                                        className="history-card"
+                                        onClick={() => navigate(`/watch/${item.movie._id}`)}
+                                    >
+                                        <div className="history-poster">
+                                            <img
+                                                src={item.movie.poster || '/placeholder.jpg'}
+                                                alt={item.movie.title}
+                                                onError={(e) => {
+                                                    e.target.src = '/placeholder.jpg';
+                                                }}
+                                            />
+                                            <div className="play-overlay">
+                                                <Play size={32} />
+                                            </div>
+                                        </div>
+                                        <div className="history-info">
+                                            <h3>{item.movie.title}</h3>
+                                            <div className="history-meta">
+                                                <span className="watch-time">{formatDate(item.lastWatched)}</span>
+                                                {item.movie.releaseYear && (
+                                                    <span className="year">{item.movie.releaseYear}</span>
+                                                )}
+                                            </div>
+                                            <div className="progress-bar-container">
+                                                <div
+                                                    className="progress-bar-fill"
+                                                    style={{ width: `${item.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                            <div className="progress-text">
+                                                {item.percentage >= 90 ? (
+                                                    <span className="completed">✓ Đã xem</span>
+                                                ) : (
+                                                    <span>{Math.round(item.percentage)}% · {formatTime(item.currentTime)}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

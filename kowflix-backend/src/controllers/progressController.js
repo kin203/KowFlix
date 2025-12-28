@@ -92,3 +92,45 @@ export const deleteProgress = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
+// Get watch history (all movies watched, including completed)
+export const getWatchHistory = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { limit = 50 } = req.query;
+
+        const historyList = await WatchProgress.find({ userId })
+            .populate('movieId', 'title slug poster backdrop duration status genres releaseYear imdbRating')
+            .sort({ lastWatched: -1 })
+            .limit(Number(limit));
+
+        // Filter out movies that don't exist anymore
+        const filtered = historyList.filter(p => p.movieId);
+
+        // Add PUBLIC_MEDIA_URL to poster paths
+        const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+
+        const formattedHistory = filtered.map(progress => {
+            const movie = progress.movieId.toObject();
+
+            // Fix poster URL
+            if (movie.poster && movie.poster.startsWith('/media/')) {
+                movie.poster = `${PUBLIC_MEDIA_URL}${movie.poster.replace('/media', '')}`;
+            }
+
+            return {
+                _id: progress._id,
+                movie: movie,
+                currentTime: progress.currentTime,
+                duration: progress.duration,
+                percentage: progress.percentage,
+                lastWatched: progress.lastWatched
+            };
+        });
+
+        res.json({ success: true, data: formattedHistory });
+    } catch (err) {
+        console.error('getWatchHistory error:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
