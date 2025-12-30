@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User, Camera, X, LogOut, Save, ArrowLeft, Clock, Play, Heart } from 'lucide-react';
 import { authAPI, progressAPI, wishlistAPI } from '../services/api';
 import './Profile.css';
@@ -19,6 +19,16 @@ const Profile = () => {
     const [wishlist, setWishlist] = useState([]);
     const [loadingWishlist, setLoadingWishlist] = useState(false);
     const [activeTab, setActiveTab] = useState('history'); // 'history' or 'wishlist'
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.hash === '#wishlist') {
+            setActiveTab('wishlist');
+        } else if (location.hash === '#history') {
+            setActiveTab('history');
+        }
+    }, [location]);
 
     useEffect(() => {
         fetchProfile();

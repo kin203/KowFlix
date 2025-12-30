@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, ChevronDown, LogOut, Settings, Menu, X, Heart } from 'lucide-react';
+import { Search, User, ChevronDown, LogOut, Settings, Menu, X, Heart, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI, navMenuAPI } from '../services/api';
 import NotificationDropdown from './NotificationDropdown';
@@ -189,6 +189,10 @@ const Navbar = () => {
                                     <Heart size={18} />
                                     <span>My List</span>
                                 </Link>
+                                <Link to="/profile#history" className="dropdown-item">
+                                    <Clock size={18} />
+                                    <span>Lịch sử xem</span>
+                                </Link>
                                 {isAdmin && (
                                     <Link to="/admin" className="dropdown-item">
                                         <Settings size={18} />
@@ -271,6 +275,10 @@ const Navbar = () => {
                                     <Link to="/profile#wishlist" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
                                         <Heart size={20} />
                                         <span>My List</span>
+                                    </Link>
+                                    <Link to="/profile#history" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
+                                        <Clock size={20} />
+                                        <span>Lịch sử xem</span>
                                     </Link>
                                     {isAdmin && (
                                         <Link to="/admin" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
