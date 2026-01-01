@@ -1,3 +1,23 @@
+.maintenance-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: #FFD700;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 .navbar {
     position: fixed;
     top: 0;
@@ -8,8 +28,13 @@
     align-items: center;
     justify-content: space-between;
     z-index: 100;
-    transition: background-color var(--transition-normal);
+    transition: top 0.3s ease, background-color var(--transition-normal);
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, rgba(0, 0, 0, 0));
+}
+
+.navbar.has-banner {
+    top: 30px;
+    /* Push navbar down when banner is active */
 }
 
 .navbar.scrolled {
@@ -350,4 +375,186 @@
     .logo {
         font-size: 1.3rem !important;
     }
+}
+
+/* Mobile Menu Styles */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    background: #141414;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-header h3 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.mobile-menu-header button {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobile-greeting {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.greeting-text {
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.greeting-subtext {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.mobile-nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: auto;
+    /* Push footer to bottom */
+    overflow-y: auto;
+}
+
+.mobile-nav-links a,
+.mobile-menu-item {
+    color: #e5e5e5;
+    font-size: 1.1rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: color 0.2s;
+}
+
+.mobile-nav-links a:hover,
+.mobile-menu-item:hover {
+    color: white;
+}
+
+.mobile-nav-links i,
+.mobile-menu-item svg {
+    width: 20px;
+    text-align: center;
+    color: #e50914;
+}
+
+.mobile-menu-footer {
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.mobile-menu-item.logout {
+    color: #ff6b6b;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    padding: 0;
+}
+
+.mobile-login-btn {
+    display: block;
+    text-align: center;
+    background: #e50914;
+    color: white;
+    padding: 0.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Mobile Search Styles */
+.mobile-search-toggle {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.mobile-search-bar {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #141414;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.2s ease;
+}
+
+.mobile-search-bar input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    outline: none;
+}
+
+.mobile-search-bar button {
+    background: none;
+    border: none;
+    color: #999;
+    padding: 0.5rem;
 }

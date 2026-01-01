@@ -1,13 +1,22 @@
 .admin-dashboard-container {
     display: flex;
     min-height: 100vh;
-    background-color: #000000;
+    background-color: var(--background-black);
+    transition: background-color 0.3s ease;
+}
+
+.light-theme .admin-dashboard-container {
+    background-color: #f4f4f4;
 }
 
 .admin-dashboard-content {
     flex: 1;
     padding: 2rem 4%;
     color: white;
+}
+
+.light-theme .admin-dashboard-content {
+    color: var(--text-black);
 }
 
 .admin-header {
@@ -24,9 +33,17 @@
     color: #FFFFFF;
 }
 
+.light-theme .admin-header h1 {
+    color: var(--text-black);
+}
+
 .admin-header p {
     color: #888888;
     margin: 0;
+}
+
+.light-theme .admin-header p {
+    color: var(--text-gray);
 }
 
 .btn-add {
@@ -52,6 +69,12 @@
     overflow: hidden;
 }
 
+.light-theme .categories-section {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 .categories-table {
     width: 100%;
     border-collapse: collapse;
@@ -64,10 +87,20 @@
     border-bottom: 1px solid #333333;
 }
 
+.light-theme .categories-table th,
+.light-theme .categories-table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .categories-table th {
     background: rgba(255, 255, 255, 0.05);
     font-weight: 600;
     color: #FFFFFF;
+}
+
+.light-theme .categories-table th {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-black);
 }
 
 .categories-table tr:last-child td {
@@ -92,6 +125,11 @@
     border-radius: 4px;
     font-size: 0.85rem;
     color: #FFD700;
+}
+
+.light-theme .categories-table code {
+    color: #ce9e00;
+    background: rgba(255, 215, 0, 0.2);
 }
 
 .color-preview {
@@ -145,10 +183,21 @@
     overflow-y: auto;
 }
 
+.light-theme .modal-content {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-black);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
 .modal-content h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
     color: #FFFFFF;
+}
+
+.light-theme .modal-content h2 {
+    color: var(--text-black);
 }
 
 .form-row {
@@ -171,6 +220,10 @@
     font-size: 0.9rem;
 }
 
+.light-theme .form-field label {
+    color: var(--text-gray);
+}
+
 .form-field input,
 .form-field textarea {
     padding: 0.75rem;
@@ -180,6 +233,13 @@
     color: white;
     font-size: 1rem;
     transition: all 0.2s ease;
+}
+
+.light-theme .form-field input,
+.light-theme .form-field textarea {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: var(--text-black);
 }
 
 .form-field input:focus,
@@ -209,6 +269,10 @@
     color: white;
     cursor: pointer;
     font-weight: 500;
+}
+
+.light-theme .checkbox-label {
+    color: var(--text-black);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -276,8 +340,17 @@
     transition: all 0.2s ease;
 }
 
+.light-theme .cancel-btn {
+    border: 1px solid #ccc;
+    color: var(--text-black);
+}
+
 .cancel-btn:hover {
     background: rgba(255, 255, 255, 0.05);
+}
+
+.light-theme .cancel-btn:hover {
+    background: #e0e0e0;
 }
 
 .btn-secondary {
@@ -289,6 +362,11 @@
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.9rem;
+}
+
+.light-theme .btn-secondary {
+    color: #bfa100;
+    border-color: #bfa100;
 }
 
 .btn-secondary:hover {
@@ -338,6 +416,10 @@
     font-size: 1.1rem;
 }
 
+.light-theme .loading {
+    color: var(--text-gray);
+}
+
 /* Icon Picker Styles */
 .icon-picker-container {
     position: relative;
@@ -353,6 +435,12 @@
     align-items: center;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.light-theme .icon-display {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: var(--text-black);
 }
 
 .icon-display:hover {
@@ -385,6 +473,12 @@
     overflow-y: auto;
     z-index: 10;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.light-theme .icon-grid {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .icon-option {
@@ -429,6 +523,11 @@
     font-weight: 600;
     display: inline-block;
     width: fit-content;
+}
+
+.light-theme .upload-label {
+    color: #bfa100;
+    border-color: #bfa100;
 }
 
 .upload-label:hover {

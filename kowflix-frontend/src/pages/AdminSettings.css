@@ -1,0 +1,226 @@
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--background-black);
+    /* Will toggle with theme */
+    color: var(--text-white);
+}
+
+.admin-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--primary-red);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.settings-card {
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+.light-theme .card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.card-icon {
+    color: var(--primary-red);
+}
+
+.setting-item {
+    margin-bottom: 1.5rem;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+/* Theme Toggle Buttons */
+.theme-toggle {
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-gray);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.light-theme .theme-btn {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.theme-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .theme-btn:hover {
+    background-color: #d0d0d0;
+}
+
+.theme-btn.active {
+    background-color: var(--primary-red);
+    color: white;
+}
+
+/* Select & Input */
+.settings-select,
+.settings-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: var(--background-black);
+    color: var(--text-white);
+    font-size: 1rem;
+}
+
+.light-theme .settings-select,
+.light-theme .settings-input {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Toggle Switch */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-red);
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px var(--primary-red);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.setting-desc {
+    font-size: 0.875rem;
+    color: var(--text-dark-gray);
+    margin-top: 0.5rem;
+}
+
+/* Actions */
+.settings-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-save {
+    background-color: var(--primary-red);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn-save:hover {
+    background-color: #c40812;
+}
+
+.save-success {
+    color: #4caf50;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

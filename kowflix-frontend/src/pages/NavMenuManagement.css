@@ -1,13 +1,23 @@
 .navmenu-management-container {
     display: flex;
     min-height: 100vh;
-    background: #0a0a0a;
+    background: var(--background-black);
+    transition: background-color 0.3s ease;
+}
+
+.light-theme .navmenu-management-container {
+    background: #f4f4f4;
 }
 
 .navmenu-content {
     flex: 1;
     padding: 2rem;
     margin-left: 250px;
+    color: var(--text-white);
+}
+
+.light-theme .navmenu-content {
+    color: var(--text-black);
 }
 
 .navmenu-header {
@@ -18,9 +28,13 @@
 }
 
 .navmenu-header h1 {
-    color: #fff;
+    color: var(--text-white);
     font-size: 2rem;
     margin: 0;
+}
+
+.light-theme .navmenu-header h1 {
+    color: var(--text-black);
 }
 
 .btn-add {
@@ -51,10 +65,15 @@
 }
 
 .menu-group {
-    background: #1a1a1a;
+    background: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .menu-group {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .menu-item-row {
@@ -62,13 +81,22 @@
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 1.5rem;
-    background: #1a1a1a;
-    border-bottom: 1px solid #2a2a2a;
+    background: var(--card-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: background 0.2s ease;
 }
 
+.light-theme .menu-item-row {
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .menu-item-row:hover {
-    background: #222;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .menu-item-row:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .menu-item-row:last-child {
@@ -76,20 +104,32 @@
 }
 
 .submenu-item {
-    background: #151515 !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     padding-left: 3rem !important;
 }
 
+.light-theme .submenu-item {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
 .submenu-item:hover {
-    background: #1a1a1a !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.light-theme .submenu-item:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
 }
 
 .submenu-items {
-    border-top: 1px solid #2a2a2a;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .submenu-items {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .submenu-indicator {
-    color: #666;
+    color: var(--text-gray);
     margin-right: 0.5rem;
 }
 
@@ -113,13 +153,17 @@
 }
 
 .menu-item-details h4 {
-    color: #fff;
+    color: var(--text-white);
     margin: 0 0 0.25rem 0;
     font-size: 1.1rem;
 }
 
+.light-theme .menu-item-details h4 {
+    color: var(--text-black);
+}
+
 .menu-item-details p {
-    color: #888;
+    color: var(--text-gray);
     margin: 0;
     font-size: 0.9rem;
 }
@@ -165,7 +209,7 @@
 }
 
 .order-badge {
-    color: #666;
+    color: var(--text-gray);
     font-size: 0.85rem;
 }
 
@@ -181,16 +225,25 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #888;
+    color: var(--text-gray);
+}
+
+.light-theme .btn-icon {
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .btn-icon:hover {
-    background: #2a2a2a;
-    border-color: #444;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.light-theme .btn-icon:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.3);
 }
 
 .btn-icon.edit:hover {
@@ -208,6 +261,11 @@
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+    background: var(--card-bg);
+}
+
+.light-theme .navmenu-modal {
+    background: #ffffff;
 }
 
 .form-row {
@@ -222,30 +280,44 @@
 
 .form-group label {
     display: block;
-    color: #ccc;
+    color: var(--text-gray-light);
     margin-bottom: 0.5rem;
     font-weight: 500;
+}
+
+.light-theme .form-group label {
+    color: var(--text-gray);
 }
 
 .form-input {
     width: 100%;
     padding: 0.75rem;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: var(--background-black);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    color: #fff;
+    color: var(--text-white);
     font-size: 1rem;
     transition: all 0.2s ease;
+}
+
+.light-theme .form-input {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: var(--text-black);
 }
 
 .form-input:focus {
     outline: none;
     border-color: #E50914;
-    background: #222;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.light-theme .form-input:focus {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .form-input::placeholder {
-    color: #666;
+    color: var(--text-gray);
 }
 
 /* Icon Picker */
@@ -258,16 +330,25 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: var(--background-black);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
+.light-theme .icon-display {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
 .icon-display:hover {
     border-color: #E50914;
-    background: #222;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.light-theme .icon-display:hover {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .icon-display i {
@@ -277,7 +358,11 @@
 
 .icon-display span {
     flex: 1;
-    color: #ccc;
+    color: var(--text-gray-light);
+}
+
+.light-theme .icon-display span {
+    color: var(--text-black);
 }
 
 .icon-grid {
@@ -287,8 +372,8 @@
     right: 0;
     margin-top: 0.5rem;
     padding: 1rem;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
@@ -299,22 +384,36 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+.light-theme .icon-grid {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 .icon-option {
     width: 50px;
     height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #222;
+    background: rgba(0, 0, 0, 0.3);
     border: 2px solid transparent;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
+.light-theme .icon-option {
+    background: rgba(0, 0, 0, 0.05);
+}
+
 .icon-option:hover {
-    background: #2a2a2a;
+    background: rgba(255, 255, 255, 0.05);
     border-color: #E50914;
+}
+
+.light-theme .icon-option:hover {
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .icon-option.selected {
@@ -339,8 +438,12 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: #ccc;
+    color: var(--text-gray-light);
     cursor: pointer;
+}
+
+.light-theme .checkbox-label {
+    color: var(--text-black);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -357,23 +460,37 @@
     justify-content: flex-end;
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #333;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .modal-actions {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .btn-cancel {
     padding: 0.75rem 1.5rem;
     background: transparent;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    color: #ccc;
+    color: var(--text-gray-light);
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
+.light-theme .btn-cancel {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: var(--text-gray);
+}
+
 .btn-cancel:hover {
-    background: #2a2a2a;
-    border-color: #444;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.light-theme .btn-cancel:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.3);
 }
 
 .btn-submit {
@@ -400,16 +517,21 @@
     align-items: center;
     justify-content: center;
     padding: 4rem;
-    color: #888;
+    color: var(--text-gray);
 }
 
 .loading-spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid #333;
+    border: 4px solid rgba(255, 255, 255, 0.1);
     border-top-color: #E50914;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+.light-theme .loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #E50914;
 }
 
 @keyframes spin {

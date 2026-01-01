@@ -1,0 +1,21 @@
+.language-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.language-switcher:hover {
+    opacity: 0.8;
+}
+
+.lang-code {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}

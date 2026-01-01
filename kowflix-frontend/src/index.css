@@ -15,6 +15,20 @@
   --transition-normal: 0.3s ease-in-out;
 }
 
+.light-theme {
+  --primary-red: #e50914;
+  --background-black: #f5f5f5;
+  --text-white: #141414;
+  --text-gray: #4a4a4a;
+  --text-dark-gray: #7a7a7a;
+  --input-bg: #ffffff;
+  --error-color: #e87c03;
+
+  /* Additional overrides for specific components if needed */
+  background-color: var(--background-black);
+  color: var(--text-white);
+}
+
 * {
   margin: 0;
   padding: 0;

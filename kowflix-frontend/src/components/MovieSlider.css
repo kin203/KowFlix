@@ -115,6 +115,14 @@
 
     .slider-container {
         gap: 0.6rem;
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .slider-container::-webkit-scrollbar {
+        display: none;
     }
 }
 

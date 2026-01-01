@@ -1,0 +1,124 @@
+{
+    "admin": {
+        "dashboard": "Bảng điều khiển",
+        "movies": "Quản lý Phim",
+        "categories": "Danh mục",
+        "nav_menu": "Quản lý Menu",
+        "jobs": "Công việc",
+        "users": "Người dùng",
+        "reviews": "Đánh giá",
+        "hero": "Hero Banner",
+        "notifications": "Thông báo",
+        "logout": "Thoát",
+        "tmdb_search_label": "Tìm kiếm phim từ TMDb",
+        "tmdb_search_hint": "(Tự động điền thông tin)",
+        "tmdb_search_placeholder": "Tìm kiếm phim (vd: Mai, Đào...)",
+        "no_movies_found": "Không tìm thấy phim nào cho \"{{query}}\""
+    },
+    "navbar": {
+        "home": "Trang chủ",
+        "movies": "Phim Lẻ",
+        "series": "Phim Bộ",
+        "search_placeholder": "Tìm kiếm phim, diễn viên...",
+        "login": "Đăng nhập",
+        "profile": "Hồ sơ",
+        "my_list": "Danh sách của tôi",
+        "history": "Lịch sử xem",
+        "admin_panel": "Quản trị",
+        "logout": "Đăng xuất",
+        "greeting": "Xin chào",
+        "morning": "Chào buổi sáng",
+        "afternoon": "Chào buổi chiều",
+        "evening": "Chào buổi tối"
+    },
+    "genres": {
+        "phim_hoạt_hình": "Phim Hoạt Hình",
+        "phim_hài": "Phim Hài",
+        "phim_gia_đình": "Phim Gia Đình",
+        "phim_phiêu_lưu": "Phim Phiêu Lưu",
+        "phim_hành_động": "Phim Hành Động",
+        "phim_tình_cảm": "Phim Tình Cảm",
+        "phim_kinh_dị": "Phim Kinh Dị",
+        "phim_khoa_học_viễn_tưởng": "Phim Khoa Học Viễn Tưởng",
+        "marvel": "Marvel",
+        "action": "Hành Động",
+        "comedy": "Hài Hước",
+        "romance": "Tình Cảm",
+        "family": "Gia Đình",
+        "adventure": "Phiêu Lưu"
+    },
+    "home": {
+        "interested_in": "Bạn đang quan tâm gì?",
+        "trending": "Top Thịnh Hành",
+        "top_rated": "Đánh Giá Cao",
+        "action_movies": "Phim Hành Động"
+    },
+    "settings": {
+        "title": "Cài đặt & Tùy chỉnh",
+        "title_short": "Cài đặt",
+        "appearance": "Giao diện",
+        "theme": "Chế độ",
+        "language": "Ngôn ngữ",
+        "select_language": "Chọn ngôn ngữ",
+        "system": "Hệ thống",
+        "maintenance": {
+            "title": "Đang Bảo Trì",
+            "message": "Hệ thống đang được nâng cấp để mang lại trải nghiệm tốt hơn.",
+            "sub_message": "Vui lòng quay lại sau ít phút!",
+            "active_banner": "CHẾ ĐỘ BẢO TRÌ ĐANG BẬT (Chỉ Admin mới thấy được trang web)"
+        },
+        "items_per_page": "Số mục trên trang (Admin)"
+    },
+    "common": {
+        "play": "Phát",
+        "more_info": "Thông tin khác",
+        "watch_now": "Xem ngay",
+        "my_list": "Danh sách của tôi",
+        "add_to_list": "Thêm vào danh sách",
+        "remove_from_list": "Xóa khỏi danh sách",
+        "episodes": "Tập phim",
+        "related_movies": "Phim liên quan",
+        "cast": "Diễn viên",
+        "genres": "Thể loại",
+        "director": "Đạo diễn",
+        "upload": "Tải lên"
+    },
+    "auth": {
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "confirm_password": "Xác nhận mật khẩu",
+        "forgot_password": "Quên mật khẩu?",
+        "dont_have_account": "Bạn chưa có tài khoản?",
+        "already_have_account": "Bạn đã có tài khoản?"
+    },
+    "modal": {
+        "reviews_title": "Đánh giá từ người xem",
+        "write_review": "Viết đánh giá của bạn",
+        "select_rating": "Chọn rating (1-10):",
+        "your_comment": "Nhận xét của bạn:",
+        "placeholder_comment": "Chia sẻ suy nghĩ của bạn về bộ phim này... (tối thiểu 10 ký tự)",
+        "submit_review": "Gửi đánh giá",
+        "submitting": "Đang gửi...",
+        "success_review": "✓ Đánh giá của bạn đã được gửi!",
+        "no_reviews": "Chưa có đánh giá nào cho phim này",
+        "loading_reviews": "Đang tải đánh giá..."
+    },
+    "footer": {
+        "slogan": "Phim hay mỗi ngày",
+        "description": "KowFlix - Trung tâm phim chất lượng cao. Khám phá kho phim mới không quảng cáo, cập nhật hàng ngày.",
+        "categories": "Thể loại",
+        "countries": "Quốc gia",
+        "new_releases": "Phim mới",
+        "connect": "Kết nối với chúng tôi",
+        "rights": "All rights reserved."
+    },
+    "player": {
+        "quality": "Chất lượng",
+        "audio": "Âm thanh",
+        "subtitles": "Phụ đề",
+        "auto": "Tự động",
+        "off": "Tắt"
+    }
+}

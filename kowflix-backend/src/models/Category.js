@@ -7,6 +7,11 @@ const CategorySchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    name_en: {
+        type: String,
+        default: '',
+        trim: true
+    },
     slug: {
         type: String,
         required: true,

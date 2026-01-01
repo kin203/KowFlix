@@ -6,6 +6,12 @@
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
     padding: 5rem 4%;
     color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.light-theme .admin-page {
+    background: #f4f4f4;
+    color: var(--text-black);
 }
 
 /* ==================== HEADER ==================== */
@@ -24,6 +30,11 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.light-theme .admin-header h1 {
+    /* Keep gold gradient or switch to solid dark? Gold looks okay on white if dark enough */
+    /* Let's keep it but maybe adjust if needed. For now it's fine. */
 }
 
 .admin-header p {
@@ -64,6 +75,14 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+.light-theme .upload-section {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    backdrop-filter: none;
+    color: var(--text-black);
+}
+
 .upload-section h2 {
     margin-top: 0;
     margin-bottom: 2rem;
@@ -73,6 +92,10 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.light-theme .upload-section h2 {
+    color: var(--text-black);
 }
 
 .upload-section h2::before {
@@ -103,10 +126,19 @@
     font-size: 0.95rem;
 }
 
+.light-theme .form-field label {
+    color: var(--text-dark-gray);
+}
+
 .auto-filled {
     color: #FFD700;
     font-size: 0.85rem;
     margin-left: 0.5rem;
+}
+
+.light-theme .auto-filled {
+    color: #d4a000;
+    /* Darker gold for better contrast on white */
 }
 
 /* ==================== FORM INPUTS ==================== */
@@ -122,6 +154,14 @@
     transition: all 0.3s ease;
 }
 
+.light-theme .form-field input,
+.light-theme .form-field textarea,
+.light-theme .form-field select {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: var(--text-black);
+}
+
 .form-field input:focus,
 .form-field textarea:focus,
 .form-field select:focus {
@@ -129,6 +169,13 @@
     border-color: #FFD700;
     background: rgba(255, 215, 0, 0.05);
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.light-theme .form-field input:focus,
+.light-theme .form-field textarea:focus,
+.light-theme .form-field select:focus {
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
 .form-field textarea {
@@ -148,6 +195,11 @@
     border-radius: 12px;
 }
 
+.light-theme .checkbox-field {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -156,6 +208,10 @@
     cursor: pointer;
     font-weight: 500;
     width: 100%;
+}
+
+.light-theme .checkbox-label {
+    color: var(--text-black);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -210,6 +266,12 @@
     transition: all 0.3s ease;
     text-align: center;
     color: rgba(255, 255, 255, 0.6);
+}
+
+.light-theme .file-input-label {
+    background: #f9f9f9;
+    border: 2px dashed #ccc;
+    color: var(--text-gray);
 }
 
 .file-input-label:hover {
@@ -304,9 +366,19 @@
     transition: all 0.3s ease;
 }
 
+.light-theme .cancel-btn {
+    background: #e0e0e0;
+    border: 1px solid #ccc;
+    color: var(--text-black);
+}
+
 .cancel-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
+}
+
+.light-theme .cancel-btn:hover {
+    background: #d0d0d0;
 }
 
 /* ==================== MESSAGES ==================== */
@@ -377,6 +449,10 @@
     margin-bottom: 0.75rem;
 }
 
+.light-theme .progress-bar {
+    background: #e0e0e0;
+}
+
 .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #FFD700, #FFA500);
@@ -389,6 +465,10 @@
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
     text-align: center;
+}
+
+.light-theme .progress-message {
+    color: var(--text-gray);
 }
 
 /* ==================== MOVIES TABLE ==================== */
@@ -406,6 +486,10 @@
     gap: 0.75rem;
 }
 
+.light-theme .movies-section h2 {
+    color: var(--text-black);
+}
+
 .movies-section h2::before {
     content: '🎬';
     font-size: 1.5rem;
@@ -421,11 +505,24 @@
     overflow: hidden;
 }
 
+.light-theme .movies-table {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-black);
+    backdrop-filter: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 .movies-table th,
 .movies-table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .movies-table th,
+.light-theme .movies-table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .movies-table th {
@@ -435,6 +532,10 @@
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
+}
+
+.light-theme .movies-table th {
+    color: #bfa100;
 }
 
 .movies-table tr:last-child td {
@@ -510,6 +611,11 @@
     color: #FFD700;
 }
 
+.light-theme .btn-secondary {
+    color: #bfa100;
+    border-color: #bfa100;
+}
+
 .btn-secondary:hover:not(:disabled) {
     background: #FFD700;
     color: #000000;
@@ -555,6 +661,12 @@
     transition: all 0.3s ease;
 }
 
+.light-theme .category-dropdown-btn {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: var(--text-black);
+}
+
 .category-dropdown-btn:hover {
     border-color: #FFD700;
     background: rgba(255, 215, 0, 0.05);
@@ -589,6 +701,12 @@
     gap: 0.5rem;
 }
 
+.light-theme .category-dropdown-menu {
+    background: #ffffff;
+    color: var(--text-black);
+    border: 1px solid #ddd;
+}
+
 .category-checkbox-item {
     display: flex;
     align-items: center;
@@ -601,9 +719,17 @@
     user-select: none;
 }
 
+.light-theme .category-checkbox-item {
+    color: var(--text-black);
+}
+
 .category-checkbox-item:hover {
     background: rgba(255, 215, 0, 0.1);
     color: white;
+}
+
+.light-theme .category-checkbox-item:hover {
+    color: black;
 }
 
 .category-checkbox-item input[type="checkbox"] {
@@ -664,6 +790,12 @@
     transition: all 0.3s ease;
 }
 
+.light-theme .search-bar input {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: var(--text-black);
+}
+
 .search-bar input:focus {
     outline: none;
     border-color: #FFD700;
@@ -673,6 +805,10 @@
 
 .search-bar input::placeholder {
     color: rgba(255, 255, 255, 0.5);
+}
+
+.light-theme .search-bar input::placeholder {
+    color: var(--text-gray);
 }
 
 /* ==================== PAGINATION ==================== */
@@ -711,6 +847,10 @@
     color: rgba(255, 255, 255, 0.8);
     font-weight: 600;
     font-size: 1rem;
+}
+
+.light-theme .page-info {
+    color: var(--text-black);
 }
 
 /* ==================== RESPONSIVE ==================== */

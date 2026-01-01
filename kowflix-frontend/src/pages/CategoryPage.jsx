@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { categoryAPI } from '../services/api';
 import Navbar from '../components/Navbar';
-import { Filter, PlayCircle } from 'lucide-react';
+import { Filter, PlayCircle, ArrowLeft } from 'lucide-react';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -61,6 +61,11 @@ const CategoryPage = () => {
     return (
         <div className="category-page">
             <Navbar />
+
+            <Link to="/" className="back-button">
+                <ArrowLeft size={24} />
+                Trang chủ
+            </Link>
 
             <div className="category-content">
                 <div className="category-header">

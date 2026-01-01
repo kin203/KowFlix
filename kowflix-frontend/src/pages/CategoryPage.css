@@ -2,8 +2,8 @@
     min-height: 100vh;
     background-color: #141414;
     color: #fff;
-    padding-top: 80px;
-    /* Space for fixed navbar */
+    padding-top: 140px;
+    /* Space for fixed navbar & back btn */
 }
 
 .category-content {
@@ -43,11 +43,39 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Floating Back Button */
+.back-button {
+    position: fixed;
+    top: 6rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.back-button:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #FFD700;
+    transform: translateX(-5px);
+    color: white;
+}
+
 /* Grid Layout */
 .movies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 2rem 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2.5rem 2rem;
 }
 
 .movie-card {
@@ -191,8 +219,8 @@
 /* Responsive */
 @media (max-width: 768px) {
     .movies-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1.5rem 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1.5rem;
     }
 
     .category-title {
@@ -203,5 +231,6 @@
 @media (max-width: 480px) {
     .movies-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 }

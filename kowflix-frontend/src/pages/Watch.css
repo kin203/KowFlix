@@ -6,20 +6,37 @@
     padding-bottom: 3rem;
 }
 
+/* Breadcrumb Container for Alignment */
+.watch-breadcrumb {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    /* Match video padding usually */
+}
+
+/* Floating Back Button (Matched Profile Page) */
 .back-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 1rem 1.5rem;
-    margin-left: 3rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
     color: white;
+    font-weight: 600;
+    cursor: pointer;
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .back-button:hover {
-    color: #FFD700;
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #FFD700;
+    transform: translateX(-5px);
+    color: white;
 }
 
 .loading,
@@ -64,6 +81,16 @@
 .action-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.4);
+}
+
+.action-btn.active {
+    background: rgba(229, 9, 20, 0.2);
+    border-color: #E50914;
+    color: #E50914;
+}
+
+.action-btn.active svg {
+    color: #E50914;
 }
 
 /* Content Layout */
@@ -867,5 +894,117 @@
         color: #ccc;
         max-width: 80%;
         text-align: center;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .content-wrapper {
+        grid-template-columns: 1fr;
+        /* Stack sidebar below content */
+        gap: 2rem;
+    }
+
+    .sidebar-section {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 2rem;
+        padding-left: 0;
+    }
+
+    .recommended-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .watch-page {
+        padding-top: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .watch-page {
+        padding-top: 70px;
+        padding-bottom: 2rem;
+    }
+
+    .watch-breadcrumb,
+    .content-wrapper,
+    .video-wrapper {
+        padding: 0 1rem;
+    }
+
+    .video-actions {
+        flex-wrap: wrap;
+        padding: 1rem;
+        gap: 0.8rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.8rem;
+    }
+
+    .movie-header-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .movie-poster-thumb {
+        width: 140px;
+        height: 210px;
+        margin-bottom: 1rem;
+    }
+
+    .movie-title {
+        font-size: 1.8rem;
+    }
+
+    .movie-meta-badges {
+        justify-content: center;
+    }
+
+    .genre-tags {
+        justify-content: center;
+    }
+
+    .cast-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 1rem;
+    }
+
+    .cast-avatar,
+    .cast-photo {
+        width: 60px;
+        height: 60px;
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .movie-title {
+        font-size: 1.5rem;
+    }
+
+    .block-title {
+        font-size: 1.2rem;
+    }
+
+    .video-actions {
+        padding: 0.8rem;
+    }
+
+    .action-btn {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+
+    /* Adjust Back Button position */
+    .back-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
     }
 }

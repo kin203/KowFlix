@@ -72,7 +72,7 @@ export const getMovie = async (req, res) => {
 // ====================== CREATE ======================
 export const createMovie = async (req, res) => {
   try {
-    const { title, description, genres = [], releaseYear, duration } = req.body;
+    const { title, title_en, description, description_en, genres = [], releaseYear, duration } = req.body;
     if (!title) return res.status(400).json({ success: false, message: "title required" });
 
     let slug = slugify(title, { lower: true, strict: true });
@@ -86,8 +86,10 @@ export const createMovie = async (req, res) => {
     // Create movie first to get ID
     const movie = await Movie.create({
       title,
+      title_en: title_en || "",
       slug,
       description,
+      description_en: description_en || "",
       genres: typeof genres === "string" ? genres.split(",").map(s => s.trim()) : genres,
       releaseYear: releaseYear ? Number(releaseYear) : undefined,
       duration: duration ? Number(duration) : undefined,
@@ -299,6 +301,9 @@ export const createMovie = async (req, res) => {
 export const updateMovie = async (req, res) => {
   try {
     const payload = { ...req.body };
+
+    // Handle bilingual fields if present in payload (already there due to ...req.body)
+    // payload.title_en and payload.description_en are automatically included
 
     if (typeof payload.genres === "string") {
       payload.genres = payload.genres.split(",").map(s => s.trim());

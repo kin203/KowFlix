@@ -1,0 +1,124 @@
+{
+    "admin": {
+        "dashboard": "Dashboard",
+        "movies": "Movies",
+        "categories": "Categories",
+        "nav_menu": "Nav Menu",
+        "jobs": "Jobs",
+        "users": "Users",
+        "reviews": "Reviews",
+        "hero": "Hero Banner",
+        "notifications": "Notifications",
+        "logout": "Logout",
+        "tmdb_search_label": "Search Movie from TMDb",
+        "tmdb_search_hint": "(Auto-fill metadata)",
+        "tmdb_search_placeholder": "Search for a movie (e.g., Inception...)",
+        "no_movies_found": "No movies found for \"{{query}}\""
+    },
+    "navbar": {
+        "home": "Home",
+        "movies": "Movies",
+        "series": "Series",
+        "search_placeholder": "Search movies, actors...",
+        "login": "Sign In",
+        "profile": "Profile",
+        "my_list": "My List",
+        "history": "Watch History",
+        "admin_panel": "Admin Panel",
+        "logout": "Logout",
+        "greeting": "Hello",
+        "morning": "Good Morning",
+        "afternoon": "Good Afternoon",
+        "evening": "Good Evening"
+    },
+    "genres": {
+        "phim_hoạt_hình": "Animation",
+        "phim_hài": "Comedy",
+        "phim_gia_đình": "Family",
+        "phim_phiêu_lưu": "Adventure",
+        "phim_hành_động": "Action",
+        "phim_tình_cảm": "Romance",
+        "phim_kinh_dị": "Horror",
+        "phim_khoa_học_viễn_tưởng": "Sci-Fi",
+        "marvel": "Marvel",
+        "action": "Action",
+        "comedy": "Comedy",
+        "romance": "Romance",
+        "family": "Family",
+        "adventure": "Adventure"
+    },
+    "home": {
+        "interested_in": "What are you interested in?",
+        "trending": "Trending Now",
+        "top_rated": "Top Rated",
+        "action_movies": "Action Movies"
+    },
+    "settings": {
+        "title": "Settings & Customization",
+        "title_short": "Settings",
+        "appearance": "Appearance",
+        "theme": "Theme",
+        "language": "Language",
+        "select_language": "Select Language",
+        "system": "System",
+        "maintenance": {
+            "title": "Under Maintenance",
+            "message": "The system is being upgraded to provide a better experience.",
+            "sub_message": "Please check back in a few minutes!",
+            "active_banner": "MAINTENANCE MODE IS ACTIVE (Visible to Admins only)"
+        },
+        "items_per_page": "Items Per Page (Admin)"
+    },
+    "common": {
+        "play": "Play",
+        "more_info": "More Info",
+        "watch_now": "Watch Now",
+        "my_list": "My List",
+        "add_to_list": "Add to List",
+        "remove_from_list": "Remove from List",
+        "episodes": "Episodes",
+        "related_movies": "Related Movies",
+        "cast": "Cast",
+        "genres": "Genres",
+        "director": "Director",
+        "upload": "Upload"
+    },
+    "auth": {
+        "login": "Sign In",
+        "register": "Sign Up",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "forgot_password": "Forgot Password?",
+        "dont_have_account": "New to KowFlix?",
+        "already_have_account": "Already have an account?"
+    },
+    "modal": {
+        "reviews_title": "User Reviews",
+        "write_review": "Write your review",
+        "select_rating": "Select rating (1-10):",
+        "your_comment": "Your comment:",
+        "placeholder_comment": "Share your thoughts about this movie... (min 10 chars)",
+        "submit_review": "Submit Review",
+        "submitting": "Submitting...",
+        "success_review": "✓ Your review has been submitted!",
+        "no_reviews": "No reviews yet for this movie",
+        "loading_reviews": "Loading reviews..."
+    },
+    "footer": {
+        "slogan": "Best movies everyday",
+        "description": "KowFlix - High quality movie center. Explore ad-free movies, updated daily.",
+        "categories": "Categories",
+        "countries": "Countries",
+        "new_releases": "New Releases",
+        "connect": "Connect with us",
+        "rights": "All rights reserved."
+    },
+    "player": {
+        "quality": "Quality",
+        "audio": "Audio",
+        "subtitles": "Subtitles",
+        "auto": "Auto",
+        "off": "Off"
+    }
+}

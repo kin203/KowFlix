@@ -1,8 +1,11 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './CategoryCards.css';
 
 const CategoryCards = ({ categories = [] }) => {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === 'en';
     const sliderRef = useRef(null);
 
     const scroll = (direction) => {
@@ -39,7 +42,7 @@ const CategoryCards = ({ categories = [] }) => {
 
     return (
         <div className="category-section">
-            <h2 className="category-title">Bạn đang quan tâm gì?</h2>
+            <h2 className="category-title">{t('home.interested_in')}</h2>
             <div className="category-slider-container">
                 <button
                     className="category-nav-btn category-nav-left"
@@ -65,9 +68,11 @@ const CategoryCards = ({ categories = [] }) => {
                             }}
                         >
                             <span className="category-icon">{category.icon}</span>
-                            <span className="category-name">{category.name}</span>
+                            <span className="category-name">
+                                {(isEnglish && category.name_en) ? category.name_en : category.name}
+                            </span>
                             <span className="category-link">
-                                Xem chi tiết <ChevronRight size={16} />
+                                {t('common.more_info')} <ChevronRight size={16} />
                             </span>
                         </a>
                     ))}

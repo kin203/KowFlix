@@ -1,0 +1,60 @@
+.maintenance-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: var(--background-black);
+    color: var(--text-white);
+    text-align: center;
+    padding: 2rem;
+}
+
+.light-theme .maintenance-container {
+    background-color: #f4f4f4;
+    color: var(--text-black);
+}
+
+.maintenance-icon {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    color: var(--primary-yellow);
+    animation: bounce 2s infinite;
+}
+
+.maintenance-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--primary-red);
+}
+
+.maintenance-message {
+    font-size: 1.25rem;
+    max-width: 600px;
+    color: var(--text-gray);
+    line-height: 1.6;
+}
+
+.light-theme .maintenance-message {
+    color: var(--text-dark-gray);
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-20px);
+    }
+
+    60% {
+        transform: translateY(-10px);
+    }
+}

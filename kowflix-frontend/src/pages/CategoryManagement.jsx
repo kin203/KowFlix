@@ -12,6 +12,7 @@ const CategoryManagement = () => {
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
+        name_en: '',
         slug: '',
         description: '',
         color: '#FFD700',
@@ -82,6 +83,7 @@ const CategoryManagement = () => {
         setEditingCategory(category);
         setFormData({
             name: category.name || '',
+            name_en: category.name_en || '',
             slug: category.slug || '',
             description: category.description || '',
             color: category.color || '#FFD700',
@@ -114,6 +116,7 @@ const CategoryManagement = () => {
         setEditingCategory(null);
         setFormData({
             name: '',
+            name_en: '',
             slug: '',
             description: '',
             color: '#FFD700',
@@ -222,13 +225,23 @@ const CategoryManagement = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="form-row">
                                     <div className="form-field">
-                                        <label>Name *</label>
+                                        <label>Name (VI) *</label>
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleNameChange}
                                             required
+                                        />
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Name (EN)</label>
+                                        <input
+                                            type="text"
+                                            name="name_en"
+                                            value={formData.name_en}
+                                            onChange={handleInputChange}
+                                            placeholder="English name..."
                                         />
                                     </div>
                                     <div className="form-field">

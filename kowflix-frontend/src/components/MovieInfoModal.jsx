@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { X, Play, Heart, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { reviewAPI, wishlistAPI } from '../services/api';
 import './MovieInfoModal.css';
 import './MovieInfoModalReviews.css';
 
 const MovieInfoModal = ({ movie, onClose }) => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(null);
@@ -71,7 +73,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
             }
         } catch (error) {
             console.error('Error toggling wishlist:', error);
-            alert(error.response?.data?.message || 'Vui lòng đăng nhập để thêm vào yêu thích');
+            alert(error.response?.data?.message || t('auth.login_required')); // translated
         } finally {
             setWishlistLoading(false);
         }
@@ -82,17 +84,17 @@ const MovieInfoModal = ({ movie, onClose }) => {
 
         const token = localStorage.getItem('token');
         if (!token) {
-            setSubmitError('Vui lòng đăng nhập để đánh giá phim');
+            setSubmitError(t('auth.login_required'));
             return;
         }
 
         if (userRating === 0) {
-            setSubmitError('Vui lòng chọn rating');
+            setSubmitError(t('modal.select_rating'));
             return;
         }
 
         if (comment.trim().length < 10) {
-            setSubmitError('Comment phải có ít nhất 10 ký tự');
+            setSubmitError(t('modal.placeholder_comment'));
             return;
         }
 
@@ -115,7 +117,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
             setTimeout(() => setSubmitSuccess(false), 3000);
         } catch (error) {
             console.error('Failed to submit review:', error);
-            const errorMsg = error.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.';
+            const errorMsg = error.response?.data?.message || t('modal.submit_error') || 'Error submitting review';
             setSubmitError(errorMsg);
         } finally {
             setSubmitting(false);
@@ -145,6 +147,10 @@ const MovieInfoModal = ({ movie, onClose }) => {
 
     if (!movie) return null;
 
+    const isEnglish = i18n.language === 'en';
+    const displayTitle = (isEnglish && movie.title_en) ? movie.title_en : movie.title;
+    const displayDescription = (isEnglish && movie.description_en) ? movie.description_en : movie.description;
+
     return (
         <div className="movie-info-modal-backdrop" onClick={handleBackdropClick}>
             <div className="movie-info-modal">
@@ -155,11 +161,11 @@ const MovieInfoModal = ({ movie, onClose }) => {
                 <div className="modal-hero" style={{ backgroundImage: `url(${movie.backdrop || movie.background || movie.poster || ''})` }}>
                     <div className="modal-hero-overlay">
                         <div className="modal-hero-content">
-                            <h1 className="modal-title">{movie.title}</h1>
+                            <h1 className="modal-title">{displayTitle}</h1>
                             <div className="modal-actions">
                                 <button className="modal-play-btn" onClick={handlePlayClick}>
                                     <Play size={24} fill="black" />
-                                    Xem ngay
+                                    {t('common.watch_now')}
                                 </button>
                                 <button
                                     className={`modal-icon-btn ${inWishlist ? 'active' : ''}`}
@@ -187,36 +193,44 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         </div>
 
                         <p className="modal-description">
-                            {movie.description || 'No description available.'}
+                            {displayDescription || t('common.no_description') || 'No description available.'}
                         </p>
                     </div>
 
                     <div className="modal-secondary-info">
                         <div className="modal-info-row">
-                            <span className="modal-label">Cast:</span>
+                            <span className="modal-label">{t('common.cast')}:</span>
                             <span className="modal-value">
                                 {(() => {
                                     if (!movie.cast || movie.cast.length === 0) return 'N/A';
 
                                     return movie.cast.map(c => {
                                         // Handle string format
-                                        if (typeof c === 'string') return c.trim();
-                                        // Handle object format with name property
-                                        if (c && typeof c === 'object' && c.name) return c.name.trim();
-                                        // Skip invalid entries
+                                        if (typeof c === 'string') {
+                                            if (c.includes('[object Object]')) return null;
+                                            return c.trim();
+                                        }
+                                        // Handle object format
+                                        if (c && typeof c === 'object') return c.name || null;
                                         return null;
                                     })
-                                        .filter(Boolean) // Remove null/undefined/empty
+                                        .filter(Boolean)
                                         .join(', ') || 'N/A';
                                 })()}
                             </span>
                         </div>
                         <div className="modal-info-row">
-                            <span className="modal-label">Genres:</span>
-                            <span className="modal-value">{movie.genres?.join(', ') || 'N/A'}</span>
+                            <span className="modal-label">{t('common.genres')}:</span>
+                            <span className="modal-value">
+                                {movie.genres?.map(g => {
+                                    const key = `genres.${g.toLowerCase().replace(/\s+/g, '_')}`;
+                                    const translated = t(key);
+                                    return translated !== key ? translated : g;
+                                }).join(', ') || 'N/A'}
+                            </span>
                         </div>
                         <div className="modal-info-row">
-                            <span className="modal-label">Director:</span>
+                            <span className="modal-label">{t('common.director')}:</span>
                             <span className="modal-value">{movie.director || 'N/A'}</span>
                         </div>
                     </div>
@@ -224,7 +238,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
 
                 <div className="modal-reviews">
                     <div className="reviews-header">
-                        <h3>Đánh giá từ người xem</h3>
+                        <h3>{t('modal.reviews_title')}</h3>
                         {avgRating && (
                             <div className="average-rating">
                                 <span className="rating-number">{avgRating}</span>
@@ -235,10 +249,10 @@ const MovieInfoModal = ({ movie, onClose }) => {
                     </div>
 
                     <form className="review-form" onSubmit={handleSubmitReview}>
-                        <h4>Viết đánh giá của bạn</h4>
+                        <h4>{t('modal.write_review')}</h4>
 
                         <div className="rating-selector">
-                            <label>Chọn rating (1-10):</label>
+                            <label>{t('modal.select_rating')}</label>
                             <div className="stars-selector">
                                 {Array.from({ length: 10 }, (_, i) => i + 1).map((star) => (
                                     <Star
@@ -257,11 +271,11 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         </div>
 
                         <div className="comment-field">
-                            <label>Nhận xét của bạn:</label>
+                            <label>{t('modal.your_comment')}</label>
                             <textarea
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                placeholder="Chia sẻ suy nghĩ của bạn về bộ phim này... (tối thiểu 10 ký tự)"
+                                placeholder={t('modal.placeholder_comment')}
                                 rows={4}
                                 maxLength={1000}
                             />
@@ -269,16 +283,16 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         </div>
 
                         {submitError && <div className="submit-error">{submitError}</div>}
-                        {submitSuccess && <div className="submit-success">✓ Đánh giá của bạn đã được gửi!</div>}
+                        {submitSuccess && <div className="submit-success">{t('modal.success_review')}</div>}
 
                         <button type="submit" className="submit-review-btn" disabled={submitting}>
-                            {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                            {submitting ? t('modal.submitting') : t('modal.submit_review')}
                         </button>
                     </form>
 
                     <div className="reviews-list">
                         {loading ? (
-                            <div className="reviews-loading">Đang tải đánh giá...</div>
+                            <div className="reviews-loading">{t('modal.loading_reviews')}</div>
                         ) : reviews.length > 0 ? (
                             reviews.map((review) => {
                                 const displayName = review.userId?.profile?.name || review.userId?.username || 'User';
@@ -319,7 +333,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                             })
                         ) : (
                             <div className="no-reviews">
-                                <p>Chưa có đánh giá nào cho phim này</p>
+                                <p>{t('modal.no_reviews')}</p>
                             </div>
                         )}
                     </div>

@@ -8,7 +8,7 @@ export const addToWishlist = async (req, res) => {
         const { movieId } = req.params;
         const userId = req.user.id;
 
-        console.log('🔍 Wishlist Debug - userId from JWT:', userId);
+
 
         // Check if movie exists
         const movie = await Movie.findById(movieId);
@@ -19,11 +19,7 @@ export const addToWishlist = async (req, res) => {
         // Get user - if doesn't exist, user might be deleted but token still valid
         let user = await User.findById(userId);
 
-        console.log('🔍 Wishlist Debug - user found:', user ? 'YES' : 'NO');
-        if (user) {
-            console.log('🔍 Wishlist Debug - user._id:', user._id);
-            console.log('🔍 Wishlist Debug - user.email:', user.email);
-        }
+
 
         if (!user) {
             return res.status(404).json({
