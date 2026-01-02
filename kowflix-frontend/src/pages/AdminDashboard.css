@@ -1,14 +1,23 @@
 .admin-dashboard-container {
     display: flex;
     min-height: 100vh;
-    background: #000000;
+    background: var(--background-black);
+    transition: background-color 0.3s ease;
+}
+
+.light-theme .admin-dashboard-container {
+    background: #f4f4f4;
 }
 
 .admin-dashboard-content {
     flex: 1;
     margin-left: 260px;
     padding: 2rem;
-    color: #FFFFFF;
+    color: var(--text-white);
+}
+
+.light-theme .admin-dashboard-content {
+    color: var(--text-black);
 }
 
 .dashboard-header {
@@ -22,11 +31,15 @@
     font-size: 2.5rem;
     font-weight: 800;
     margin: 0 0 0.5rem 0;
-    color: #FFFFFF;
+    color: var(--text-white);
+}
+
+.light-theme .dashboard-header h1 {
+    color: var(--text-black);
 }
 
 .dashboard-header p {
-    color: #888888;
+    color: var(--text-gray);
     margin: 0;
     font-size: 1.1rem;
 }
@@ -36,11 +49,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    color: #FFFFFF;
+    color: var(--text-white);
     font-size: 0.9rem;
+}
+
+.light-theme .dashboard-time {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-black);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Loading State */
@@ -56,8 +76,8 @@
 .loading-spinner {
     width: 60px;
     height: 60px;
-    border: 4px solid #333333;
-    border-top: 4px solid #FFD700;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-yellow);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -73,7 +93,7 @@
 }
 
 .dashboard-loading p {
-    color: #888888;
+    color: var(--text-gray);
     font-size: 1.1rem;
 }
 
@@ -98,10 +118,17 @@
 }
 
 .chart-card {
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 1.5rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.light-theme .chart-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .chart-header {
@@ -112,12 +139,16 @@
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 0.25rem 0;
-    color: #FFFFFF;
+    color: var(--text-white);
+}
+
+.light-theme .chart-header h3 {
+    color: var(--text-black);
 }
 
 .chart-subtitle {
     font-size: 0.875rem;
-    color: #888888;
+    color: var(--text-gray);
 }
 
 /* Simple Bar Chart */
@@ -139,7 +170,7 @@
 
 .bar {
     width: 100%;
-    background: #FFD700;
+    background: var(--primary-yellow);
     border-radius: 4px 4px 0 0;
     position: relative;
     transition: all 0.3s ease;
@@ -163,7 +194,7 @@
 
 .bar-label {
     font-size: 0.875rem;
-    color: #888888;
+    color: var(--text-gray);
 }
 
 /* Top Movies List */
@@ -178,22 +209,33 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     transition: all 0.3s ease;
 }
 
+.light-theme .top-movie-item {
+    background: #f9f9f9;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .top-movie-item:hover {
-    border-color: #FFD700;
+    border-color: var(--primary-yellow);
     transform: translateX(4px);
+}
+
+.light-theme .top-movie-item:hover {
+    border-color: var(--primary-yellow);
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .movie-rank {
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background: #FFD700;
+    background: var(--primary-yellow);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -211,19 +253,23 @@
     margin: 0 0 0.25rem 0;
     font-size: 1rem;
     font-weight: 600;
-    color: #FFFFFF;
+    color: var(--text-white);
+}
+
+.light-theme .movie-info h4 {
+    color: var(--text-black);
 }
 
 .movie-info p {
     margin: 0;
     font-size: 0.875rem;
-    color: #888888;
+    color: var(--text-gray);
 }
 
 .movie-rating {
     font-size: 1rem;
     font-weight: 600;
-    color: #FFD700;
+    color: var(--primary-yellow);
 }
 
 /* Quick Actions */
@@ -235,7 +281,11 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 1rem 0;
-    color: #FFFFFF;
+    color: var(--text-white);
+}
+
+.light-theme .quick-actions h3 {
+    color: var(--text-black);
 }
 
 .actions-grid {
@@ -250,7 +300,7 @@
     justify-content: center;
     gap: 0.75rem;
     padding: 1.25rem;
-    background: #FFD700;
+    background: var(--primary-yellow);
     border: none;
     border-radius: 8px;
     color: #000000;

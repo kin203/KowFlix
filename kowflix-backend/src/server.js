@@ -23,6 +23,7 @@ import commentRoutes from "./routes/commentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import navMenuRoutes from "./routes/navMenuRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/nav-menu", navMenuRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 // Health check route
 app.get("/", (req, res) => res.json({

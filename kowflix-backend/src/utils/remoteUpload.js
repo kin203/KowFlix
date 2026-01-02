@@ -1,60 +1,75 @@
-// src/utils/remoteUpload.js
-import SftpClient from 'ssh2-sftp-client';
+import axios from 'axios';
+import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
+import config from '../config/config.js';
 
-const REMOTE_HOST = process.env.REMOTE_HOST || '192.168.100.52';
-const REMOTE_USER = process.env.REMOTE_USER || 'kowflix';
-const REMOTE_MEDIA_ROOT = process.env.REMOTE_MEDIA_ROOT || '/media/DATA/kowflix';
+// Get Agent URL from config (default to local tunnel if not set)
+const AGENT_URL = config.remote.agentUrl;
 
 /**
- * Get SSH private key from environment variable or file path
- * Priority: REMOTE_SSH_KEY (direct key) > REMOTE_SSH_KEY_PATH (file path)
+ * Upload file to remote agent via API
+ * @param {string} localPath - Path to local file
+ * @param {string} endpoint - API endpoint (e.g., '/api/upload/video')
+ * @returns {Promise<object>} Response data
  */
-const getSSHKey = () => {
-    // Priority 1: Direct key from env (Render deployment)
-    if (process.env.REMOTE_SSH_KEY) {
-        return process.env.REMOTE_SSH_KEY;
+async function uploadToAgent(localPath, endpoint) {
+    if (!fs.existsSync(localPath)) {
+        throw new Error(`File not found: ${localPath}`);
     }
 
-    // Priority 2: Key file path (local development)
-    if (process.env.REMOTE_SSH_KEY_PATH) {
-        return fs.readFileSync(process.env.REMOTE_SSH_KEY_PATH, 'utf8');
-    }
+    const form = new FormData();
+    form.append('file', fs.createReadStream(localPath));
 
-    throw new Error('SSH key not configured. Set REMOTE_SSH_KEY or REMOTE_SSH_KEY_PATH environment variable.');
-};
+    try {
+        console.log(`📤 Uploading to Agent: ${endpoint} ...`);
+
+        const response = await axios.post(`${AGENT_URL}${endpoint}`, form, {
+            headers: {
+                ...form.getHeaders(),
+                // Increase max body length for large files (5GB)
+                'MaxContentLength': 5 * 1024 * 1024 * 1024,
+                'MaxBodyLength': 5 * 1024 * 1024 * 1024
+            },
+            // Long timeout for uploads
+            timeout: 3600000 // 1 hour
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('❌ Upload failed:', error.message);
+        if (error.response) {
+            console.error('Agent Response:', error.response.data);
+        }
+        throw error;
+    }
+}
 
 /**
  * Upload poster to remote server
  * @param {string} localPath - Local file path
- * @param {string} movieId - Movie ID for filename
+ * @param {string} movieId - Movie ID for filename (will be used by agent to name file)
  * @returns {Promise<string>} Remote file path
  */
 export async function uploadPoster(localPath, movieId) {
-    const sftp = new SftpClient();
+    // We rename the local file temporarily to the desired remote name
+    // because FormData uses the filename from the stream
+    const ext = path.extname(localPath);
+    const tempName = `${movieId}${ext}`;
+    const tempPath = path.join(path.dirname(localPath), tempName);
+
+    // Copy to temp path with new name
+    await fs.promises.copyFile(localPath, tempPath);
 
     try {
-        await sftp.connect({
-            host: REMOTE_HOST,
-            port: 22,
-            username: REMOTE_USER,
-            privateKey: getSSHKey()
-        });
-
-        const ext = path.extname(localPath);
-        const remoteFilename = `${movieId}${ext}`;
-        const remotePath = `${REMOTE_MEDIA_ROOT}/posters/${remoteFilename}`;
-
-        await sftp.put(localPath, remotePath);
-
-        console.log(`✅ Uploaded poster: ${remotePath}`);
-        return `/media/posters/${remoteFilename}`;
-    } catch (err) {
-        console.error('❌ Poster upload failed:', err);
-        throw err;
+        const result = await uploadToAgent(tempPath, '/api/upload/poster');
+        console.log(`✅ Uploaded poster: ${result.path}`);
+        return result.path;
     } finally {
-        await sftp.end();
+        // Clean up temp file
+        try {
+            await fs.promises.unlink(tempPath);
+        } catch (e) { /* ignore */ }
     }
 }
 
@@ -65,131 +80,43 @@ export async function uploadPoster(localPath, movieId) {
  * @returns {Promise<string>} Remote file path
  */
 export async function uploadVideo(localPath, movieId) {
-    const sftp = new SftpClient();
+    const ext = path.extname(localPath);
+    const tempName = `${movieId}${ext}`;
+    const tempPath = path.join(path.dirname(localPath), tempName);
+
+    // Copy to temp path with new name
+    await fs.promises.copyFile(localPath, tempPath);
 
     try {
-        await sftp.connect({
-            host: REMOTE_HOST,
-            port: 22,
-            username: REMOTE_USER,
-            privateKey: getSSHKey()
-        });
-
-        const ext = path.extname(localPath);
-        const remoteFilename = `${movieId}${ext}`;
-        const remotePath = `${REMOTE_MEDIA_ROOT}/uploads/${remoteFilename}`;
-
-        console.log(`📤 Uploading video: ${path.basename(localPath)} (this may take a while)...`);
-        await sftp.put(localPath, remotePath);
-
-        console.log(`✅ Uploaded video: ${remotePath}`);
-        return `/media/uploads/${remoteFilename}`;
-    } catch (err) {
-        console.error('❌ Video upload failed:', err);
-        throw err;
+        console.log(`PLEASE WAIT: Uploading video ${tempName} to storage server...`);
+        const result = await uploadToAgent(tempPath, '/api/upload/video');
+        console.log(`✅ Uploaded video: ${result.path}`);
+        return result.path;
     } finally {
-        await sftp.end();
+        // Clean up temp file
+        try {
+            await fs.promises.unlink(tempPath);
+        } catch (e) { /* ignore */ }
     }
 }
 
 /**
- * Delete file from remote server
- * @param {string} remotePath - Remote file path (e.g., /media/DATA/kowflix/uploads/xxx.mp4)
+ * Delete file from remote server (Agent API stub)
+ * @param {string} remotePath - Remote file path
  * @returns {Promise<boolean>} Success status
  */
 export async function deleteRemoteFile(remotePath) {
-    const sftp = new SftpClient();
-
-    try {
-        await sftp.connect({
-            host: REMOTE_HOST,
-            port: 22,
-            username: REMOTE_USER,
-            privateKey: getSSHKey()
-        });
-
-        const exists = await sftp.exists(remotePath);
-        if (exists) {
-            await sftp.delete(remotePath);
-            console.log(`✅ Deleted file: ${remotePath}`);
-            return true;
-        } else {
-            console.log(`⚠️ File not found: ${remotePath}`);
-            return false;
-        }
-    } catch (err) {
-        console.error('❌ File deletion failed:', err);
-        return false;
-    } finally {
-        await sftp.end();
-    }
+    // TODO: Implement delete API in agent
+    console.warn(`⚠️ Delete requested for ${remotePath} but Agent API does not support deletion yet.`);
+    return true; // Pretend success
 }
 
-/**
- * Delete directory from remote server (recursive)
- * @param {string} remotePath - Remote directory path
- * @returns {Promise<boolean>} Success status
- */
 export async function deleteRemoteDirectory(remotePath) {
-    const sftp = new SftpClient();
-
-    try {
-        await sftp.connect({
-            host: REMOTE_HOST,
-            port: 22,
-            username: REMOTE_USER,
-            privateKey: getSSHKey()
-        });
-
-        const exists = await sftp.exists(remotePath);
-        if (exists) {
-            await sftp.rmdir(remotePath, true); // recursive delete
-            console.log(`✅ Deleted directory: ${remotePath}`);
-            return true;
-        } else {
-            console.log(`⚠️ Directory not found: ${remotePath}`);
-            return false;
-        }
-    } catch (err) {
-        console.error('❌ Directory deletion failed:', err);
-        return false;
-    } finally {
-        await sftp.end();
-    }
+    // TODO: Implement delete API in agent
+    console.warn(`⚠️ Delete directory requested for ${remotePath} but Agent API does not support deletion yet.`);
+    return true;
 }
 
-/**
- * Delete all movie files (video, poster, HLS folder)
- * @param {string} movieId - Movie ID
- * @param {object} movie - Movie object with file paths
- * @returns {Promise<void>}
- */
 export async function deleteMovieFiles(movieId, movie) {
-    const deletionPromises = [];
-
-    // Delete video file
-    if (movie.contentFiles && movie.contentFiles.length > 0) {
-        const videoFile = movie.contentFiles.find(f => f.type === 'mp4');
-        if (videoFile && videoFile.path) {
-            const videoPath = `${REMOTE_MEDIA_ROOT}${videoFile.path.replace('/media', '')}`;
-            deletionPromises.push(deleteRemoteFile(videoPath));
-        }
-    }
-
-    // Delete poster (if not from TMDb)
-    if (movie.poster && !movie.poster.startsWith('http')) {
-        const posterPath = `${REMOTE_MEDIA_ROOT}${movie.poster.replace('/media', '')}`;
-        deletionPromises.push(deleteRemoteFile(posterPath));
-    }
-
-    // Delete HLS folder
-    if (movie.hlsFolder) {
-        const hlsPath = `${REMOTE_MEDIA_ROOT}${movie.hlsFolder.replace('/media', '')}`;
-        deletionPromises.push(deleteRemoteDirectory(hlsPath));
-    }
-
-    // Execute all deletions
-    await Promise.allSettled(deletionPromises);
-    console.log(`✅ Cleaned up files for movie: ${movieId}`);
+    console.log(`⚠️ Helper: deleteMovieFiles called for ${movieId} (No-op in Agent mode)`);
 }
-

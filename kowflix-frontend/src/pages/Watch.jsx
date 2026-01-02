@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Bookmark, Share2, Star, Play } from 'lucide-react';
-import { movieAPI, progressAPI, reviewAPI } from '../services/api';
+import { ArrowLeft, Heart, Share2, Star, Play } from 'lucide-react';
+import { movieAPI, progressAPI, reviewAPI, wishlistAPI } from '../services/api';
 import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
 import Navbar from '../components/Navbar';
 import CommentSection from '../components/CommentSection';
@@ -27,6 +27,10 @@ const Watch = () => {
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
 
+    // Wishlist state
+    const [isInWishlist, setIsInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -36,6 +40,7 @@ const Watch = () => {
                 // Always set movie data if available, even if video is missing
                 if (data.data) {
                     setMovie(data.data);
+                    checkWishlistStatus(id);
                 }
 
                 if (data.success && data.data && data.data.master) {
@@ -76,6 +81,39 @@ const Watch = () => {
 
         fetchData();
     }, [id]);
+
+    const checkWishlistStatus = async (movieId) => {
+        if (!localStorage.getItem('token')) return;
+        try {
+            const { data } = await wishlistAPI.check(movieId);
+            setIsInWishlist(data.data.inWishlist);
+        } catch (error) {
+            console.error('Failed to check wishlist status:', error);
+        }
+    };
+
+    const handleToggleWishlist = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
+            return;
+        }
+
+        try {
+            setWishlistLoading(true);
+            if (isInWishlist) {
+                await wishlistAPI.remove(id);
+                setIsInWishlist(false);
+            } else {
+                await wishlistAPI.add(id);
+                setIsInWishlist(true);
+            }
+        } catch (error) {
+            console.error('Failed to toggle wishlist:', error);
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
 
     const fetchReviews = async () => {
         try {
@@ -209,12 +247,15 @@ const Watch = () => {
 
                     {/* Action Buttons Under Video */}
                     <div className="video-actions">
-                        <button className="action-btn">
-                            <Heart size={18} /> Thích
+                        <button
+                            className={`action-btn ${isInWishlist ? 'active' : ''}`}
+                            onClick={handleToggleWishlist}
+                            disabled={wishlistLoading}
+                        >
+                            <Heart size={18} fill={isInWishlist ? "currentColor" : "none"} />
+                            {isInWishlist ? 'Đã thích' : 'Thích'}
                         </button>
-                        <button className="action-btn">
-                            <Bookmark size={18} /> Lưu
-                        </button>
+                        {/* Bookmark Button Removed */}
                         <button className="action-btn">
                             <Share2 size={18} /> Chia sẻ
                         </button>
@@ -283,8 +324,12 @@ const Watch = () => {
                                                 <span className="credit-label">Diễn viên:</span>
                                                 <span className="credit-value">
                                                     {movie.cast.slice(0, 5).map(actor => {
-                                                        if (!actor) return '';
-                                                        return typeof actor === 'string' ? actor : (actor.name || '');
+                                                        if (typeof actor === 'string') {
+                                                            if (actor.includes('[object Object]')) return null;
+                                                            return actor;
+                                                        }
+                                                        if (actor && typeof actor === 'object') return actor.name || null;
+                                                        return null;
                                                     }).filter(Boolean).join(', ')}
                                                 </span>
                                             </div>
@@ -299,9 +344,16 @@ const Watch = () => {
                                     <h3 className="block-title">Diễn viên</h3>
                                     <div className="cast-grid">
                                         {movie.cast.slice(0, 6).map((actor, index) => {
-                                            // Handle both old format (string) and new format (object)
-                                            const actorName = typeof actor === 'string' ? actor : actor.name;
-                                            const actorPhoto = typeof actor === 'object' ? actor.profile_path : null;
+                                            let actorName = 'Unknown';
+                                            let actorPhoto = null;
+
+                                            if (typeof actor === 'string') {
+                                                if (actor.includes('[object Object]')) return null;
+                                                actorName = actor;
+                                            } else if (actor && typeof actor === 'object') {
+                                                actorName = actor.name || 'Unknown';
+                                                actorPhoto = actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : null;
+                                            }
 
                                             return (
                                                 <div key={index} className="cast-item">
@@ -310,6 +362,10 @@ const Watch = () => {
                                                             src={actorPhoto}
                                                             alt={actorName}
                                                             className="cast-photo"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
                                                         />
                                                     ) : (
                                                         <div className="cast-avatar">
@@ -319,7 +375,7 @@ const Watch = () => {
                                                     <span className="cast-name">{actorName}</span>
                                                 </div>
                                             );
-                                        })}
+                                        }).filter(Boolean)}
                                     </div>
                                 </div>
                             )}

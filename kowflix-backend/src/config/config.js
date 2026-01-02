@@ -82,13 +82,10 @@ const config = {
         publicUrl: process.env.PUBLIC_MEDIA_URL || 'http://localhost:5000/media'
     },
 
-    // Remote Server Configuration (for production sync)
+    // Remote Agent Configuration (using Tunnel)
     remote: {
-        host: process.env.REMOTE_HOST || '',
-        user: process.env.REMOTE_USER || '',
-        sshKeyPath: process.env.REMOTE_SSH_KEY_PATH || '',
-        mediaRoot: process.env.REMOTE_MEDIA_ROOT || '',
-        enabled: Boolean(process.env.REMOTE_HOST && process.env.REMOTE_USER)
+        agentUrl: process.env.REMOTE_AGENT_URL || 'https://nk203.id.vn',
+        enabled: true // Always enabled if agentUrl is set (or defaulted)
     },
 
     // Cloudinary Configuration

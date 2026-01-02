@@ -1,0 +1,19 @@
+# Add this to your Nginx server block (inside /etc/nginx/sites-available/default or similar)
+# This routes all requests starting with /api/ to the Node.js Agent running on port 3001
+
+location /api/ {
+    proxy_pass http://localhost:3001;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+    
+    # Increase timeout for long uploads/encodes
+    proxy_read_timeout 3600;
+    proxy_connect_timeout 3600;
+    proxy_send_timeout 3600;
+    
+    # Disable body size limit for uploads
+    client_max_body_size 0;
+}

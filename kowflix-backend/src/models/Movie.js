@@ -41,9 +41,11 @@ const ContentFileSchema = new mongoose.Schema({
 }, { _id: false });
 
 const MovieSchema = new mongoose.Schema({
-  title: { type: String, required: true, index: "text" },
+  title: { type: String, required: true, index: "text" }, // Default (Vietnamese)
+  title_en: { type: String, default: "" }, // English Title
   slug: { type: String, required: true, unique: true, index: true },
-  description: { type: String, default: "" },
+  description: { type: String, default: "" }, // Default (Vietnamese)
+  description_en: { type: String, default: "" }, // English Description
   genres: { type: [String], default: [] },
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   poster: { type: String, default: "" },

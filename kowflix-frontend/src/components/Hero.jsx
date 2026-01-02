@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Info, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { wishlistAPI } from '../services/api';
 import MovieInfoModal from './MovieInfoModal';
 import './Hero.css';
 
 const Hero = ({ heroBanners = [] }) => {
+    const { t, i18n } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [activeBanner, setActiveBanner] = useState(null);
+    const [inWishlist, setInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     useEffect(() => {
         if (heroBanners.length > 0 && !activeBanner) {
@@ -14,12 +19,51 @@ const Hero = ({ heroBanners = [] }) => {
         }
     }, [heroBanners, activeBanner]);
 
+    // Check if movie is in wishlist
+    useEffect(() => {
+        const checkWishlist = async () => {
+            if (!activeBanner?.movieId?._id) return;
+            try {
+                const { data } = await wishlistAPI.check(activeBanner.movieId._id);
+                setInWishlist(data.data.inWishlist);
+            } catch (error) {
+                console.error('Error checking wishlist:', error);
+            }
+        };
+        checkWishlist();
+    }, [activeBanner]);
+
     if (!activeBanner || !activeBanner.movieId) return null;
+
+    const handleToggleWishlist = async () => {
+        if (wishlistLoading) return;
+        setWishlistLoading(true);
+        try {
+            if (inWishlist) {
+                await wishlistAPI.remove(movie._id);
+                setInWishlist(false);
+            } else {
+                await wishlistAPI.add(movie._id);
+                setInWishlist(true);
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            alert(error.response?.data?.message || t('auth.login_required')); // translated alert
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
 
     // Extract movie data from populated movieId
     const movie = activeBanner.movieId;
-    const title = activeBanner.title || movie.title;
-    const description = activeBanner.description || movie.description;
+    const isEnglish = i18n.language === 'en';
+
+    // Get title: prioritize banner title -> movie English title (if en) -> movie title (vi/default)
+    const title = activeBanner.title || (isEnglish && movie.title_en ? movie.title_en : movie.title);
+
+    // Get description: prioritize banner description -> movie English description (if en) -> movie description
+    const description = activeBanner.description || (isEnglish && movie.description_en ? movie.description_en : movie.description);
+
     // Prioritize backdrop for better quality, then custom imageUrl, then poster as fallback
     const imageUrl = movie.backdrop || activeBanner.imageUrl || movie.poster;
 
@@ -99,9 +143,15 @@ const Hero = ({ heroBanners = [] }) => {
 
                     {movie.genres && movie.genres.length > 0 && (
                         <div className="hero-genres">
-                            {movie.genres.slice(0, 4).map((genre, index) => (
-                                <span key={index} className="genre-tag">{genre}</span>
-                            ))}
+                            {movie.genres.slice(0, 4).map((genre, index) => {
+                                const key = `genres.${genre.toLowerCase().replace(/\s+/g, '_')}`;
+                                const translated = t(key);
+                                return (
+                                    <span key={index} className="genre-tag">
+                                        {translated !== key ? translated : genre}
+                                    </span>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -110,13 +160,17 @@ const Hero = ({ heroBanners = [] }) => {
                     <div className="hero-buttons">
                         <Link to={`/watch/${movie._id}`} className="btn-play">
                             <Play fill="black" size={24} />
-                            <span>Xem ngay</span>
+                            <span>{t('common.watch_now')}</span>
                         </Link>
                         <button className="btn-info" onClick={() => setShowModal(true)}>
                             <Info size={24} />
                         </button>
-                        <button className="btn-favorite">
-                            <Heart size={24} />
+                        <button
+                            className={`btn-favorite ${inWishlist ? 'active' : ''}`}
+                            onClick={handleToggleWishlist}
+                            disabled={wishlistLoading}
+                        >
+                            <Heart size={24} fill={inWishlist ? 'currentColor' : 'none'} />
                         </button>
                     </div>
                 </div>

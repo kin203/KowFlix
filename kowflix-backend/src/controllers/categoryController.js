@@ -66,7 +66,7 @@ export const getCategory = async (req, res) => {
 // Create category
 export const createCategory = async (req, res) => {
     try {
-        const { name, slug, description, color, link, icon, order, isActive } = req.body;
+        const { name, name_en, slug, description, color, link, icon, order, isActive } = req.body;
 
         // Check if category name or slug already exists
         const existing = await Category.findOne({
@@ -81,6 +81,7 @@ export const createCategory = async (req, res) => {
 
         const category = new Category({
             name,
+            name_en,
             slug,
             description,
             color,
@@ -109,7 +110,7 @@ export const createCategory = async (req, res) => {
 // Update category
 export const updateCategory = async (req, res) => {
     try {
-        const { name, slug, description, color, link, icon, order, isActive } = req.body;
+        const { name, name_en, slug, description, color, link, icon, order, isActive } = req.body;
 
         // Check if new name or slug conflicts with existing category
         if (name || slug) {
@@ -130,7 +131,7 @@ export const updateCategory = async (req, res) => {
 
         const category = await Category.findByIdAndUpdate(
             req.params.id,
-            { name, slug, description, color, link, icon, order, isActive },
+            { name, name_en, slug, description, color, link, icon, order, isActive },
             { new: true, runValidators: true }
         );
 

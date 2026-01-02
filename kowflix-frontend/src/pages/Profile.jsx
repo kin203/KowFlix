@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Camera, X, LogOut, Save, ArrowLeft } from 'lucide-react';
-import { authAPI } from '../services/api';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { User, Camera, X, LogOut, Save, ArrowLeft, Clock, Play, Heart } from 'lucide-react';
+import { authAPI, progressAPI, wishlistAPI } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -14,9 +14,26 @@ const Profile = () => {
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [watchHistory, setWatchHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [wishlist, setWishlist] = useState([]);
+    const [loadingWishlist, setLoadingWishlist] = useState(false);
+    const [activeTab, setActiveTab] = useState('history'); // 'history' or 'wishlist'
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.hash === '#wishlist') {
+            setActiveTab('wishlist');
+        } else if (location.hash === '#history') {
+            setActiveTab('history');
+        }
+    }, [location]);
 
     useEffect(() => {
         fetchProfile();
+        fetchWatchHistory();
+        fetchWishlist();
     }, []);
 
     const fetchProfile = async () => {
@@ -96,6 +113,49 @@ const Profile = () => {
         } catch (error) {
             setMessage({ type: 'error', text: error.response?.data?.message || 'Cập nhật thất bại' });
         }
+    };
+
+    const fetchWatchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+            const { data } = await progressAPI.getHistory();
+            setWatchHistory(data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch watch history:', error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    const fetchWishlist = async () => {
+        setLoadingWishlist(true);
+        try {
+            const { data } = await wishlistAPI.get();
+            setWishlist(data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch wishlist:', error);
+        } finally {
+            setLoadingWishlist(false);
+        }
+    };
+
+    const formatTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        if (hrs > 0) return `${hrs}h ${mins}m`;
+        return `${mins}m`;
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'Hôm nay';
+        if (diffDays === 1) return 'Hôm qua';
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        return date.toLocaleDateString('vi-VN');
     };
 
     const handleLogout = () => {
@@ -229,6 +289,147 @@ const Profile = () => {
                                     Hủy
                                 </button>
                             </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* History & Wishlist Section with Tabs */}
+                <div className="info-card history-section">
+                    <div className="info-header">
+                        <h2>Phim của tôi</h2>
+                    </div>
+
+                    {/* Tabs Navigation */}
+                    <div className="tabs-container">
+                        <button
+                            className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('history')}
+                        >
+                            <Clock size={18} />
+                            <span>Lịch sử xem</span>
+                        </button>
+                        <button
+                            className={`tab-button ${activeTab === 'wishlist' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('wishlist')}
+                        >
+                            <Heart size={18} />
+                            <span>Yêu thích</span>
+                        </button>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="history-body">
+                        {/* History Tab */}
+                        {activeTab === 'history' && (
+                            <>
+                                {loadingHistory ? (
+                                    <div className="history-loading">
+                                        <div className="loading-spinner"></div>
+                                        <p>Đang tải lịch sử...</p>
+                                    </div>
+                                ) : watchHistory.length === 0 ? (
+                                    <div className="history-empty">
+                                        <Play size={48} />
+                                        <p>Bạn chưa xem phim nào</p>
+                                    </div>
+                                ) : (
+                                    <div className="history-grid">
+                                        {watchHistory.map((item) => (
+                                            <div
+                                                key={item._id}
+                                                className="history-card"
+                                                onClick={() => navigate(`/watch/${item.movie._id}`)}
+                                            >
+                                                <div className="history-poster">
+                                                    <img
+                                                        src={item.movie.poster || '/placeholder.jpg'}
+                                                        alt={item.movie.title}
+                                                        onError={(e) => {
+                                                            e.target.src = '/placeholder.jpg';
+                                                        }}
+                                                    />
+                                                    <div className="play-overlay">
+                                                        <Play size={32} />
+                                                    </div>
+                                                </div>
+                                                <div className="history-info">
+                                                    <h3>{item.movie.title}</h3>
+                                                    <div className="history-meta">
+                                                        <span className="watch-time">{formatDate(item.lastWatched)}</span>
+                                                        {item.movie.releaseYear && (
+                                                            <span className="year">{item.movie.releaseYear}</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="progress-bar-container">
+                                                        <div
+                                                            className="progress-bar-fill"
+                                                            style={{ width: `${item.percentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <div className="progress-text">
+                                                        {item.percentage >= 90 ? (
+                                                            <span className="completed">✓ Đã xem</span>
+                                                        ) : (
+                                                            <span>{Math.round(item.percentage)}% · {formatTime(item.currentTime)}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Wishlist Tab */}
+                        {activeTab === 'wishlist' && (
+                            <>
+                                {loadingWishlist ? (
+                                    <div className="history-loading">
+                                        <div className="loading-spinner"></div>
+                                        <p>Đang tải danh sách...</p>
+                                    </div>
+                                ) : wishlist.length === 0 ? (
+                                    <div className="history-empty">
+                                        <Heart size={48} />
+                                        <p>Chưa có phim yêu thích</p>
+                                    </div>
+                                ) : (
+                                    <div className="history-grid">
+                                        {wishlist.map((movie) => (
+                                            <div
+                                                key={movie._id}
+                                                className="history-card"
+                                                onClick={() => navigate(`/watch/${movie._id}`)}
+                                            >
+                                                <div className="history-poster">
+                                                    <img
+                                                        src={movie.poster || '/placeholder.jpg'}
+                                                        alt={movie.title}
+                                                        onError={(e) => {
+                                                            e.target.src = '/placeholder.jpg';
+                                                        }}
+                                                    />
+                                                    <div className="play-overlay">
+                                                        <Play size={32} />
+                                                    </div>
+                                                </div>
+                                                <div className="history-info">
+                                                    <h3>{movie.title}</h3>
+                                                    <div className="history-meta">
+                                                        {movie.imdbRating && (
+                                                            <span className="watch-time">⭐ {movie.imdbRating.toFixed(1)}</span>
+                                                        )}
+                                                        {movie.releaseYear && (
+                                                            <span className="year">{movie.releaseYear}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

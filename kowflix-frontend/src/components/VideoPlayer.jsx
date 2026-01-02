@@ -1,9 +1,11 @@
 // src/components/VideoPlayer.jsx
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Hls from 'hls.js';
 import './VideoPlayer.css';
 
 const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtitles = [] }) => {
+    const { t } = useTranslation();
     const videoRef = useRef(null);
     const hlsRef = useRef(null);
     const progressIntervalRef = useRef(null);
@@ -454,13 +456,13 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
             {showSettings && (
                 <div className="settings-menu">
                     <div className="settings-section">
-                        <h4>Quality</h4>
+                        <h4>{t('player.quality')}</h4>
                         <button
                             className={currentQuality === -1 ? 'active' : ''}
                             onClick={() => changeQuality(-1)}
                             disabled={isLoadingQuality}
                         >
-                            Auto
+                            {t('player.auto')}
                         </button>
                         {qualities.map((quality) => (
                             <button
@@ -476,7 +478,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
 
                     {audioTracks.length > 1 && (
                         <div className="settings-section">
-                            <h4>Audio</h4>
+                            <h4>{t('player.audio')}</h4>
                             {audioTracks.map((track) => (
                                 <button
                                     key={track.index}
@@ -492,7 +494,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
                     {/* Subtitles Section */}
                     {subtitles && subtitles.length > 0 && (
                         <div className="settings-section">
-                            <h4>Subtitles</h4>
+                            <h4>{t('player.subtitles')}</h4>
                             <button
                                 className={currentSubtitle === -1 ? 'active' : ''}
                                 onClick={() => {
@@ -505,7 +507,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
                                     }
                                 }}
                             >
-                                Off
+                                {t('player.off')}
                             </button>
                             {subtitles.map((subtitle, index) => (
                                 <button

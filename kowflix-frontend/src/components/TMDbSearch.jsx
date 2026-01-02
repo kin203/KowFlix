@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 import { movieAPI } from '../services/api';
 import './TMDbSearch.css';
 
 const TMDbSearch = ({ onSelectMovie }) => {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -58,8 +60,8 @@ const TMDbSearch = ({ onSelectMovie }) => {
     return (
         <div className="tmdb-search-container">
             <label className="tmdb-search-label">
-                Search Movie from TMDb
-                <span className="tmdb-search-hint">(Auto-fill metadata)</span>
+                {t('admin.tmdb_search_label')}
+                <span className="tmdb-search-hint">{t('admin.tmdb_search_hint')}</span>
             </label>
 
             <div className="tmdb-search-input-wrapper">
@@ -67,7 +69,7 @@ const TMDbSearch = ({ onSelectMovie }) => {
                 <input
                     type="text"
                     className="tmdb-search-input"
-                    placeholder="Search for a movie (e.g., Inception, Avatar...)"
+                    placeholder={t('admin.tmdb_search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -115,7 +117,7 @@ const TMDbSearch = ({ onSelectMovie }) => {
 
             {showResults && searchResults.length === 0 && !searching && (
                 <div className="tmdb-no-results">
-                    No movies found for "{searchQuery}"
+                    {t('admin.no_movies_found', { query: searchQuery })}
                 </div>
             )}
         </div>

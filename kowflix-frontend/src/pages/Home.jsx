@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import CategoryCards from '../components/CategoryCards';
@@ -9,6 +10,7 @@ import axios from 'axios';
 import './Home.css';
 
 const Home = () => {
+    const { t } = useTranslation();
     const [heroBanners, setHeroBanners] = useState([]);
     const [movies, setMovies] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -49,9 +51,9 @@ const Home = () => {
             <Navbar />
             <Hero heroBanners={heroBanners} />
             <CategoryCards categories={categories} />
-            <MovieSlider title="Trending Now" movies={movies} />
-            <MovieSlider title="Top Rated" movies={[...movies].reverse()} />
-            <MovieSlider title="Action Movies" movies={movies} />
+            <MovieSlider title={t('home.trending')} movies={movies} />
+            <MovieSlider title={t('home.top_rated')} movies={[...movies].reverse()} />
+            <MovieSlider title={t('home.action_movies')} movies={movies} />
             <Footer />
         </div>
     );

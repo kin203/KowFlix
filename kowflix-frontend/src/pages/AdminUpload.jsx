@@ -8,7 +8,9 @@ import './CategoryChips.css';
 const AdminUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
+        title_en: '', // English Title
         description: '',
+        description_en: '', // English Description
         releaseYear: '',
         genres: '',
         // TMDb metadata
@@ -99,7 +101,9 @@ const AdminUpload = () => {
         setFormData({
             ...formData,
             title: movieData.title || '',
+            title_en: movieData.title_en || '', // Assuming TMDb might provide original title or English title? For now leave empty or same
             description: movieData.overview || '',
+            description_en: movieData.overview || '', // TMDb usually maps overview to requested language, we might need separate logic if we want both from TMDb
             releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : '',
             genres: movieData.genres?.join(', ') || '',
             tmdbId: movieData.tmdbId || '',
@@ -128,7 +132,9 @@ const AdminUpload = () => {
             // Prepare form data with all fields
             const data = new FormData();
             data.append('title', formData.title);
+            data.append('title_en', formData.title_en);
             data.append('description', formData.description);
+            data.append('description_en', formData.description_en);
             data.append('releaseYear', formData.releaseYear);
             data.append('genres', formData.genres);
 
@@ -182,7 +188,9 @@ const AdminUpload = () => {
     const resetForm = () => {
         setFormData({
             title: '',
+            title_en: '',
             description: '',
+            description_en: '',
             releaseYear: '',
             genres: '',
             tmdbId: '',
@@ -208,7 +216,9 @@ const AdminUpload = () => {
         setEditingMovie(movie);
         setFormData({
             title: movie.title || '',
+            title_en: movie.title_en || '',
             description: movie.description || '',
+            description_en: movie.description_en || '',
             releaseYear: movie.releaseYear?.toString() || '',
             genres: movie.genres?.join(', ') || '',
             tmdbId: movie.tmdbId?.toString() || '',
@@ -237,7 +247,9 @@ const AdminUpload = () => {
         try {
             const data = new FormData();
             data.append('title', formData.title);
+            data.append('title_en', formData.title_en);
             data.append('description', formData.description);
+            data.append('description_en', formData.description_en);
             data.append('releaseYear', formData.releaseYear);
             data.append('genres', formData.genres);
 
@@ -278,7 +290,9 @@ const AdminUpload = () => {
         setEditingMovie(null);
         setFormData({
             title: '',
+            title_en: '',
             description: '',
+            description_en: '',
             releaseYear: '',
             genres: '',
             tmdbId: '',
@@ -422,6 +436,19 @@ const AdminUpload = () => {
                                     required
                                 />
                             </div>
+
+
+                            <div className="form-field">
+                                <label>Title (English)</label>
+                                <input
+                                    type="text"
+                                    name="title_en"
+                                    value={formData.title_en}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter English title"
+                                />
+                            </div>
+
                             <div className="form-field">
                                 <label>Release Year</label>
                                 <input
@@ -438,6 +465,16 @@ const AdminUpload = () => {
                                     name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-field full-width">
+                                <label>Description (English)</label>
+                                <textarea
+                                    name="description_en"
+                                    value={formData.description_en}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter English description"
                                 />
                             </div>
 
