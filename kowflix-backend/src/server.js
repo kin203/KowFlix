@@ -24,6 +24,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import navMenuRoutes from "./routes/navMenuRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import uploadRoutes from './routes/uploadRoutes.js'; // Added uploadRoutes
 
 const app = express();
 
@@ -58,6 +59,10 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/nav-menu", navMenuRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use('/api/upload', uploadRoutes); // Added uploadRoutes API route
+
+// Serve static files from 'public' folder
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Health check route
 app.get("/", (req, res) => res.json({

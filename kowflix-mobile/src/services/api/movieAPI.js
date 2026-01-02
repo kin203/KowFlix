@@ -12,4 +12,10 @@ export const movieAPI = {
 
     // Search movies
     search: (query) => api.get('/movies/search', { params: { q: query } }),
+
+    // Get Recommendations (Simulated for now using category/genre)
+    getRecommendations: (movieId) => api.get('/movies', { params: { limit: 10, sort: 'newest' } }),
+
+    // Add to history
+    addToHistory: (movieId) => api.post(`/users/history/${movieId}`),
 };

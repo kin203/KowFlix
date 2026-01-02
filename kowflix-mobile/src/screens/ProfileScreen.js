@@ -98,7 +98,7 @@ const ProfileScreen = ({ navigation }) => {
         {
             icon: 'heart-outline',
             title: 'Danh sách yêu thích',
-            onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển'),
+            onPress: () => navigation.navigate('Wishlist'),
             color: '#FF6B6B'
         },
         {

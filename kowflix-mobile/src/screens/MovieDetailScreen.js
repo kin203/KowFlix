@@ -8,7 +8,9 @@ import {
     TouchableOpacity,
     Dimensions,
     Platform,
-    Share
+    Share,
+    Alert, // Added Alert
+    FlatList
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,32 +19,74 @@ import { WebView } from 'react-native-webview';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, RADIUS } from '../constants/colors';
 import { getImageUrl } from '../utils/imageUtils';
 import { movieAPI } from '../services/api/movieAPI';
+import { wishlistAPI } from '../services/api/wishlistAPI';
+import { commentAPI } from '../services/api/commentAPI';
+import { useAuth } from '../context/AuthContext';
+import { TextInput } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const MovieDetailScreen = ({ route, navigation }) => {
     const { movieId, movie: initialMovieData } = route.params;
+    const { isAuthenticated } = useAuth(); // Get auth state
     const insets = useSafeAreaInsets();
 
     const [movie, setMovie] = useState(initialMovieData || null);
     const [loading, setLoading] = useState(!initialMovieData);
+    const [recommendations, setRecommendations] = useState([]); // Added recommendations state
+    const [comments, setComments] = useState([]); // Comments state
+    const [userComment, setUserComment] = useState(''); // Comment input
+    const [submittingComment, setSubmittingComment] = useState(false);
+
     const [playingTrailer, setPlayingTrailer] = useState(false);
-    const [activeTab, setActiveTab] = useState('cast'); // 'cast' or 'recommendations'
+    const [activeTab, setActiveTab] = useState('cast'); // 'cast', 'recommendations', 'comments'
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [isInWishlist, setIsInWishlist] = useState(false); // New state
 
     useEffect(() => {
-        fetchMovieDetails();
-    }, [movieId]);
+        if (isAuthenticated) {
+            checkWishlistStatus();
+        }
+    }, [movieId, isAuthenticated]);
+
+    const checkWishlistStatus = async () => {
+        try {
+            const wishRes = await wishlistAPI.checkStatus(movieId);
+            if (wishRes.data.success) {
+                // Backend returns { success: true, data: { inWishlist: boolean } }
+                setIsInWishlist(!!wishRes.data.data?.inWishlist);
+            }
+        } catch (err) {
+            console.log('Check wishlist error:', err);
+        }
+    };
+
+    const fetchComments = async () => {
+        try {
+            const res = await commentAPI.getMovieComments(movieId);
+            if (res.data.success) {
+                setComments(res.data.data);
+            }
+        } catch (error) {
+            console.log('Fetch comments error:', error);
+        }
+    };
 
     const fetchMovieDetails = async () => {
         try {
-            // Fetch full details if we only have basic info or need fresh data
-            // Also fetch similar movies, cast etc. if API supports it
-            // For now, assume movieAPI.getById returns full info
             const response = await movieAPI.getById(movieId);
             if (response.data.success) {
                 setMovie(response.data.data);
             }
+
+            if (movieAPI.getRecommendations) {
+                const recResponse = await movieAPI.getRecommendations(movieId);
+                if (recResponse.data.success) {
+                    setRecommendations(recResponse.data.data || []);
+                }
+            }
+
+            await fetchComments();
         } catch (error) {
             console.error('Fetch movie details error:', error);
         } finally {
@@ -50,10 +94,79 @@ const MovieDetailScreen = ({ route, navigation }) => {
         }
     };
 
+    const handlePostComment = async () => {
+        if (!userComment.trim()) return;
+        if (!isAuthenticated) {
+            Alert.alert("Yêu cầu đăng nhập", "Bạn cần đăng nhập để bình luận.");
+            return;
+        }
+
+        setSubmittingComment(true);
+        try {
+            const res = await commentAPI.create({
+                movieId,
+                content: userComment
+            });
+            if (res.data.success) {
+                setUserComment('');
+                fetchComments();
+                Alert.alert("Thành công", "Đã đăng bình luận!");
+            }
+        } catch (error) {
+            console.error('Post comment error:', error);
+            Alert.alert("Lỗi", "Không thể đăng bình luận.");
+        } finally {
+            setSubmittingComment(false);
+        }
+    };
+
     const handlePlayPress = () => {
-        // Navigate to full screen player
         navigation.navigate('Watch', { movie });
     };
+
+    const handleAddToMyList = () => {
+        Alert.alert("Thông báo", "Đã thêm vào danh sách xem sau!");
+    };
+
+    const handleFavorite = async () => {
+        try {
+            if (isInWishlist) {
+                await wishlistAPI.remove(movieId);
+                setIsInWishlist(false);
+                Alert.alert("Thông báo", "Đã xóa khỏi danh sách yêu thích");
+            } else {
+                await wishlistAPI.add(movieId);
+                setIsInWishlist(true);
+                Alert.alert("Thông báo", "Đã thêm vào danh sách yêu thích");
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || '';
+            if (error.response?.status === 400 && (errorMessage.includes('Already in wishlist') || errorMessage.includes('exist'))) {
+                // Auto-correct state
+                setIsInWishlist(true);
+                Alert.alert("Thông báo", "Phim đã có trong danh sách yêu thích");
+            } else {
+                console.error('Toggle wishlist error:', error);
+                Alert.alert("Lỗi", "Không thể cập nhật danh sách yêu thích");
+            }
+        }
+    };
+
+    // ... (renderHeader, renderActionButtons kept same implicitly by only replacing logic block)
+
+    // ... (Skip to Tab Rendering part)
+    /* 
+       Note: The tool replaces a contiguous block. 
+       I need to replace from 'useEffect' (line 46) down to the end of Tab Content 'line 361' 
+       to cover both logic fixes and the ternary rendering fix.
+       This is a large block. I will try to target specific blocks if possible, 
+       but the logic changes are intertwined.
+       Let's replace the Logic Block first (useEffect to handleShare), 
+       then the Tab Rendering block.
+    */
+
+    // Changing approach: Replace Logic Block first.
+
 
     const handleShare = async () => {
         try {
@@ -125,25 +238,23 @@ const MovieDetailScreen = ({ route, navigation }) => {
     };
 
     const renderActionButtons = () => (
-        <View style={styles.actionGrid}>
-            <TouchableOpacity style={styles.actionItem}>
-                <Ionicons name="heart-outline" size={24} color="#FFF" />
-                <Text style={styles.actionText}>Yêu thích</Text>
+        <View style={[styles.actionGrid, { justifyContent: 'flex-start', gap: 20 }]}>
+            <TouchableOpacity style={styles.actionItem} onPress={handleFavorite}>
+                <Ionicons
+                    name={isInWishlist ? "heart" : "heart-outline"}
+                    size={24}
+                    color={isInWishlist ? COLORS.primary : "#FFF"}
+                />
+                <Text style={[styles.actionText, isInWishlist && { color: COLORS.primary }]}>
+                    {isInWishlist ? "Đã thích" : "Yêu thích"}
+                </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionItem}>
-                <Ionicons name="add" size={28} color="#FFF" />
-                <Text style={styles.actionText}>Thêm vào</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionItem}>
-                <View style={styles.ratingBadge}>
-                    <Text style={styles.ratingBadgeText}>{movie.rating?.toFixed(1) || '0.0'}</Text>
-                </View>
-                <Text style={styles.actionText}>Đánh giá</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionItem}>
+
+            <TouchableOpacity style={styles.actionItem} onPress={() => setActiveTab('comments')}>
                 <Ionicons name="chatbubble-outline" size={24} color="#FFF" />
                 <Text style={styles.actionText}>Bình luận</Text>
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.actionItem} onPress={handleShare}>
                 <Ionicons name="share-social-outline" size={24} color="#FFF" />
                 <Text style={styles.actionText}>Chia sẻ</Text>
@@ -208,22 +319,21 @@ const MovieDetailScreen = ({ route, navigation }) => {
 
                     {/* Tabs */}
                     <View style={styles.tabContainer}>
-                        <TouchableOpacity
-                            style={[styles.tabButton, activeTab === 'cast' && styles.activeTabButton]}
-                            onPress={() => setActiveTab('cast')}
-                        >
-                            <Text style={[styles.tabText, activeTab === 'cast' && styles.activeTabText]}>Diễn viên</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.tabButton, activeTab === 'recommendations' && styles.activeTabButton]}
-                            onPress={() => setActiveTab('recommendations')}
-                        >
-                            <Text style={[styles.tabText, activeTab === 'recommendations' && styles.activeTabText]}>Đề xuất</Text>
-                        </TouchableOpacity>
+                        {['cast', 'recommendations', 'comments'].map(tab => (
+                            <TouchableOpacity
+                                key={tab}
+                                style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
+                                onPress={() => setActiveTab(tab)}
+                            >
+                                <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                                    {tab === 'cast' ? 'Diễn viên' : tab === 'recommendations' ? 'Đề xuất' : 'Bình luận'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     {/* Tab Content */}
-                    {activeTab === 'cast' ? (
+                    {activeTab === 'cast' && (
                         <View style={styles.castList}>
                             {movie.cast?.length > 0 ? movie.cast.map((actor, idx) => (
                                 <View key={idx} style={styles.castItem}>
@@ -235,17 +345,75 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                         <Text style={styles.castName}>{actor.name}</Text>
                                         <Text style={styles.characterName}>{actor.character || 'Diễn viên'}</Text>
                                     </View>
-                                    <TouchableOpacity style={styles.castInfoButton}>
-                                        <Text style={styles.castInfoButtonText}>Thông tin</Text>
-                                    </TouchableOpacity>
                                 </View>
                             )) : (
                                 <Text style={styles.emptyText}>Đang cập nhật diễn viên...</Text>
                             )}
                         </View>
-                    ) : (
+                    )}
+
+                    {activeTab === 'recommendations' && (
                         <View style={styles.recommendationList}>
-                            <Text style={styles.emptyText}>Chưa có đề xuất nào.</Text>
+                            {recommendations.length > 0 ? (
+                                <FlatList
+                                    data={recommendations}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    keyExtractor={(item) => item._id}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            style={styles.recommendationItem}
+                                            onPress={() => navigation.push('MovieDetail', { movieId: item._id, movie: item })}
+                                        >
+                                            <Image
+                                                source={{ uri: getImageUrl(item.poster) }}
+                                                style={styles.recommendationPoster}
+                                            />
+                                            <Text style={styles.recommendationTitle} numberOfLines={1}>{item.title}</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                            ) : (
+                                <Text style={styles.emptyText}>Chưa có đề xuất nào.</Text>
+                            )}
+                        </View>
+                    )}
+
+                    {activeTab === 'comments' && (
+                        <View style={styles.reviewSection}>
+                            {/* Input */}
+                            <View style={styles.reviewInputContainer}>
+                                <TextInput
+                                    style={styles.reviewInput}
+                                    placeholder="Viết bình luận..."
+                                    placeholderTextColor={COLORS.textMuted}
+                                    value={userComment}
+                                    onChangeText={setUserComment}
+                                    multiline
+                                />
+                                <TouchableOpacity
+                                    style={[styles.postButton, !userComment.trim() && { opacity: 0.5 }]}
+                                    onPress={handlePostComment}
+                                    disabled={submittingComment || !userComment.trim()}
+                                >
+                                    <Ionicons name="send" size={20} color="#000" />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* List */}
+                            {comments.length > 0 ? comments.map((comment) => (
+                                <View key={comment._id} style={styles.reviewItem}>
+                                    <View style={styles.reviewHeader}>
+                                        <Text style={styles.reviewerName}>{comment.userId?.username || 'Người dùng'}</Text>
+                                        <Text style={styles.reviewDate}>
+                                            {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.reviewContent}>{comment.content}</Text>
+                                </View>
+                            )) : (
+                                <Text style={styles.emptyText}>Chưa có bình luận nào. Hãy là người đầu tiên!</Text>
+                            )}
                         </View>
                     )}
 
@@ -490,12 +658,80 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZES.xs,
     },
     recommendationList: {
-        padding: SPACING.lg,
-        alignItems: 'center',
+        paddingVertical: SPACING.md,
+    },
+    recommendationItem: {
+        marginRight: SPACING.md,
+        width: 120,
+    },
+    recommendationPoster: {
+        width: 120,
+        height: 180,
+        borderRadius: RADIUS.sm,
+        marginBottom: SPACING.xs,
+    },
+    recommendationTitle: {
+        color: COLORS.text,
+        fontSize: FONT_SIZES.sm,
+        fontWeight: 'bold',
     },
     emptyText: {
         color: COLORS.textSecondary,
         fontStyle: 'italic',
+        textAlign: 'center',
+        marginTop: SPACING.lg,
+    },
+    reviewSection: {
+        marginTop: SPACING.md,
+    },
+    reviewInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#333',
+        borderRadius: RADIUS.md,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        marginBottom: SPACING.lg,
+    },
+    reviewInput: {
+        flex: 1,
+        color: '#FFF',
+        paddingVertical: 8,
+        minHeight: 40,
+    },
+    postButton: {
+        backgroundColor: COLORS.primary,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: SPACING.xs,
+    },
+    reviewItem: {
+        backgroundColor: COLORS.backgroundCard,
+        borderRadius: RADIUS.md,
+        padding: SPACING.md,
+        marginBottom: SPACING.md,
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+    },
+    reviewerName: {
+        color: COLORS.text,
+        fontWeight: 'bold',
+        fontSize: FONT_SIZES.sm,
+    },
+    reviewDate: {
+        color: COLORS.textSecondary,
+        fontSize: FONT_SIZES.xs,
+    },
+    reviewContent: {
+        color: COLORS.textSecondary,
+        fontSize: FONT_SIZES.md,
+        lineHeight: 20,
     },
 });
 
