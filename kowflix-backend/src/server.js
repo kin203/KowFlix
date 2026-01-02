@@ -97,25 +97,34 @@ const server = app.listen(config.server.port, () => {
 });
 
 // Graceful shutdown
+// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM received, shutting down gracefully...');
-  server.close(() => {
+  server.close(async () => {
     console.log('✅ Server closed');
-    mongoose.connection.close(false, () => {
+    try {
+      await mongoose.connection.close(false);
       console.log('✅ MongoDB connection closed');
       process.exit(0);
-    });
+    } catch (err) {
+      console.error('Error closing MongoDB connection:', err);
+      process.exit(1);
+    }
   });
 });
 
 process.on('SIGINT', () => {
   console.log('👋 SIGINT received, shutting down gracefully...');
-  server.close(() => {
+  server.close(async () => {
     console.log('✅ Server closed');
-    mongoose.connection.close(false, () => {
+    try {
+      await mongoose.connection.close(false);
       console.log('✅ MongoDB connection closed');
       process.exit(0);
-    });
+    } catch (err) {
+      console.error('Error closing MongoDB connection:', err);
+      process.exit(1);
+    }
   });
 });
 
