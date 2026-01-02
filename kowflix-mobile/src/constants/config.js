@@ -1,17 +1,19 @@
 // API Base URL Configuration
 // Use process.env.NODE_ENV instead of __DEV__ for better compatibility
 const isDevelopment = process.env.NODE_ENV !== 'production';
-export const API_BASE_URL = isDevelopment
-    ? 'http://192.168.100.31:5000/api'  // Development (Use LAN IP)
-    : 'https://your-production-api.com/api';  // Production
+export const API_BASE_URL = 'https://kowflix.onrender.com/api';  // Always use Production for now to test
+// export const API_BASE_URL = isDevelopment
+//     ? 'http://192.168.100.31:5000/api'  // Development (Use LAN IP)
+//     : 'https://kowflix.onrender.com/api';  // Production
 
-export const MEDIA_BASE_URL = isDevelopment
-    ? 'http://192.168.100.31:5000'
-    : 'https://your-production-api.com';
+export const MEDIA_BASE_URL = 'https://kowflix.onrender.com';
+// export const MEDIA_BASE_URL = isDevelopment
+//     ? 'http://192.168.100.31:5000'
+//     : 'https://kowflix.onrender.com';
 
 // App Configuration
 export const APP_NAME = 'KowFlix';
-export const APP_SLOGAN = 'Phim hay cả rồ';
+export const APP_SLOGAN = 'Thế giới điện ảnh trong tầm tay';
 
 // Splash Screen Duration
 export const SPLASH_DURATION = 2500; // milliseconds

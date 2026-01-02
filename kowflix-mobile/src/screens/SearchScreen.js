@@ -61,7 +61,7 @@ const SearchScreen = ({ navigation, route }) => {
             // Basic debounce logic could be here, but for now calling directly
             // In production, use lodash.debounce
             const params = {
-                search: text,
+                q: text,
                 limit: 20
             };
 
@@ -114,7 +114,7 @@ const SearchScreen = ({ navigation, route }) => {
         <View style={styles.gridItem}>
             <MovieCard
                 movie={item}
-                onPress={() => console.log('Press movie', item.title)}
+                onPress={() => navigation.push('MovieDetail', { movieId: item._id, movie: item })}
             />
         </View>
     );
@@ -182,7 +182,7 @@ const SearchScreen = ({ navigation, route }) => {
                     data={results}
                     renderItem={renderMovieItem}
                     keyExtractor={(item) => item._id}
-                    numColumns={3}
+                    numColumns={2}
                     contentContainerStyle={styles.listContent}
                     columnWrapperStyle={styles.columnWrapper}
                     ListEmptyComponent={
@@ -258,9 +258,10 @@ const styles = StyleSheet.create({
         paddingBottom: 100, // Space for tab bar
     },
     gridItem: {
-        flex: 1 / 3, // 3 columns
+        flex: 1 / 2, // 2 columns
         marginBottom: SPACING.md,
         alignItems: 'center',
+        paddingHorizontal: SPACING.xs, // Add spacing between items
     },
     columnWrapper: {
         justifyContent: 'flex-start', // Left align

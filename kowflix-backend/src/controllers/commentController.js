@@ -1,284 +1,118 @@
 import Comment from '../models/Comment.js';
-import Movie from '../models/Movie.js';
+import Review from '../models/Review.js'; // Import Review model
 
-// @desc    Create a new comment
-// @route   POST /api/comments
-// @access  Private
-export const createComment = async (req, res) => {
-    try {
-        const { movieId, content, isAnonymous, parentId } = req.body;
-        const userId = req.user.id;
-
-        // Validate movie exists
-        const movie = await Movie.findById(movieId);
-        if (!movie) {
-            return res.status(404).json({ message: 'Movie not found' });
-        }
-
-        // If parentId provided, validate parent comment exists
-        if (parentId) {
-            const parentComment = await Comment.findById(parentId);
-            if (!parentComment) {
-                return res.status(404).json({ message: 'Parent comment not found' });
-            }
-        }
-
-        const comment = await Comment.create({
-            movieId,
-            userId,
-            content,
-            isAnonymous: isAnonymous || false,
-            parentId: parentId || null
-        });
-
-        // Populate user info
-        await comment.populate('userId', 'profile');
-
-        res.status(201).json({
-            success: true,
-            data: comment
-        });
-    } catch (error) {
-        console.error('Error creating comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// @desc    Get all comments for a movie
-// @route   GET /api/comments/movie/:movieId
-// @access  Public
-export const getCommentsByMovie = async (req, res) => {
+// Get comments for a movie (including legacy reviews)
+export const getMovieComments = async (req, res) => {
     try {
         const { movieId } = req.params;
 
-        // Recursive function to get all nested replies
-        const getRepliesRecursive = async (parentId) => {
-            const replies = await Comment.find({ parentId })
-                .populate('userId', 'profile')
-                .sort({ createdAt: 1 })
-                .lean();
-            
-            // For each reply, get its nested replies and add counts
-            for (let reply of replies) {
-                reply.likeCount = reply.likes?.length || 0;
-                reply.dislikeCount = reply.dislikes?.length || 0;
-                reply.replies = await getRepliesRecursive(reply._id);
-            }
-            
-            return replies;
-        };
-
-        // Get top-level comments (no parent)
-        const comments = await Comment.find({ movieId, parentId: null })
-            .populate('userId', 'profile')
-            .sort({ createdAt: -1 })
+        // Fetch new comments
+        const commentsPromise = Comment.find({ movieId })
+            .populate('userId', 'username email profile')
             .lean();
 
-        // Get all nested replies recursively for each comment and add counts
-        for (let comment of comments) {
-            comment.likeCount = comment.likes?.length || 0;
-            comment.dislikeCount = comment.dislikes?.length || 0;
-            comment.replies = await getRepliesRecursive(comment._id);
-        }
+        // Fetch legacy reviews
+        const reviewsPromise = Review.find({ movieId })
+            .populate('userId', 'username email profile')
+            .lean();
 
-        res.status(200).json({
+        const [comments, reviews] = await Promise.all([commentsPromise, reviewsPromise]);
+
+        // Format reviews to look like comments
+        const formattedReviews = reviews.map(review => ({
+            ...review,
+            content: review.comment, // Map comment field
+            isReview: true, // Flag to identify origin
+            rating: review.rating // Keep rating info
+        }));
+
+        // Merge and sort by date (newest first)
+        const allComments = [...comments, ...formattedReviews].sort((a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        res.json({
             success: true,
-            count: comments.length,
-            data: comments
+            data: allComments
         });
     } catch (error) {
-        console.error('Error fetching comments:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('getMovieComments error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch comments'
+        });
     }
 };
 
-// @desc    Like a comment
-// @route   POST /api/comments/:id/like
-// @access  Private
-export const likeComment = async (req, res) => {
+// Create a new comment
+export const createComment = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { movieId, content } = req.body;
         const userId = req.user.id;
 
-        const comment = await Comment.findById(id);
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
+        if (!content || !content.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Comment content is required'
+            });
         }
 
-        // Remove from dislikes if present
-        comment.dislikes = comment.dislikes.filter(
-            uid => uid.toString() !== userId.toString()
-        );
-
-        // Toggle like
-        const likeIndex = comment.likes.findIndex(
-            uid => uid.toString() === userId.toString()
-        );
-
-        if (likeIndex > -1) {
-            // Unlike
-            comment.likes.splice(likeIndex, 1);
-        } else {
-            // Like
-            comment.likes.push(userId);
-        }
+        const comment = new Comment({
+            userId,
+            movieId,
+            content
+        });
 
         await comment.save();
 
-        res.status(200).json({
+        // Populate user info for immediate display
+        await comment.populate('userId', 'username profile');
+
+        res.status(201).json({
             success: true,
-            data: {
-                likeCount: comment.likes.length,
-                dislikeCount: comment.dislikes.length
-            }
+            data: comment,
+            message: 'Comment posted successfully'
         });
     } catch (error) {
-        console.error('Error liking comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('createComment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to post comment'
+        });
     }
 };
 
-// @desc    Dislike a comment
-// @route   POST /api/comments/:id/dislike
-// @access  Private
-export const dislikeComment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id;
-
-        const comment = await Comment.findById(id);
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
-
-        // Remove from likes if present
-        comment.likes = comment.likes.filter(
-            uid => uid.toString() !== userId.toString()
-        );
-
-        // Toggle dislike
-        const dislikeIndex = comment.dislikes.findIndex(
-            uid => uid.toString() === userId.toString()
-        );
-
-        if (dislikeIndex > -1) {
-            // Remove dislike
-            comment.dislikes.splice(dislikeIndex, 1);
-        } else {
-            // Dislike
-            comment.dislikes.push(userId);
-        }
-
-        await comment.save();
-
-        res.status(200).json({
-            success: true,
-            data: {
-                likeCount: comment.likes.length,
-                dislikeCount: comment.dislikes.length
-            }
-        });
-    } catch (error) {
-        console.error('Error disliking comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// @desc    Update a comment
-// @route   PUT /api/comments/:id
-// @access  Private
-export const updateComment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { content } = req.body;
-        const userId = req.user.id;
-
-        const comment = await Comment.findById(id);
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
-
-        // Check if user owns the comment
-        if (comment.userId.toString() !== userId.toString()) {
-            return res.status(403).json({ message: 'Not authorized to edit this comment' });
-        }
-
-        comment.content = content;
-        await comment.save();
-
-        await comment.populate('userId', 'profile');
-
-        res.status(200).json({
-            success: true,
-            data: comment
-        });
-    } catch (error) {
-        console.error('Error updating comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// @desc    Delete a comment
-// @route   DELETE /api/comments/:id
-// @access  Private
+// Delete a comment
 export const deleteComment = async (req, res) => {
     try {
-        const { id } = req.params;
-        const userId = req.user.id;
+        const comment = await Comment.findById(req.params.id);
 
-        const comment = await Comment.findById(id);
         if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Comment not found'
+            });
         }
 
-        // Check if user owns the comment or is admin
-        if (comment.userId.toString() !== userId.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized to delete this comment' });
+        // Check permission: admin or owner
+        if (req.user.role !== 'admin' && comment.userId.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to delete this comment'
+            });
         }
 
-        // Delete all replies to this comment
-        await Comment.deleteMany({ parentId: id });
+        await comment.deleteOne();
 
-        // Delete the comment
-        await Comment.findByIdAndDelete(id);
-
-        res.status(200).json({
+        res.json({
             success: true,
             message: 'Comment deleted successfully'
         });
     } catch (error) {
-        console.error('Error deleting comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// @desc    Report a comment
-// @route   POST /api/comments/:id/report
-// @access  Private
-export const reportComment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { reason } = req.body;
-
-        const comment = await Comment.findById(id);
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
-
-        comment.isReported = true;
-        comment.reportCount += 1;
-        await comment.save();
-
-        // TODO: Send notification to admin or create a Report document
-
-        res.status(200).json({
-            success: true,
-            message: 'Comment reported successfully'
+        console.error('deleteComment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete comment'
         });
-    } catch (error) {
-        console.error('Error reporting comment:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-

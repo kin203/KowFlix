@@ -14,11 +14,12 @@ const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map 
 // ====================== LIST ======================
 export const listMovies = async (req, res) => {
   try {
-    const { q, genre, page = 1, limit = 12 } = req.query;
+    const { q, genre, categoryId, page = 1, limit = 12 } = req.query;
     const query = {};
 
     if (q) query.$text = { $search: q };
     if (genre) query.genres = genre;
+    if (categoryId) query.categories = categoryId;
 
     const total = await Movie.countDocuments(query);
 

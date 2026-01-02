@@ -7,6 +7,8 @@ import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import MovieDetailScreen from '../screens/MovieDetailScreen';
+import WatchScreen from '../screens/WatchScreen';
+import WishlistScreen from '../screens/WishlistScreen';
 
 const Stack = createStackNavigator();
 
@@ -22,7 +24,20 @@ const AuthenticatedNavigator = () => {
                     presentation: 'card'
                 }}
             />
-            {/* Add WatchScreen here later */}
+            <Stack.Screen
+                name="Watch"
+                component={WatchScreen}
+                options={{
+                    orientation: 'landscape', // Force landscape if using orientation package, else mostly handled by OS or Player
+                    headerShown: false,
+                    presentation: 'modal'
+                }}
+            />
+            <Stack.Screen
+                name="Wishlist"
+                component={WishlistScreen}
+                options={{ headerShown: false }}
+            />
         </Stack.Navigator>
     );
 };
