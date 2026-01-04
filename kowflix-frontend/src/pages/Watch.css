@@ -10,9 +10,11 @@
 .watch-breadcrumb {
     width: 100%;
     max-width: 1400px;
-    margin: 0 auto 1rem;
+    margin: 0 auto 2rem;
+    /* Increased margin */
     padding: 0 1rem;
-    /* Match video padding usually */
+    position: relative;
+    z-index: 5;
 }
 
 /* Floating Back Button (Matched Profile Page) */
@@ -30,6 +32,10 @@
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .back-button:hover {

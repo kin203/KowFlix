@@ -103,7 +103,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
     useEffect(() => {
         if (isPlaying && onProgress) {
             progressIntervalRef.current = setInterval(() => {
-                if (videoRef.current) {
+                if (videoRef.current && videoRef.current.duration > 0) {
                     onProgress({
                         currentTime: videoRef.current.currentTime,
                         duration: videoRef.current.duration
@@ -122,7 +122,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
     // Save progress on unmount
     useEffect(() => {
         return () => {
-            if (onProgress && videoRef.current) {
+            if (onProgress && videoRef.current && videoRef.current.duration > 0) {
                 onProgress({
                     currentTime: videoRef.current.currentTime,
                     duration: videoRef.current.duration
@@ -283,6 +283,11 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyPress = (e) => {
+            // Ignore if typing in input or textarea
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable) {
+                return;
+            }
+
             switch (e.key) {
                 case ' ':
                     e.preventDefault();
@@ -369,19 +374,19 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
             <div className={`video-controls ${showControls ? 'show' : ''}`}>
                 {/* Progress Bar */}
                 <div
-                    className="progress-bar-container"
+                    className="kf-video-progress-container"
                     onClick={handleSeek}
                     onMouseMove={handleProgressHover}
                     onMouseLeave={handleProgressLeave}
                 >
-                    <div className="progress-bar-buffered" style={{ width: `${buffered}%` }} />
-                    <div className="progress-bar-played" style={{ width: `${(currentTime / duration) * 100}%` }} />
-                    <div className="progress-bar-thumb" style={{ left: `${(currentTime / duration) * 100}%` }} />
+                    <div className="kf-video-progress-buffered" style={{ width: `${buffered}%` }} />
+                    <div className="kf-video-progress-played" style={{ width: `${(currentTime / duration) * 100}%` }} />
+                    <div className="kf-video-progress-thumb" style={{ left: `${(currentTime / duration) * 100}%` }} />
 
                     {/* Hover time tooltip */}
                     {hoverTime !== null && (
                         <div
-                            className="progress-time-tooltip"
+                            className="kf-video-progress-tooltip"
                             style={{ left: `${(hoverTime / duration) * 100}%` }}
                         >
                             {formatTime(hoverTime)}
