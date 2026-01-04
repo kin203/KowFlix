@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
+import { settingAPI } from '../services/api/settingAPI';
 import { Moon, Sun, Globe, AlertTriangle, Monitor, Save } from 'lucide-react';
 import './AdminSettings.css';
 
@@ -35,22 +36,37 @@ const AdminSettings = () => {
     };
 
     useEffect(() => {
-        // Initialize state from localStorage
-        const storedMaintenance = localStorage.getItem('maintenanceMode') === 'true';
-        setMaintenanceMode(storedMaintenance);
+        const fetchSettings = async () => {
+            try {
+                const { data } = await settingAPI.getAll();
+                setMaintenanceMode(data.maintenanceMode === true);
+                // Sync local storage for immediate consistency
+                localStorage.setItem('maintenanceMode', data.maintenanceMode === true);
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
+        };
+        fetchSettings();
     }, []);
 
-    const handleSave = () => {
-        // Save to localStorage immediately for demonstration
-        localStorage.setItem('maintenanceMode', maintenanceMode);
+    const handleSave = async () => {
+        try {
+            // Save to backend
+            await settingAPI.update('maintenanceMode', maintenanceMode, 'System maintenance mode');
 
-        // Here you would typically save to backend
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+            // Save to localStorage for client-side caching
+            localStorage.setItem('maintenanceMode', maintenanceMode);
 
-        // Force a re-render/check in App.jsx
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new Event('maintenance_update')); // Custom event for same-tab sync
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+
+            // Force a re-render/check in App.jsx
+            window.dispatchEvent(new Event('storage'));
+            window.dispatchEvent(new Event('maintenance_update'));
+        } catch (error) {
+            console.error("Failed to save settings:", error);
+            // Optionally show error to user
+        }
     };
 
     return (

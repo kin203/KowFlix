@@ -19,6 +19,7 @@ import CategoryPage from './pages/CategoryPage';
 import Profile from './pages/Profile';
 import MaintenancePage from './pages/MaintenancePage';
 import PatrioticLoader from './components/PatrioticLoader';
+import { settingAPI } from './services/api/settingAPI';
 import './index.css';
 
 function App() {
@@ -58,7 +59,20 @@ const MaintenanceWrapper = ({ children }) => {
   const location = useLocation();
 
   React.useEffect(() => {
-    const checkMaintenance = () => {
+    const checkMaintenance = async () => {
+      // Check API for authoritative status
+      try {
+        const { data } = await settingAPI.getAll();
+        const serverMaintenance = data.maintenanceMode === true;
+
+        // Update local storage to match server
+        if (localStorage.getItem('maintenanceMode') !== String(serverMaintenance)) {
+          localStorage.setItem('maintenanceMode', serverMaintenance);
+        }
+      } catch (err) {
+        console.error("Failed to check maintenance status:", err);
+      }
+
       const isMaintenance = localStorage.getItem('maintenanceMode') === 'true';
       const isAdminRoute = location.pathname.startsWith('/admin');
       const isLogin = location.pathname === '/login';
