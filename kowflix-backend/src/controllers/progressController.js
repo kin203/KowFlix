@@ -9,7 +9,7 @@ export const saveProgress = async (req, res) => {
         const { currentTime, duration } = req.body;
         const userId = req.user._id;
 
-        if (!currentTime || !duration) {
+        if (currentTime === undefined || currentTime === null || !duration) {
             return res.status(400).json({
                 success: false,
                 message: 'currentTime and duration are required'

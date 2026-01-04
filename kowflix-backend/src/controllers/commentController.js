@@ -116,3 +116,80 @@ export const deleteComment = async (req, res) => {
         });
     }
 };
+
+// Toggle Like
+export const likeComment = async (req, res) => {
+    try {
+        const comment = await Comment.findById(req.params.id);
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+
+        const userId = req.user.id;
+
+        // Check if already liked
+        if (comment.likes.includes(userId)) {
+            // Unlike
+            comment.likes.pull(userId);
+        } else {
+            // Like (and remove dislike if exists)
+            comment.likes.push(userId);
+            comment.dislikes.pull(userId);
+        }
+
+        await comment.save();
+        res.json({ success: true, data: comment });
+    } catch (error) {
+        console.error('likeComment error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// Toggle Dislike
+export const dislikeComment = async (req, res) => {
+    try {
+        const comment = await Comment.findById(req.params.id);
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+
+        const userId = req.user.id;
+
+        // Check if already disliked
+        if (comment.dislikes.includes(userId)) {
+            // Undislike
+            comment.dislikes.pull(userId);
+        } else {
+            // Dislike (and remove like if exists)
+            comment.dislikes.push(userId);
+            comment.likes.pull(userId);
+        }
+
+        await comment.save();
+        res.json({ success: true, data: comment });
+    } catch (error) {
+        console.error('dislikeComment error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// Report Comment
+export const reportComment = async (req, res) => {
+    try {
+        const comment = await Comment.findById(req.params.id);
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+
+        const { reason } = req.body;
+        const userId = req.user.id;
+
+        // Check if already reported
+        const existingReport = comment.reports.find(r => r.userId.toString() === userId);
+        if (existingReport) {
+            return res.status(400).json({ success: false, message: 'You have already reported this comment' });
+        }
+
+        comment.reports.push({ userId, reason });
+        await comment.save();
+
+        res.json({ success: true, message: 'Report submitted successfully' });
+    } catch (error) {
+        console.error('reportComment error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
