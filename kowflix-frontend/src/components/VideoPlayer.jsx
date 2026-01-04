@@ -103,7 +103,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
     useEffect(() => {
         if (isPlaying && onProgress) {
             progressIntervalRef.current = setInterval(() => {
-                if (videoRef.current) {
+                if (videoRef.current && videoRef.current.duration > 0) {
                     onProgress({
                         currentTime: videoRef.current.currentTime,
                         duration: videoRef.current.duration
@@ -122,7 +122,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
     // Save progress on unmount
     useEffect(() => {
         return () => {
-            if (onProgress && videoRef.current) {
+            if (onProgress && videoRef.current && videoRef.current.duration > 0) {
                 onProgress({
                     currentTime: videoRef.current.currentTime,
                     duration: videoRef.current.duration

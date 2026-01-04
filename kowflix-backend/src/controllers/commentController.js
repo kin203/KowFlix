@@ -7,33 +7,62 @@ export const getMovieComments = async (req, res) => {
         const { movieId } = req.params;
 
         // Fetch new comments
-        const commentsPromise = Comment.find({ movieId })
+        const comments = await Comment.find({ movieId })
             .populate('userId', 'username email profile')
+            .sort({ createdAt: -1 }) // Newest first
             .lean();
 
         // Fetch legacy reviews
-        const reviewsPromise = Review.find({ movieId })
+        const reviews = await Review.find({ movieId })
             .populate('userId', 'username email profile')
             .lean();
 
-        const [comments, reviews] = await Promise.all([commentsPromise, reviewsPromise]);
+        // Process comments: Add counts and structure threads
+        const commentMap = {};
+        const rootComments = [];
 
-        // Format reviews to look like comments
+        // First pass: Prepare comments and map them
+        comments.forEach(comment => {
+            comment.likeCount = comment.likes ? comment.likes.length : 0;
+            comment.dislikeCount = comment.dislikes ? comment.dislikes.length : 0;
+            comment.replies = [];
+            comment.isReview = false;
+            commentMap[comment._id] = comment;
+        });
+
+        // Second pass: Link replies to parents
+        comments.forEach(comment => {
+            if (comment.parentId) {
+                const parent = commentMap[comment.parentId];
+                if (parent) {
+                    parent.replies.push(comment);
+                    // Sort replies oldest to newest
+                    parent.replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                }
+            } else {
+                rootComments.push(comment);
+            }
+        });
+
+        // Process reviews
         const formattedReviews = reviews.map(review => ({
             ...review,
-            content: review.comment, // Map comment field
-            isReview: true, // Flag to identify origin
-            rating: review.rating // Keep rating info
+            content: review.comment,
+            isReview: true,
+            rating: review.rating,
+            likeCount: review.likes ? review.likes.length : 0,
+            dislikeCount: review.dislikes ? review.dislikes.length : 0,
+            replies: [] // Reviews don't have threaded replies in this legacy structure usually, or handled differently
         }));
 
-        // Merge and sort by date (newest first)
-        const allComments = [...comments, ...formattedReviews].sort((a, b) =>
+        // Merge roots and reviews
+        const allContent = [...rootComments, ...formattedReviews].sort((a, b) =>
             new Date(b.createdAt) - new Date(a.createdAt)
         );
 
         res.json({
             success: true,
-            data: allComments
+            data: allContent
         });
     } catch (error) {
         console.error('getMovieComments error:', error);
@@ -47,7 +76,7 @@ export const getMovieComments = async (req, res) => {
 // Create a new comment
 export const createComment = async (req, res) => {
     try {
-        const { movieId, content } = req.body;
+        const { movieId, content, parentId } = req.body;
         const userId = req.user.id;
 
         if (!content || !content.trim()) {
@@ -60,7 +89,8 @@ export const createComment = async (req, res) => {
         const comment = new Comment({
             userId,
             movieId,
-            content
+            content,
+            parentId: parentId || null
         });
 
         await comment.save();
