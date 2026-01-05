@@ -6,10 +6,13 @@ import CategoryCards from '../components/CategoryCards';
 import MovieSlider from '../components/MovieSlider';
 import Footer from '../components/Footer';
 import { movieAPI, heroAPI } from '../services/api';
+import useDocumentTitle from '../components/useDocumentTitle';
 import axios from 'axios';
 import './Home.css';
 
 const Home = () => {
+    // Set Document Title
+    useDocumentTitle('KowFlix - Trang chủ');
     const { t } = useTranslation();
     const [heroBanners, setHeroBanners] = useState([]);
     const [movies, setMovies] = useState([]);

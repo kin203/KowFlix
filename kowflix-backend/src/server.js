@@ -25,6 +25,7 @@ import jobRoutes from "./routes/jobRoutes.js";
 import navMenuRoutes from "./routes/navMenuRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/nav-menu", navMenuRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/settings", settingRoutes);
+app.use("/api/upload", uploadRoutes); // Dedicated upload route for Storage Server
 
 // Serve static files from 'public' folder
 app.use(express.static(path.join(__dirname, '../public')));

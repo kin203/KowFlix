@@ -1,5 +1,30 @@
 import Movie from '../models/Movie.js';
 import User from '../models/User.js';
+import DailyStat from '../models/DailyStat.js';
+
+// Track movie view
+export const trackView = async (req, res) => {
+    try {
+        const { movieId } = req.params;
+
+        // 1. Increment total views for the movie
+        await Movie.findByIdAndUpdate(movieId, { $inc: { views: 1 } });
+
+        // 2. Increment daily stats
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+        await DailyStat.findOneAndUpdate(
+            { date: today },
+            { $inc: { views: 1 } },
+            { upsert: true, new: true }
+        );
+
+        res.json({ success: true, message: 'View tracked' });
+    } catch (error) {
+        console.error('trackView error:', error);
+        res.status(500).json({ success: false, message: 'Failed to track view' });
+    }
+};
 
 // Get overall dashboard statistics
 export const getDashboardStats = async (req, res) => {
@@ -20,7 +45,9 @@ export const getDashboardStats = async (req, res) => {
         ]);
         const totalViews = viewsResult.length > 0 ? viewsResult[0].totalViews : 0;
 
-        // Get trending movies count (movies with views in last 7 days)
+        // Get trending movies count (movies with views in last 7 days) - APPROXIMATION
+        // ideally we track this in a separate collection, but for now using updatedAt or just Movie count
+        // Let's use UpdatedAt as proxy or just return 0 if not tracked
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const trendingCount = await Movie.countDocuments({
             updatedAt: { $gte: sevenDaysAgo }
@@ -48,18 +75,29 @@ export const getDashboardStats = async (req, res) => {
 // Get weekly views data for chart
 export const getWeeklyViews = async (req, res) => {
     try {
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        // Get last 7 days
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            dates.push(d.toISOString().split('T')[0]);
+        }
 
-        // Mock data for now - in production, you'd track daily views
-        const weeklyData = [
-            { day: 'Mon', views: 420 },
-            { day: 'Tue', views: 380 },
-            { day: 'Wed', views: 510 },
-            { day: 'Thu', views: 390 },
-            { day: 'Fri', views: 620 },
-            { day: 'Sat', views: 780 },
-            { day: 'Sun', views: 650 }
-        ];
+        const stats = await DailyStat.find({
+            date: { $in: dates }
+        });
+
+        // Map to format required by chart (day name + views)
+        const weeklyData = dates.map(dateStr => {
+            const stat = stats.find(s => s.date === dateStr);
+            const dateObj = new Date(dateStr);
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return {
+                day: days[dateObj.getDay()],
+                views: stat ? stat.views : 0,
+                fullDate: dateStr
+            };
+        });
 
         res.json({
             success: true,

@@ -61,13 +61,15 @@
         "language": "Ngôn ngữ",
         "select_language": "Chọn ngôn ngữ",
         "system": "Hệ thống",
-        "maintenance": {
-            "title": "Đang Bảo Trì",
-            "message": "Hệ thống đang được nâng cấp để mang lại trải nghiệm tốt hơn.",
-            "sub_message": "Vui lòng quay lại sau ít phút!",
-            "active_banner": "CHẾ ĐỘ BẢO TRÌ ĐANG BẬT (Chỉ Admin mới thấy được trang web)"
-        },
+        "maintenance_mode": "Chế độ bảo trì",
+        "maintenance_desc": "Ngăn người dùng truy cập trang web trong khi bạn cập nhật hệ thống.",
         "items_per_page": "Số mục trên trang (Admin)"
+    },
+    "maintenance": {
+        "title": "Đang Bảo Trì",
+        "message": "Hệ thống đang được nâng cấp để mang lại trải nghiệm tốt hơn.",
+        "sub_message": "Vui lòng quay lại sau ít phút!",
+        "active_banner": "CHẾ ĐỘ BẢO TRÌ ĐANG BẬT (Chỉ Admin mới thấy được trang web)"
     },
     "common": {
         "play": "Phát",

@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, User, ChevronDown, LogOut, Settings, Menu, X, Heart, Clock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, X, Heart, Clock, AlertTriangle } from 'lucide-react';
 import { authAPI, navMenuAPI } from '../services/api';
 import NotificationDropdown from './NotificationDropdown';
 import LanguageSwitcher from './LanguageSwitcher';
 import './Navbar.css';
+
+// Import Custom SVG Icons
+import LogoFull from '../assets/icons/logo_full.svg?react';
+import LogoIcon from '../assets/icons/app_icon.svg?react';
+import SearchIcon from '../assets/icons/search.svg?react';
+import ProfileIcon from '../assets/icons/profile.svg?react';
+import LibraryIcon from '../assets/icons/library.svg?react';
 
 const Navbar = () => {
     const { t } = useTranslation();
@@ -61,10 +68,14 @@ const Navbar = () => {
     const fetchProfile = async () => {
         try {
             const res = await authAPI.getProfile();
-            setProfile(res.data);
+            if (res.data && res.data.success) {
+                setProfile(res.data.data);
+            } else {
+                setProfile(res.data);
+            }
         } catch (err) {
             console.error('Error fetching profile:', err);
-            // Don't auto-logout on simple profile fetch error unless 401, but keeping it simple
+            // Don't auto-logout on simple profile fetch error unless 401
             if (err.response && err.response.status === 401) {
                 handleLogout();
             }
@@ -124,8 +135,16 @@ const Navbar = () => {
             )}
             <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${isMaintenance ? 'has-banner' : ''}`}>
                 <div className="navbar-left">
-                    {/* ... rest of navbar */}
-                    <Link to="/" className="logo">KowFlix</Link>
+                    <Link to="/" className="logo-container">
+                        {/* Desktop Logo */}
+                        <div className="desktop-only">
+                            <LogoFull height={30} width={100} />
+                        </div>
+                        {/* Mobile Logo */}
+                        <div className="mobile-only">
+                            <LogoIcon height={32} width={32} />
+                        </div>
+                    </Link>
 
                     {/* Permanent Search Bar */}
                     <form onSubmit={handleSearch} className="search-form-navbar desktop-only">
@@ -136,22 +155,29 @@ const Navbar = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                        <Search className="navbar-search-icon" size={20} strokeWidth={2.5} />
+                        <SearchIcon className="navbar-search-icon text-gray-400" width={20} height={20} />
                     </form>
 
                     {/* Dynamic Nav Links */}
                     <ul className="nav-links desktop-only">
+                        {/* Static Home Link First */}
+                        <li>
+                            <Link to="/">
+                                {t('navbar.home', 'Trang chủ')}
+                            </Link>
+                        </li>
+
                         {menuItems.filter(item => shouldShowMenuItem(item)).map((item) => (
                             <li key={item._id || item.path} className={item.subItems && item.subItems.length > 0 ? 'has-submenu' : ''}>
                                 {item.isExternal ? (
                                     <a href={item.path} target="_blank" rel="noopener noreferrer">
-                                        {item.icon && <i className={`fas ${item.icon}`} style={{ marginRight: '0.5rem' }}></i>}
+                                        {/* Fallback to legacy icon class if new SVG not mapped, assuming library logic or just text */}
                                         {item.label}
                                         {item.subItems && item.subItems.length > 0 && <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />}
                                     </a>
                                 ) : (
                                     <Link to={item.path}>
-                                        {item.icon && <i className={`fas ${item.icon}`} style={{ marginRight: '0.5rem' }}></i>}
+                                        {/* Mapping Dynamic Icons could be complex, sticking to label for dynamic items unless specific maps exist */}
                                         {item.label}
                                         {item.subItems && item.subItems.length > 0 && <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />}
                                     </Link>
@@ -164,12 +190,10 @@ const Navbar = () => {
                                             <li key={subItem._id || subItem.path}>
                                                 {subItem.isExternal ? (
                                                     <a href={subItem.path} target="_blank" rel="noopener noreferrer">
-                                                        {subItem.icon && <i className={`fas ${subItem.icon}`}></i>}
                                                         <span>{subItem.label}</span>
                                                     </a>
                                                 ) : (
                                                     <Link to={subItem.path}>
-                                                        {subItem.icon && <i className={`fas ${subItem.icon}`}></i>}
                                                         <span>{subItem.label}</span>
                                                     </Link>
                                                 )}
@@ -200,7 +224,7 @@ const Navbar = () => {
                                     />
                                 ) : (
                                     <div className="profile-icon">
-                                        <User size={20} />
+                                        <ProfileIcon width={24} height={24} className="text-white" />
                                     </div>
                                 )}
                                 <ChevronDown size={16} className="dropdown-arrow" />
@@ -209,7 +233,7 @@ const Navbar = () => {
                             {showDropdown && (
                                 <div className="dropdown-menu">
                                     <Link to="/profile" className="dropdown-item">
-                                        <User size={18} />
+                                        <ProfileIcon width={18} height={18} className="mr-2" />
                                         <span>{t('navbar.profile')}</span>
                                     </Link>
                                     <Link to="/profile#wishlist" className="dropdown-item">
@@ -244,7 +268,7 @@ const Navbar = () => {
                         className="mobile-search-toggle mobile-only"
                         onClick={() => setShowMobileSearch(!showMobileSearch)}
                     >
-                        <Search size={22} />
+                        <SearchIcon width={22} height={22} className="text-white" />
                     </button>
 
                     <button
@@ -252,7 +276,7 @@ const Navbar = () => {
                         onClick={() => setShowMobileMenu(!showMobileMenu)}
                         aria-label="Toggle menu"
                     >
-                        {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+                        {showMobileMenu ? <X size={24} /> : <LibraryIcon width={24} height={24} className="text-white" />}
                     </button>
                 </div>
 
@@ -277,7 +301,9 @@ const Navbar = () => {
                     <div className="mobile-menu-overlay" onClick={() => setShowMobileMenu(false)}>
                         <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
                             <div className="mobile-menu-header">
-                                <h3>Menu</h3>
+                                <h3 className="flex items-center gap-2">
+                                    <LogoIcon width={24} height={24} /> Menu
+                                </h3>
                                 <button onClick={() => setShowMobileMenu(false)}>
                                     <X size={24} />
                                 </button>
@@ -295,6 +321,13 @@ const Navbar = () => {
                             )}
 
                             <ul className="mobile-nav-links">
+                                {/* Static Home Link Mobile */}
+                                <li>
+                                    <Link to="/" onClick={() => setShowMobileMenu(false)}>
+                                        Trang chủ
+                                    </Link>
+                                </li>
+
                                 {menuItems.filter(item => shouldShowMenuItem(item)).map((item) => (
                                     <li key={item._id || item.path}>
                                         {item.isExternal ? (
@@ -304,12 +337,13 @@ const Navbar = () => {
                                                 rel="noopener noreferrer"
                                                 onClick={() => setShowMobileMenu(false)}
                                             >
+                                                {/* Fallback for API icons */}
                                                 {item.icon && <i className={`fas ${item.icon}`} style={{ marginRight: '0.5rem' }}></i>}
                                                 {item.label}
                                             </a>
                                         ) : (
                                             <Link to={item.path} onClick={() => setShowMobileMenu(false)}>
-                                                {item.icon && <i className={`fas ${item.icon}`} style={{ marginRight: '0.5rem' }}></i>}
+                                                {/* Fallback for API icons */}
                                                 {item.label}
                                             </Link>
                                         )}
@@ -321,7 +355,7 @@ const Navbar = () => {
                                 {isLoggedIn ? (
                                     <>
                                         <Link to="/profile" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
-                                            <User size={20} />
+                                            <ProfileIcon width={20} height={20} />
                                             <span>{t('navbar.profile')}</span>
                                         </Link>
                                         <Link to="/profile#wishlist" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>

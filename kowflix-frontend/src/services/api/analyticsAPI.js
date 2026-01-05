@@ -43,4 +43,11 @@ export const analyticsAPI = {
      * @returns {Promise} User growth chart data
      */
     getUserGrowth: () => api.get('/analytics/user-growth'),
+
+    /**
+     * Track movie view
+     * @param {string} movieId - ID of the movie
+     * @returns {Promise} Success status
+     */
+    trackView: (movieId) => api.post(`/analytics/view/${movieId}`),
 };

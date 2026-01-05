@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { movieAPI, jobAPI, categoryAPI } from '../services/api';
+import { movieAPI, jobAPI, categoryAPI, storageAPI } from '../services/api';
 import TMDbSearch from '../components/TMDbSearch';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
+import useDocumentTitle from '../components/useDocumentTitle';
 import './AdminUpload.css';
 import './CategoryChips.css';
 
 const AdminUpload = () => {
+    useDocumentTitle('Upload Phim - Quản trị KowFlix');
     const [formData, setFormData] = useState({
         title: '',
         title_en: '', // English Title
@@ -31,6 +33,7 @@ const AdminUpload = () => {
     const [movies, setMovies] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [encoding, setEncoding] = useState({});
     const [editingMovie, setEditingMovie] = useState(null); // Track which movie is being edited
     const [migrating, setMigrating] = useState(false);
@@ -42,6 +45,7 @@ const AdminUpload = () => {
     // Search and UI states
     const [searchQuery, setSearchQuery] = useState('');
     const [formCollapsed, setFormCollapsed] = useState(false);
+    const [useDirectUpload, setUseDirectUpload] = useState(false); // Toggle for Direct Upload
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -127,6 +131,7 @@ const AdminUpload = () => {
         e.preventDefault();
         setMessage({ type: '', text: '' });
         setUploading(true);
+        setUploadProgress(0);
 
         try {
             // Prepare form data with all fields
@@ -155,14 +160,46 @@ const AdminUpload = () => {
 
             // Add files directly
             if (posterFile) data.append('poster', posterFile);
-            if (videoFile) data.append('video', videoFile);
+
+            // HANDLE VIDEO UPLOAD
+            if (videoFile) {
+                if (useDirectUpload) {
+                    // 1. Direct Upload to Storage Server
+                    setMessage({ type: 'info', text: 'Uploading directly to Storage Server... (0%)' });
+
+                    try {
+                        const videoPath = await storageAPI.uploadVideo(videoFile, (progress) => {
+                            setUploadProgress(progress);
+                            setMessage({ type: 'info', text: `Uploading directly to Storage Server... (${progress}%)` });
+                        });
+
+                        console.log('✅ Direct upload successful, path:', videoPath);
+                        data.append('videoPath', videoPath); // Send path instead of file
+                        setMessage({ type: 'info', text: 'Video uploaded! Creating movie record...' });
+                    } catch (uploadErr) {
+                        console.error('Direct upload error:', uploadErr);
+                        throw new Error(`Direct Upload Failed: ${uploadErr.message}`);
+                    }
+                } else {
+                    // 2. Legacy Upload (Proxy through Backend)
+                    data.append('video', videoFile);
+                }
+            }
 
             // Add subtitle files
             if (subtitleEN) data.append('subtitle_en', subtitleEN);
             if (subtitleVI) data.append('subtitle_vi', subtitleVI);
 
             // Upload everything through backend API
-            await movieAPI.create(data);
+            // Pass setUploadProgress only if NOT using direct upload (or for the remaining part)
+            const config = !useDirectUpload ? {
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                }
+            } : {};
+
+            await movieAPI.create(data, config);
 
             // Success - show redirect message
             setMessage({
@@ -170,6 +207,7 @@ const AdminUpload = () => {
                 text: 'Phim đã được tạo thành công! Hãy vào trang Công việc để theo dõi tiến độ upload và encoding.'
             });
             setUploading(false);
+            setUploadProgress(0);
 
             // Refresh movie list and reset form
             fetchMovies();
@@ -519,16 +557,29 @@ const AdminUpload = () => {
                                 )}
                             </div>
 
-                            <div className="form-field checkbox-field" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        name="useTrailer"
-                                        checked={formData.useTrailer}
-                                        onChange={(e) => setFormData({ ...formData, useTrailer: e.target.checked })}
-                                    />
-                                    <span style={{ color: '#FFD700', fontWeight: 'bold' }}>Enable Trailer</span> (Auto-play on Hero Banner)
-                                </label>
+                            <div className="form-row" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                                <div className="form-field checkbox-field">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            name="useTrailer"
+                                            checked={formData.useTrailer}
+                                            onChange={(e) => setFormData({ ...formData, useTrailer: e.target.checked })}
+                                        />
+                                        <span style={{ color: '#FFD700', fontWeight: 'bold' }}>Enable Trailer</span> (Auto-play on Hero Banner)
+                                    </label>
+                                </div>
+                                {/* Direct Upload Toggle */}
+                                <div className="form-field checkbox-field">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={useDirectUpload}
+                                            onChange={(e) => setUseDirectUpload(e.target.checked)}
+                                        />
+                                        <span style={{ color: '#00fa9a', fontWeight: 'bold' }}>Direct Upload</span> (Upload to Storage Server directly - Save bandwidth)
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="form-field">
@@ -611,7 +662,7 @@ const AdminUpload = () => {
                             {uploading && uploadProgress > 0 && (
                                 <div className="upload-progress-container">
                                     <div className="progress-info">
-                                        <span>Uploading...</span>
+                                        <span>{useDirectUpload ? 'Direct Uploading...' : 'Uploading...'}</span>
                                         <span>{uploadProgress}%</span>
                                     </div>
                                     <div className="progress-bar">
@@ -622,7 +673,7 @@ const AdminUpload = () => {
                                     </div>
                                     <div className="progress-message">
                                         {uploadProgress < 100
-                                            ? 'Uploading files to server...'
+                                            ? (useDirectUpload ? 'Sending video to Storage Server...' : 'Uploading files to server...')
                                             : 'Processing... This may take a few minutes for large files.'}
                                     </div>
                                 </div>

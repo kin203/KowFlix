@@ -5,9 +5,11 @@ import StatsCard from '../components/admin/StatsCard';
 import EngagementChart from '../components/admin/EngagementChart';
 import { Users, Film, Eye, TrendingUp, Clock } from 'lucide-react';
 import { analyticsAPI } from '../services/api';
+import useDocumentTitle from '../components/useDocumentTitle';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
+    useDocumentTitle('Dashboard - Quản trị KowFlix');
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -137,7 +139,7 @@ const AdminDashboard = () => {
                     <div className="chart-full-width">
                         <EngagementChart
                             data={weeklyData}
-                            title="Engagement Trends"
+                            title="Thống kê lượt xem"
                             subtitle="Lượt xem theo tuần - 7 ngày qua"
                         />
                     </div>

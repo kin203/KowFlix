@@ -71,6 +71,9 @@ const MovieSchema = new mongoose.Schema({
   trailerKey: { type: String, default: "" }, // YouTube trailer key from TMDb
   useTrailer: { type: Boolean, default: true }, // Toggle to enable/disable trailer
 
+  // Views
+  views: { type: Number, default: 0 },
+
   // trạng thái encode
   status: { type: String, enum: ["draft", "processing", "ready", "error"], default: "draft" },
   hlsFolder: { type: String, default: "" }, // ví dụ: /media/hls/<movieId>/

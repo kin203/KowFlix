@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User, Camera, X, LogOut, Save, ArrowLeft, Clock, Play, Heart } from 'lucide-react';
 import { authAPI, progressAPI, wishlistAPI } from '../services/api';
+import useDocumentTitle from '../components/useDocumentTitle';
 import './Profile.css';
 
 const Profile = () => {
+    useDocumentTitle('Hồ sơ của tôi - KowFlix');
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);

@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+    trackView,
     getDashboardStats,
     getWeeklyViews,
     getTopMovies,
@@ -11,6 +12,9 @@ import auth from '../middleware/auth.js';
 import isAdmin from '../middleware/admin.js';
 
 const router = express.Router();
+
+// Public/User Analytics Routes
+router.post('/view/:movieId', auth, trackView);
 
 // All analytics routes require admin authentication
 router.get('/stats', auth, isAdmin, getDashboardStats);

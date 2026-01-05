@@ -68,5 +68,17 @@ export { API_URL };
 
 // Export individual API modules
 export { authAPI } from './authAPI.js';
+export { analyticsAPI } from './analyticsAPI.js';
+export { categoryAPI } from './categoryAPI.js';
+export { commentAPI } from './commentAPI.js';
+export { heroAPI } from './heroAPI.js';
+export { jobAPI } from './jobAPI.js';
+export { movieAPI } from './movieAPI.js';
+export { navMenuAPI } from './navMenuAPI.js';
+export { notificationAPI } from './notificationAPI.js';
 export { progressAPI } from './progressAPI.js';
+export { reviewAPI } from './reviewAPI.js';
+export { settingAPI } from './settingAPI.js';
+export { userAPI } from './userAPI.js';
 export { wishlistAPI } from './wishlistAPI.js';
+export { default as storageAPI } from './storageAPI.js';
