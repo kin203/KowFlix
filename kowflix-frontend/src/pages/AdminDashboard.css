@@ -235,14 +235,15 @@
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background: var(--primary-yellow);
+    background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 1.1rem;
-    color: #000000;
+    font-size: 1.2rem;
+    color: var(--primary-yellow);
     flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .movie-info {
@@ -263,7 +264,7 @@
 .movie-info p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--text-gray);
+    color: #cccccc;
 }
 
 .movie-rating {

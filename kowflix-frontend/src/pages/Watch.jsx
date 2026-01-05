@@ -9,7 +9,7 @@ import CheckIcon from '../assets/icons/check.svg?react';
 import AddIcon from '../assets/icons/add.svg?react';
 import DownloadIcon from '../assets/icons/download.svg?react';
 import BackIcon from '../assets/icons/back.svg?react';
-import { movieAPI, progressAPI, reviewAPI, wishlistAPI } from '../services/api';
+import { movieAPI, progressAPI, reviewAPI, wishlistAPI, analyticsAPI } from '../services/api';
 import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
 import Navbar from '../components/Navbar';
 import CommentSection from '../components/CommentSection';
@@ -49,6 +49,7 @@ const Watch = () => {
                 if (data.data) {
                     setMovie(data.data);
                     checkWishlistStatus(id);
+                    analyticsAPI.trackView(id).catch(err => console.error('Failed to track view', err));
                 }
 
                 // Set Title

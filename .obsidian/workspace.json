@@ -185,6 +185,7 @@
   },
   "active": "1d3b544586588d79",
   "lastOpenFiles": [
+    "kowflix-backend/src/models/DailyStat.js",
     "kowflix-frontend/node_modules/cosmiconfig/dist/util.js.map",
     "kowflix-frontend/node_modules/cosmiconfig/dist/util.js",
     "kowflix-frontend/node_modules/cosmiconfig/dist/util.d.ts.map",
@@ -195,7 +196,6 @@
     "kowflix-frontend/node_modules/cosmiconfig/dist/types.d.ts.map",
     "kowflix-frontend/node_modules/cosmiconfig/dist/types.js",
     "kowflix-frontend/node_modules/cosmiconfig/dist/loaders.js",
-    "kowflix-frontend/node_modules/cosmiconfig/dist/loaders.d.ts.map",
     "kowflix-frontend/node_modules/cosmiconfig/README.md",
     "kowflix-frontend/node_modules/json-parse-even-better-errors/README.md",
     "kowflix-frontend/node_modules/json-parse-even-better-errors/LICENSE.md",
