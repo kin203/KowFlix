@@ -61,13 +61,15 @@
         "language": "Language",
         "select_language": "Select Language",
         "system": "System",
-        "maintenance": {
-            "title": "Under Maintenance",
-            "message": "The system is being upgraded to provide a better experience.",
-            "sub_message": "Please check back in a few minutes!",
-            "active_banner": "MAINTENANCE MODE IS ACTIVE (Visible to Admins only)"
-        },
+        "maintenance_mode": "Maintenance Mode",
+        "maintenance_desc": "Prevents users from accessing the site while you make updates.",
         "items_per_page": "Items Per Page (Admin)"
+    },
+    "maintenance": {
+        "title": "Under Maintenance",
+        "message": "The system is being upgraded to provide a better experience.",
+        "sub_message": "Please check back in a few minutes!",
+        "active_banner": "MAINTENANCE MODE IS ACTIVE (Visible to Admins only)"
     },
     "common": {
         "play": "Play",

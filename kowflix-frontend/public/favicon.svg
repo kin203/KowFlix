@@ -1,0 +1,18 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Back Vertical Bar -->
+  <rect x="4" y="4" width="8" height="32" rx="1" fill="#E50914"/>
+  
+  <!-- Upper Arm -->
+  <path d="M12 20L24 6H34L18 22L12 20Z" fill="#E50914"/>
+  
+  <!-- Lower Arm -->
+  <path d="M16 18L34 34H24L12 20" fill="#E50914"/>
+  
+  <!-- Yellow Play Button - Floating on the right -->
+  <!-- Subtle shadow for depth -->
+  <filter id="dropShadow" x="0" y="0" width="40" height="40" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.3"/>
+  </filter>
+  
+  <path d="M26 12L38 19L26 26V12Z" fill="#FFC107" filter="url(#dropShadow)" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

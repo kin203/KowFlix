@@ -109,7 +109,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
                         duration: videoRef.current.duration
                     });
                 }
-            }, 10000); // Save every 10 seconds
+            }, 30000); // Save every 30 seconds
 
             return () => {
                 if (progressIntervalRef.current) {

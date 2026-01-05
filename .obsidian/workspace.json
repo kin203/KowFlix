@@ -1,0 +1,223 @@
+{
+  "main": {
+    "id": "7dc93252da694330",
+    "type": "split",
+    "children": [
+      {
+        "id": "e10bd0ec741c8ac8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1d3b544586588d79",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "KowFlix_System_Design.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "KowFlix_System_Design"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b41360ecf7b03e06",
+    "type": "split",
+    "children": [
+      {
+        "id": "f208ed1ab69e0205",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5aa17d5827d376f7",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "04ec3d09ebf98cbd",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "519c8c731a181d56",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "80c69a7bb43fb9eb",
+    "type": "split",
+    "children": [
+      {
+        "id": "8664a4901bae2d17",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d8b33bcaddf8eda1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "KowFlix_System_Design.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for KowFlix_System_Design"
+            }
+          },
+          {
+            "id": "190469c849908f0e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "KowFlix_System_Design.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from KowFlix_System_Design"
+            }
+          },
+          {
+            "id": "e5e6d105e36cf0db",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "6a2bbea1d2a60752",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "16c34b327b3826ee",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "KowFlix_System_Design.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of KowFlix_System_Design"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "1d3b544586588d79",
+  "lastOpenFiles": [
+    "kowflix-frontend/node_modules/cosmiconfig/dist/util.js.map",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/util.js",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/util.d.ts.map",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/util.d.ts",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/types.js.map",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/types.d.ts",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/loaders.js.map",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/types.d.ts.map",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/types.js",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/loaders.js",
+    "kowflix-frontend/node_modules/cosmiconfig/dist/loaders.d.ts.map",
+    "kowflix-frontend/node_modules/cosmiconfig/README.md",
+    "kowflix-frontend/node_modules/json-parse-even-better-errors/README.md",
+    "kowflix-frontend/node_modules/json-parse-even-better-errors/LICENSE.md",
+    "kowflix-frontend/node_modules/json-parse-even-better-errors/CHANGELOG.md",
+    "kowflix-frontend/node_modules/lower-case/README.md",
+    "kowflix-frontend/node_modules/dot-case/README.md",
+    "kowflix-frontend/node_modules/no-case/README.md",
+    "kowflix-frontend/node_modules/camelcase/readme.md",
+    "kowflix-frontend/node_modules/error-ex/README.md",
+    "kowflix-frontend/node_modules/lines-and-columns/README.md",
+    "kowflix-frontend/node_modules/path-type/readme.md",
+    "kowflix-frontend/node_modules/is-arrayish/README.md",
+    "kowflix-frontend/public/favicon.svg",
+    "kowflix-frontend/src/assets/icons/README.md",
+    "kowflix-frontend/src/assets/icons/download.svg",
+    "kowflix-frontend/src/assets/icons/share.svg",
+    "kowflix-frontend/src/assets/icons/back.svg",
+    "kowflix-frontend/src/assets/icons/close.svg",
+    "kowflix-frontend/src/assets/icons/check.svg",
+    "kowflix-frontend/src/assets/icons/add.svg",
+    "kowflix-frontend/src/assets/icons/info.svg",
+    "kowflix-frontend/src/assets/icons/pause.svg",
+    "kowflix-frontend/src/assets/icons/play_circle.svg"
+  ]
+}

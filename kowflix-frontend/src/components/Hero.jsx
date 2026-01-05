@@ -106,20 +106,7 @@ const Hero = ({ heroBanners = [] }) => {
                     />
                 )}
 
-                {/* Preload trailers for carousel banners */}
-                {heroBanners.map((banner) => {
-                    const m = banner.movieId;
-                    if (!m || banner._id === activeBanner._id || !m.trailerKey || m.useTrailer === false) return null;
-                    return (
-                        <iframe
-                            key={banner._id}
-                            src={getTrailerUrl(m.trailerKey)}
-                            title={`Preload ${banner.title}`}
-                            style={{ display: 'none' }}
-                            frameBorder="0"
-                        />
-                    );
-                })}
+                {/* Preload removed for performance */}
 
                 <div className="hero-overlay"></div>
 

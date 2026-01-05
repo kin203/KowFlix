@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, Star, Play } from 'lucide-react';
+import PlayIcon from '../assets/icons/play_circle.svg?react';
+import PauseIcon from '../assets/icons/pause.svg?react';
+import InfoIcon from '../assets/icons/info.svg?react';
+import ShareIcon from '../assets/icons/share.svg?react';
+import CheckIcon from '../assets/icons/check.svg?react';
+import AddIcon from '../assets/icons/add.svg?react';
+import DownloadIcon from '../assets/icons/download.svg?react';
+import BackIcon from '../assets/icons/back.svg?react';
 import { movieAPI, progressAPI, reviewAPI, wishlistAPI } from '../services/api';
 import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
 import Navbar from '../components/Navbar';
 import CommentSection from '../components/CommentSection';
 import { getUserIdFromToken } from '../utils/authUtils';
+import useDocumentTitle from '../components/useDocumentTitle';
 import './Watch.css';
 import './VideoError.css';
 
@@ -37,11 +46,13 @@ const Watch = () => {
                 setLoading(true);
                 const { data } = await movieAPI.play(id);
 
-                // Always set movie data if available, even if video is missing
                 if (data.data) {
                     setMovie(data.data);
                     checkWishlistStatus(id);
                 }
+
+                // Set Title
+                document.title = data.data ? `Đang xem: ${data.data.title} - KowFlix` : 'KowFlix';
 
                 if (data.success && data.data && data.data.master) {
                     setHlsUrl(data.data.master);
@@ -80,6 +91,10 @@ const Watch = () => {
         };
 
         fetchData();
+
+        return () => {
+            document.title = 'KowFlix';
+        };
     }, [id]);
 
     const checkWishlistStatus = async (movieId) => {
@@ -217,7 +232,7 @@ const Watch = () => {
                 {/* Back Button / Breadcrumb */}
                 <div className="watch-breadcrumb">
                     <Link to="/" className="back-button">
-                        <ArrowLeft size={20} />
+                        <BackIcon width={24} height={24} />
                         <span>Xem phim {movie?.title || ''}</span>
                     </Link>
                 </div>
@@ -252,12 +267,15 @@ const Watch = () => {
                             onClick={handleToggleWishlist}
                             disabled={wishlistLoading}
                         >
-                            <Heart size={18} fill={isInWishlist ? "currentColor" : "none"} />
-                            {isInWishlist ? 'Đã thích' : 'Thích'}
+                            {isInWishlist ? <CheckIcon width={18} height={18} /> : <AddIcon width={18} height={18} />}
+                            {isInWishlist ? 'Đã thêm' : 'DS của tôi'}
                         </button>
                         {/* Bookmark Button Removed */}
                         <button className="action-btn">
-                            <Share2 size={18} /> Chia sẻ
+                            <ShareIcon width={18} height={18} /> Chia sẻ
+                        </button>
+                        <button className="action-btn">
+                            <DownloadIcon width={18} height={18} /> Tải xuống
                         </button>
                     </div>
                 </div>
@@ -405,7 +423,7 @@ const Watch = () => {
                                                 className="rec-poster"
                                             />
                                             <div className="play-icon">
-                                                <Play size={28} fill="white" />
+                                                <PlayIcon width={32} height={32} />
                                             </div>
                                         </div>
                                         <div className="rec-info">
