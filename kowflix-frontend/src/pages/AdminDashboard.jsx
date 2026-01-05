@@ -139,7 +139,7 @@ const AdminDashboard = () => {
                     <div className="chart-full-width">
                         <EngagementChart
                             data={weeklyData}
-                            title="Engagement Trends"
+                            title="Thống kê lượt xem"
                             subtitle="Lượt xem theo tuần - 7 ngày qua"
                         />
                     </div>
