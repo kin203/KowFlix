@@ -92,7 +92,9 @@ export async function getMovieDetails(tmdbId) {
             posterPath: details.poster_path ? `${TMDB_IMAGE_BASE_URL}/w500${details.poster_path}` : null,
             backdropPath: details.backdrop_path ? `${TMDB_IMAGE_BASE_URL}/original${details.backdrop_path}` : null,
             tagline: details.tagline,
-            status: details.status
+            tagline: details.tagline,
+            status: details.status,
+            countries: details.production_countries?.map(c => c.name) || [] // Extract country names
         };
     } catch (error) {
         console.error('TMDb getDetails error:', error.message);

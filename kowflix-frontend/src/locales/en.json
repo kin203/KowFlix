@@ -1,6 +1,16 @@
 {
     "admin": {
         "dashboard": "Dashboard",
+        "total_users": "Total Users",
+        "total_movies": "Total Movies",
+        "active_users": "Active Users",
+        "total_views": "Total Views",
+        "views_analysis": "Views Analysis",
+        "views_weekly": "Weekly Views - Last 7 Days",
+        "top_movies": "Top Movies",
+        "by_views": "By Views",
+        "this_week": "this week",
+        "views_count": "{{count}} views",
         "movies": "Movies",
         "categories": "Categories",
         "nav_menu": "Nav Menu",
@@ -19,6 +29,7 @@
         "home": "Home",
         "movies": "Movies",
         "series": "Series",
+        "new_and_popular": "New & Popular",
         "search_placeholder": "Search movies, actors...",
         "login": "Sign In",
         "profile": "Profile",
@@ -83,7 +94,11 @@
         "cast": "Cast",
         "genres": "Genres",
         "director": "Director",
-        "upload": "Upload"
+        "upload": "Upload",
+        "filter": "Filter",
+        "back_home": "Back to Home",
+        "no_movies": "No movies found in this category",
+        "error_fetch": "Failed to fetch movies"
     },
     "auth": {
         "login": "Sign In",

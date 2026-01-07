@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MovieInfoModal from './MovieInfoModal';
 import { progressAPI } from '../services/api';
 import './MovieSlider.css';
@@ -6,6 +6,7 @@ import './MovieSlider.css';
 const MovieSlider = ({ title, movies }) => {
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [movieProgress, setMovieProgress] = useState({});
+    const sliderRef = useRef(null);
 
     // Fetch watch progress for all movies
     useEffect(() => {
@@ -33,44 +34,95 @@ const MovieSlider = ({ title, movies }) => {
         fetchProgress();
     }, [movies]);
 
+    const scroll = (direction) => {
+        if (sliderRef.current) {
+            const container = sliderRef.current;
+            const scrollAmount = direction === 'left' ? -container.offsetWidth * 0.75 : container.offsetWidth * 0.75;
+
+            // Custom smooth scroll with easing
+            const start = container.scrollLeft;
+            const target = start + scrollAmount;
+            const startTime = performance.now();
+            const duration = 800; // Slower, more premium feel
+
+            // Ease Out Quart (starts fast, slows down very smoothly)
+            const easeOutQuart = (t) => 1 - (--t) * t * t * t;
+
+            const animateScroll = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                if (elapsed < duration) {
+                    const progress = easeOutQuart(elapsed / duration);
+                    container.scrollLeft = start + (scrollAmount * progress);
+                    requestAnimationFrame(animateScroll);
+                } else {
+                    container.scrollLeft = target;
+                }
+            };
+
+            requestAnimationFrame(animateScroll);
+        }
+    };
+
     if (!movies || movies.length === 0) return null;
 
     return (
         <>
             <div className="movie-slider">
-                <h2 className="slider-title">{title}</h2>
-                <div className="slider-container">
-                    {movies.map((movie) => {
-                        const progress = movieProgress[movie._id] || 0;
-                        const hasProgress = progress > 0 && progress < 95; // Show progress if between 0-95%
+                <div className="slider-header">
+                    <h2 className="slider-title">{title}</h2>
+                </div>
 
-                        return (
-                            <div
-                                key={movie._id}
-                                className="movie-card"
-                                onClick={() => setSelectedMovie(movie)}
-                            >
-                                <img
-                                    src={movie.poster || "https://via.placeholder.com/200x300?text=No+Poster"}
-                                    alt={movie.title}
-                                    className="movie-poster"
-                                    onLoad={() => console.log('✅ Image loaded:', movie.title)}
-                                    onError={(e) => {
-                                        console.error('❌ Image failed:', movie.title, e.target.src);
-                                        e.target.src = "https://via.placeholder.com/200x300?text=Error";
-                                    }}
-                                />
-                                {hasProgress && (
-                                    <div className="movie-progress-bar">
-                                        <div
-                                            className="movie-progress-fill"
-                                            style={{ width: `${progress}%` }}
+                <div className="slider-wrapper">
+                    <button
+                        className="slider-arrow left"
+                        onClick={() => scroll('left')}
+                        aria-label="Scroll left"
+                    >
+                        &#10094;
+                    </button>
+
+                    <div className="slider-container" ref={sliderRef}>
+                        {movies.map((movie) => {
+                            const progress = movieProgress[movie._id] || 0;
+                            const hasProgress = progress > 0 && progress < 95;
+
+                            return (
+                                <div
+                                    key={movie._id}
+                                    className="movie-card-container"
+                                    onClick={() => setSelectedMovie(movie)}
+                                >
+                                    <div className="movie-card">
+                                        <img
+                                            src={movie.poster || "https://via.placeholder.com/200x300?text=No+Poster"}
+                                            alt={movie.title}
+                                            className="movie-poster"
+                                            onError={(e) => {
+                                                e.target.src = "https://via.placeholder.com/200x300?text=Error";
+                                            }}
                                         />
+                                        {hasProgress && (
+                                            <div className="movie-progress-bar">
+                                                <div
+                                                    className="movie-progress-fill"
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                                    <h3 className="movie-title">{movie.title}</h3>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <button
+                        className="slider-arrow right"
+                        onClick={() => scroll('right')}
+                        aria-label="Scroll right"
+                    >
+                        &#10095;
+                    </button>
                 </div>
             </div>
 

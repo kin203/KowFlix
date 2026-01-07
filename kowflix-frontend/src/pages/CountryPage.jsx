@@ -1,41 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { categoryAPI } from '../services/api';
+import { movieAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import { Filter, PlayCircle, ArrowLeft } from 'lucide-react';
-import './CategoryPage.css';
+import './CategoryPage.css'; // Reuse CategoryPage CSS
 
-const CategoryPage = () => {
+const CountryPage = () => {
     const { t } = useTranslation();
-    const { slug } = useParams();
-    const [category, setCategory] = useState(null);
+    const { country } = useParams();
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchCategoryData = async () => {
+        const fetchMovies = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await categoryAPI.getMoviesBySlug(slug);
+                // Decode country name in case it's generic e.g. "United States of America"
+                const decodedCountry = decodeURIComponent(country);
+
+                const response = await movieAPI.getAll({ country: decodedCountry, limit: 100 });
                 if (response.data.success) {
-                    setCategory(response.data.data.category);
-                    setMovies(response.data.data.movies);
+                    setMovies(response.data.data);
                 }
             } catch (err) {
-                console.error('Failed to fetch category movies:', err);
+                console.error('Failed to fetch movies by country:', err);
                 setError(t('common.error_fetch'));
             } finally {
                 setLoading(false);
             }
         };
 
-        if (slug) {
-            fetchCategoryData();
+        if (country) {
+            fetchMovies();
         }
-    }, [slug, t]);
+    }, [country, t]);
 
     if (loading) {
         return (
@@ -48,12 +49,12 @@ const CategoryPage = () => {
         );
     }
 
-    if (error || !category) {
+    if (error) {
         return (
             <div className="category-page">
                 <Navbar />
                 <div className="category-error">
-                    <h2>{error || 'Category not found'}</h2>
+                    <h2>{error}</h2>
                     <Link to="/" className="back-home-btn">{t('common.back_home')}</Link>
                 </div>
             </div>
@@ -71,7 +72,7 @@ const CategoryPage = () => {
 
             <div className="category-content">
                 <div className="category-header">
-                    <h1 className="category-title">{category.name}</h1>
+                    <h1 className="category-title">{t('common.related_movies')}: {decodeURIComponent(country)}</h1>
                     <button className="filter-btn">
                         <Filter size={18} />
                         {t('common.filter')}
@@ -115,4 +116,4 @@ const CategoryPage = () => {
     );
 };
 
-export default CategoryPage;
+export default CountryPage;

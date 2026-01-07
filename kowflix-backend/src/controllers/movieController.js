@@ -12,6 +12,88 @@ import * as jobQueue from "../services/jobQueue.js";
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
 
 // ====================== LIST ======================
+export const getTrendingMovies = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const movies = await Movie.find()
+      .sort({ views: -1 })
+      .limit(limit);
+
+    // Add PUBLIC_MEDIA_URL to poster paths
+    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+    const moviesWithFullUrls = movies.map(movie => {
+      const movieObj = movie.toObject();
+      if (movieObj.poster && movieObj.poster.startsWith('/media/')) {
+        movieObj.poster = `${PUBLIC_MEDIA_URL}${movieObj.poster.replace('/media', '')}`;
+      }
+      if (movieObj.background && movieObj.background.startsWith('/media/')) {
+        movieObj.background = `${PUBLIC_MEDIA_URL}${movieObj.background.replace('/media', '')}`;
+      }
+      return movieObj;
+    });
+
+    res.json({ success: true, data: moviesWithFullUrls });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const getTopRatedMovies = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Dynamically import Review to avoid circular dependency issues if any
+    const Review = (await import("../models/Review.js")).default;
+
+    // Aggregate reviews to get average rating
+    const topRatedIds = await Review.aggregate([
+      {
+        $group: {
+          _id: "$movieId",
+          avgRating: { $avg: "$rating" },
+          count: { $sum: 1 }
+        }
+      },
+      { $match: { count: { $gte: 1 } } }, // Optional: require at least 1 review
+      { $sort: { avgRating: -1 } },
+      { $limit: limit }
+    ]);
+
+    // Extract valid ObjectIds
+    const movieIds = topRatedIds.map(item => item._id);
+
+    // Fetch full movie details
+    const movies = await Movie.find({ _id: { $in: movieIds } });
+
+    // Map back to preserve order and structure
+    const orderedMovies = movieIds
+      .map(id => movies.find(m => m._id.toString() === id.toString()))
+      .filter(m => m); // Filter out nulls if movie was deleted but reviews exist
+
+    // Add PUBLIC_MEDIA_URL
+    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+    const moviesWithFullUrls = orderedMovies.map(movie => {
+      const movieObj = movie.toObject();
+      const ratingInfo = topRatedIds.find(item => item._id.toString() === movie._id.toString());
+      movieObj.voteAverage = ratingInfo ? ratingInfo.avgRating : 0; // In case we want to display it
+
+      if (movieObj.poster && movieObj.poster.startsWith('/media/')) {
+        movieObj.poster = `${PUBLIC_MEDIA_URL}${movieObj.poster.replace('/media', '')}`;
+      }
+      if (movieObj.background && movieObj.background.startsWith('/media/')) {
+        movieObj.background = `${PUBLIC_MEDIA_URL}${movieObj.background.replace('/media', '')}`;
+      }
+      return movieObj;
+    });
+
+    res.json({ success: true, data: moviesWithFullUrls });
+  } catch (err) {
+    console.error("getTopRatedMovies error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export const listMovies = async (req, res) => {
   try {
     const { q, genre, categoryId, page = 1, limit = 12 } = req.query;
@@ -20,6 +102,8 @@ export const listMovies = async (req, res) => {
     if (q) query.$text = { $search: q };
     if (genre) query.genres = genre;
     if (categoryId) query.categories = categoryId;
+    // Support filtering by country (exact match from array)
+    if (req.query.country) query.countries = req.query.country;
 
     const total = await Movie.countDocuments(query);
 
@@ -92,6 +176,7 @@ export const createMovie = async (req, res) => {
       description,
       description_en: description_en || "",
       genres: typeof genres === "string" ? genres.split(",").map(s => s.trim()) : genres,
+      countries: req.body.countries ? (typeof req.body.countries === "string" ? req.body.countries.split(",").map(s => s.trim()) : req.body.countries) : [], // NEW: Handle countries
       releaseYear: releaseYear ? Number(releaseYear) : undefined,
       duration: duration ? Number(duration) : undefined,
       // TMDb metadata
@@ -310,6 +395,10 @@ export const updateMovie = async (req, res) => {
       payload.genres = payload.genres.split(",").map(s => s.trim());
     }
 
+    if (typeof payload.countries === "string") {
+      payload.countries = payload.countries.split(",").map(s => s.trim());
+    }
+
     // Handle cast: if it's a string, try to parse it
     if (typeof payload.cast === "string") {
       try {
@@ -432,6 +521,24 @@ export const playMovie = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ success: false, message: "Not found" });
+
+    // Increment views
+    await Movie.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+
+    // Update DailyStat (fire and forget to not block response)
+    (async () => {
+      try {
+        const DailyStat = (await import("../models/DailyStat.js")).default;
+        const today = new Date().toISOString().split('T')[0];
+        await DailyStat.findOneAndUpdate(
+          { date: today },
+          { $inc: { views: 1 } },
+          { upsert: true }
+        );
+      } catch (err) {
+        console.error("Failed to update daily stats:", err);
+      }
+    })();
 
     const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
 
@@ -718,5 +825,24 @@ export const streamMP4 = async (req, res) => {
   } catch (error) {
     console.error("Stream MP4 error:", error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ====================== GET FILTER OPTIONS (Countries, etc.) ======================
+export const getFilterOptions = async (req, res) => {
+  try {
+    const countries = await Movie.distinct("countries");
+    const genres = await Movie.distinct("genres");
+
+    res.json({
+      success: true,
+      data: {
+        countries: countries.filter(c => c).sort(),
+        genres: genres.filter(g => g).sort()
+      }
+    });
+  } catch (err) {
+    console.error("Get filter options error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

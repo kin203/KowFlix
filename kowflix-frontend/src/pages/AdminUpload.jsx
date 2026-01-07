@@ -15,6 +15,7 @@ const AdminUpload = () => {
         description_en: '', // English Description
         releaseYear: '',
         genres: '',
+        countries: '', // NEW: Countries
         // TMDb metadata
         tmdbId: '',
         imdbId: '',
@@ -110,6 +111,7 @@ const AdminUpload = () => {
             description_en: movieData.overview || '', // TMDb usually maps overview to requested language, we might need separate logic if we want both from TMDb
             releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : '',
             genres: movieData.genres?.join(', ') || '',
+            countries: movieData.countries?.join(', ') || '', // Autofill countries
             tmdbId: movieData.tmdbId || '',
             imdbId: movieData.imdbId || '',
             runtime: movieData.runtime || '',
@@ -142,6 +144,7 @@ const AdminUpload = () => {
             data.append('description_en', formData.description_en);
             data.append('releaseYear', formData.releaseYear);
             data.append('genres', formData.genres);
+            data.append('countries', formData.countries); // Submit countries
 
             // TMDb metadata
             if (formData.tmdbId) data.append('tmdbId', formData.tmdbId);
@@ -259,6 +262,7 @@ const AdminUpload = () => {
             description_en: movie.description_en || '',
             releaseYear: movie.releaseYear?.toString() || '',
             genres: movie.genres?.join(', ') || '',
+            countries: movie.countries?.join(', ') || '', // Load countries
             tmdbId: movie.tmdbId?.toString() || '',
             imdbId: movie.imdbId || '',
             runtime: movie.runtime?.toString() || '',
@@ -290,6 +294,7 @@ const AdminUpload = () => {
             data.append('description_en', formData.description_en);
             data.append('releaseYear', formData.releaseYear);
             data.append('genres', formData.genres);
+            data.append('countries', formData.countries); // Update countries
 
             // TMDb metadata
             if (formData.tmdbId) data.append('tmdbId', formData.tmdbId);
@@ -524,6 +529,17 @@ const AdminUpload = () => {
                                     value={formData.genres}
                                     onChange={handleInputChange}
                                     placeholder="Action, Drama, Sci-Fi"
+                                />
+                            </div>
+
+                            <div className="form-field">
+                                <label>Countries (comma separated) {formData.countries && <span className="auto-filled">✓ Auto-filled</span>}</label>
+                                <input
+                                    type="text"
+                                    name="countries"
+                                    value={formData.countries}
+                                    onChange={handleInputChange}
+                                    placeholder="USA, Vietnam, Korea"
                                 />
                             </div>
 

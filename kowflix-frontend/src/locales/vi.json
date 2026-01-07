@@ -1,6 +1,16 @@
 {
     "admin": {
         "dashboard": "Bảng điều khiển",
+        "total_users": "Tổng người dùng",
+        "total_movies": "Tổng phim",
+        "active_users": "Người dùng hoạt động",
+        "total_views": "Lượt xem",
+        "views_analysis": "Thống kê lượt xem",
+        "views_weekly": "Lượt xem theo tuần - 7 ngày qua",
+        "top_movies": "Phim nổi bật",
+        "by_views": "Theo lượt xem",
+        "this_week": "tuần này",
+        "views_count": "{{count}} lượt xem",
         "movies": "Quản lý Phim",
         "categories": "Danh mục",
         "nav_menu": "Quản lý Menu",
@@ -19,6 +29,7 @@
         "home": "Trang chủ",
         "movies": "Phim Lẻ",
         "series": "Phim Bộ",
+        "new_and_popular": "Mới & Phổ biến",
         "search_placeholder": "Tìm kiếm phim, diễn viên...",
         "login": "Đăng nhập",
         "profile": "Hồ sơ",
@@ -73,7 +84,7 @@
     },
     "common": {
         "play": "Phát",
-        "more_info": "Thông tin khác",
+        "more_info": "Xem thêm",
         "watch_now": "Xem ngay",
         "my_list": "Danh sách của tôi",
         "add_to_list": "Thêm vào danh sách",
@@ -83,7 +94,11 @@
         "cast": "Diễn viên",
         "genres": "Thể loại",
         "director": "Đạo diễn",
-        "upload": "Tải lên"
+        "upload": "Tải lên",
+        "filter": "Bộ lọc",
+        "back_home": "Quay về trang chủ",
+        "no_movies": "Chưa có phim nào trong mục này",
+        "error_fetch": "Không thể tải danh sách phim"
     },
     "auth": {
         "login": "Đăng nhập",

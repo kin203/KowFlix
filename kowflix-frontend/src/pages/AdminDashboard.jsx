@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import DashboardSidebar from '../components/admin/DashboardSidebar';
 import StatsCard from '../components/admin/StatsCard';
 import EngagementChart from '../components/admin/EngagementChart';
@@ -9,7 +10,8 @@ import useDocumentTitle from '../components/useDocumentTitle';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-    useDocumentTitle('Dashboard - Quản trị KowFlix');
+    const { t } = useTranslation();
+    useDocumentTitle(t('admin.dashboard') + ' - KowFlix');
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -68,7 +70,7 @@ const AdminDashboard = () => {
                 <div className="admin-dashboard-content">
                     <div className="dashboard-loading">
                         <div className="loading-spinner"></div>
-                        <p>Đang tải dữ liệu...</p>
+                        <p>{t('common.loading', 'Đang tải dữ liệu...')}</p>
                     </div>
                 </div>
             </div>
@@ -83,8 +85,8 @@ const AdminDashboard = () => {
             <div className="admin-dashboard-content">
                 <div className="dashboard-header">
                     <div>
-                        <h1>Dashboard</h1>
-                        <p>Chào mừng trở lại, Admin! 👋</p>
+                        <h1>{t('admin.dashboard')}</h1>
+                        <p>{t('navbar.greeting')}, Admin! 👋</p>
                     </div>
                     <div className="dashboard-time">
                         <Clock size={18} />
@@ -101,7 +103,7 @@ const AdminDashboard = () => {
                 <div className="stats-grid">
                     <StatsCard
                         icon={Users}
-                        title="Tổng người dùng"
+                        title={t('admin.total_users')}
                         value={stats.totalUsers.toLocaleString()}
                         trend="up"
                         trendValue="+12% so với tháng trước"
@@ -109,7 +111,7 @@ const AdminDashboard = () => {
                     />
                     <StatsCard
                         icon={Eye}
-                        title="Người dùng online"
+                        title={t('admin.active_users')}
                         value={stats.onlineUsers}
                         trend="up"
                         trendValue="+5% so với hôm qua"
@@ -117,7 +119,7 @@ const AdminDashboard = () => {
                     />
                     <StatsCard
                         icon={Film}
-                        title="Tổng số phim"
+                        title={t('admin.total_movies')}
                         value={stats.totalMovies}
                         trend="up"
                         trendValue="+8 phim mới"
@@ -125,10 +127,10 @@ const AdminDashboard = () => {
                     />
                     <StatsCard
                         icon={TrendingUp}
-                        title="Lượt xem"
-                        value={`${(stats.totalViews / 1000).toFixed(1)}k`}
+                        title={t('admin.total_views')}
+                        value={stats.totalViews >= 1000 ? `${(stats.totalViews / 1000).toFixed(1)}k` : stats.totalViews}
                         trend="up"
-                        trendValue="+15% tuần này"
+                        trendValue={`+15% ${t('admin.this_week')}`}
                         color="#3B82F6"
                     />
                 </div>
@@ -139,16 +141,16 @@ const AdminDashboard = () => {
                     <div className="chart-full-width">
                         <EngagementChart
                             data={weeklyData}
-                            title="Thống kê lượt xem"
-                            subtitle="Lượt xem theo tuần - 7 ngày qua"
+                            title={t('admin.views_analysis')}
+                            subtitle={t('admin.views_weekly')}
                         />
                     </div>
 
                     {/* Top Viewed Movies */}
                     <div className="chart-card">
                         <div className="chart-header">
-                            <h3>Top 5 phim được xem nhiều nhất</h3>
-                            <span className="chart-subtitle">Theo lượt xem</span>
+                            <h3>{t('admin.top_movies')}</h3>
+                            <span className="chart-subtitle">{t('admin.by_views')}</span>
                         </div>
                         <div className="top-movies-list">
                             {topMovies.length > 0 ? (
@@ -157,7 +159,7 @@ const AdminDashboard = () => {
                                         <div className="movie-rank">#{index + 1}</div>
                                         <div className="movie-info">
                                             <h4>{movie.title}</h4>
-                                            <p>{movie.views ? movie.views.toLocaleString() : 0} lượt xem</p>
+                                            <p>{t('admin.views_count', { count: movie.views ? movie.views.toLocaleString() : 0 })}</p>
                                         </div>
                                     </div>
                                 ))
