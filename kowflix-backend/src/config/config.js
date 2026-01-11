@@ -110,28 +110,7 @@ const config = {
 
     // CORS Configuration
     cors: {
-        origin: function (origin, callback) {
-            const allowedOrigins = [
-                'http://localhost:5173',
-                'http://localhost:3000',
-                'https://kowflix.onrender.com',
-                'https://nk203.id.vn',
-                'https://kow-flix.vercel.app',
-                undefined // Allow non-browser requests (e.g. apps, curl)
-            ];
-
-            // Also allow if CORS_ORIGIN env var matches
-            if (process.env.CORS_ORIGIN && process.env.CORS_ORIGIN !== '*' && origin === process.env.CORS_ORIGIN) {
-                return callback(null, true);
-            }
-
-            if (!origin || allowedOrigins.includes(origin) || process.env.CORS_ORIGIN === '*') {
-                callback(null, true);
-            } else {
-                console.log('Blocked by CORS:', origin);
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
+        origin: true, // Allow all origins (User requested for dynamic Vercel links)
         credentials: true
     },
 
