@@ -44,7 +44,15 @@ export const getTopRatedMovies = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
 
     // Dynamically import Review to avoid circular dependency issues if any
-    const Review = (await import("../models/Review.js")).default;
+    let Review;
+    try {
+      Review = (await import("../models/Review.js")).default;
+    } catch (e) {
+      console.error("Failed to import Review model:", e);
+      // Fallback to sorting by createdAt if Review model fails
+      const fallbackMovies = await Movie.find().sort({ createdAt: -1 }).limit(limit);
+      return res.json({ success: true, data: fallbackMovies });
+    }
 
     // Aggregate reviews to get average rating
     const topRatedIds = await Review.aggregate([
@@ -60,6 +68,24 @@ export const getTopRatedMovies = async (req, res) => {
       { $limit: limit }
     ]);
 
+    // If no rated movies found, return trending or new instead of empty
+    if (!topRatedIds || topRatedIds.length === 0) {
+      const fallbackMovies = await Movie.find().sort({ views: -1 }).limit(limit);
+      // Add PUBLIC_MEDIA_URL to poster paths (duplicate logic, should be helper but inline for now)
+      const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+      const moviesWithFullUrls = fallbackMovies.map(movie => {
+        const movieObj = movie.toObject();
+        if (movieObj.poster && movieObj.poster.startsWith('/media/')) {
+          movieObj.poster = `${PUBLIC_MEDIA_URL}${movieObj.poster.replace('/media', '')}`;
+        }
+        if (movieObj.background && movieObj.background.startsWith('/media/')) {
+          movieObj.background = `${PUBLIC_MEDIA_URL}${movieObj.background.replace('/media', '')}`;
+        }
+        return movieObj;
+      });
+      return res.json({ success: true, data: moviesWithFullUrls });
+    }
+
     // Extract valid ObjectIds
     const movieIds = topRatedIds.map(item => item._id);
 
@@ -68,7 +94,7 @@ export const getTopRatedMovies = async (req, res) => {
 
     // Map back to preserve order and structure
     const orderedMovies = movieIds
-      .map(id => movies.find(m => m._id.toString() === id.toString()))
+      .map(id => movies.find(m => m && m._id.toString() === id.toString())) // Added check for m
       .filter(m => m); // Filter out nulls if movie was deleted but reviews exist
 
     // Add PUBLIC_MEDIA_URL
@@ -90,7 +116,7 @@ export const getTopRatedMovies = async (req, res) => {
     res.json({ success: true, data: moviesWithFullUrls });
   } catch (err) {
     console.error("getTopRatedMovies error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error: " + err.message });
   }
 };
 

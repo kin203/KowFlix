@@ -1,110 +1,452 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, StatusBar, Platform } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, StatusBar, Text, BackHandler, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import Slider from '@react-native-community/slider';
 import { COLORS } from '../constants/colors';
+import { movieAPI } from '../services/api/movieAPI';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const WatchScreen = ({ route, navigation }) => {
     const { movie } = route.params;
-    const insets = useSafeAreaInsets();
+    const [source, setSource] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Prioritize streamUrl, fallback to videoUrl or trailerUrl
-    const videoUrl = movie.streamUrl || movie.videoUrl || (movie.trailerKey ? `https://www.youtube.com/embed/${movie.trailerKey}` : null);
+    // UI State
+    const [showControls, setShowControls] = useState(true);
+    const [isLocked, setIsLocked] = useState(false);
+    const [resizeMode, setResizeMode] = useState('contain'); // contain, cover
+    const [showQualitySelector, setShowQualitySelector] = useState(false);
 
-    // Simple HTML content to wrap video if it's a direct file, ensuring full screen
-    // For HLS, modern WebViews handle it, or we can use a player like Clappr/VideoJS in the HTML.
-    // simpler approach: Direct link for WebView often works for simple playback.
-    // But for better control, we might want to inject a player.
-    // For this MVP, we will try direct load first.
+    // Player State
+    const [activeQualities, setActiveQualities] = useState([]);
+    const [currentQuality, setCurrentQuality] = useState('Auto');
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
 
-    // If it's a youtube link or embed, direct URI is fine.
+    // Refs
+    const controlsTimeoutRef = useRef(null);
+    const isTogglingRef = useRef(false);
+    const savedTimeRef = useRef(0);
 
+    // Initialize Video Player
+    const player = useVideoPlayer(source, player => {
+        player.loop = false;
+        player.timeUpdateEventInterval = 0.5;
+        if (source) {
+            player.play();
+            if (savedTimeRef.current > 0) {
+                player.currentTime = savedTimeRef.current;
+                savedTimeRef.current = 0; // Reset after seek
+            }
+            setIsPlaying(true);
+        }
+    });
+
+    // --- State Synchronization ---
+    useEffect(() => {
+        if (!player) return;
+
+        const subPlaying = player.addListener('playingChange', (playing) => {
+            if (!isTogglingRef.current) {
+                setIsPlaying(playing);
+            }
+            if (player.duration > 0 && duration === 0) setDuration(player.duration);
+        });
+
+        const subTime = player.addListener('timeUpdate', (event) => {
+            setCurrentTime(event.currentTime);
+            if (player.duration > 0 && duration === 0) {
+                setDuration(player.duration);
+            }
+            if (isPlaying && showControls && !isLocked && !showQualitySelector) {
+                resetControlsTimeout();
+            }
+        });
+
+        const subStatus = player.addListener('statusChange', (status) => {
+            if (status.duration > 0) setDuration(status.duration);
+            if (!isTogglingRef.current && typeof status.isPlaying === 'boolean') {
+                setIsPlaying(status.isPlaying);
+            }
+        });
+
+        return () => {
+            subPlaying.remove();
+            subTime.remove();
+            subStatus.remove();
+        };
+    }, [player, showControls, isPlaying, isLocked, duration, showQualitySelector]);
+
+
+    // --- Controls Logic ---
+    const resetControlsTimeout = () => {
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (isPlaying && !isLocked && !showQualitySelector) {
+                setShowControls(false);
+            }
+        }, 3000);
+    };
+
+    const toggleControls = () => {
+        if (showQualitySelector) {
+            setShowQualitySelector(false);
+            return;
+        }
+        if (showControls) {
+            setShowControls(false);
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        } else {
+            setShowControls(true);
+            resetControlsTimeout();
+        }
+    };
+
+    const togglePlay = () => {
+        if (player) {
+            isTogglingRef.current = true;
+            const shouldPlay = !isPlaying;
+            setIsPlaying(shouldPlay);
+
+            if (shouldPlay) {
+                player.play();
+                resetControlsTimeout();
+            } else {
+                player.pause();
+            }
+
+            setTimeout(() => {
+                isTogglingRef.current = false;
+                if (player.playing !== shouldPlay) {
+                    setIsPlaying(player.playing);
+                }
+            }, 600);
+        }
+    };
+
+    const toggleResizeMode = () => {
+        setResizeMode(prev => (prev === 'contain' ? 'cover' : 'contain'));
+        resetControlsTimeout();
+    };
+
+    const seekBy = (seconds) => {
+        if (player) {
+            const newTime = Math.max(0, Math.min(player.duration, player.currentTime + seconds));
+            player.currentTime = newTime;
+            setCurrentTime(newTime);
+            resetControlsTimeout();
+        }
+    };
+
+    const seekTo = (value) => {
+        if (player) {
+            player.currentTime = value;
+            setCurrentTime(value);
+            resetControlsTimeout();
+        }
+    };
+
+    const changeQuality = (qualityObj) => {
+        if (qualityObj.quality === currentQuality) {
+            setShowQualitySelector(false);
+            return;
+        }
+
+        // Save time and switch
+        savedTimeRef.current = currentTime;
+        setIsLoading(true);
+        setSource(qualityObj.url);
+        setCurrentQuality(qualityObj.quality);
+        setShowQualitySelector(false);
+    };
+
+    const formatTime = (seconds) => {
+        if (!seconds || isNaN(seconds)) return "00:00";
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+
+    // --- API & Lifecycle ---
+    const fetchStreamUrl = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await movieAPI.play(movie._id);
+            if (response.data.success) {
+                const data = response.data.data;
+                let finalSource = null;
+                let qualities = [];
+
+                if (data.qualities && data.qualities.length > 0) {
+                    // Extract qualities
+                    qualities = data.qualities;
+                    const preferred = qualities.find(q => q.quality === '1080p') ||
+                        qualities.find(q => q.quality === '720p') ||
+                        qualities[0];
+                    finalSource = preferred.url;
+                    setCurrentQuality(preferred.quality);
+                } else if (data.master) {
+                    // Just master HLS
+                    qualities = [{ quality: 'Auto', url: data.master }];
+                    finalSource = data.master;
+                    setCurrentQuality('Auto');
+                }
+
+                if (finalSource) {
+                    setActiveQualities(qualities);
+                    setSource(finalSource);
+                } else {
+                    setError('Không tìm thấy nguồn phim.');
+                }
+            } else {
+                setError('Lỗi kết nối máy chủ.');
+            }
+        } catch (err) {
+            setError('Không thể tải phim.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+            if (!source) fetchStreamUrl();
+
+            const backAction = () => {
+                if (showQualitySelector) {
+                    setShowQualitySelector(false);
+                    return true;
+                }
+                handleBack();
+                return true;
+            };
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+            return () => {
+                backHandler.remove();
+                ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                if (player) {
+                    try { player.pause(); } catch (e) { }
+                }
+            };
+        }, [source, player, showQualitySelector])
+    );
+
+    const handleBack = () => {
+        navigation.goBack();
+    };
+
+
+    // --- Render ---
     return (
         <View style={styles.container}>
             <StatusBar hidden={true} />
-            <View style={styles.playerContainer}>
-                {videoUrl ? (
-                    <WebView
-                        source={{ uri: videoUrl }}
-                        style={styles.webview}
-                        javaScriptEnabled={true}
-                        domStorageEnabled={true}
-                        allowsFullscreenVideo={true}
-                        onLoadStart={() => setIsLoading(true)}
-                        onLoadEnd={() => setIsLoading(false)}
-                        mediaPlaybackRequiresUserAction={false}
-                        startInLoadingState={true}
-                        renderLoading={() => (
-                            <View style={styles.loadingOverlay}>
-                                <ActivityIndicator size="large" color={COLORS.primary} />
-                            </View>
-                        )}
-                    />
-                ) : (
-                    <View style={styles.errorContainer}>
-                        <Ionicons name="alert-circle-outline" size={50} color={COLORS.textSecondary} />
-                        <Text style={styles.errorText}>Không tìm thấy nguồn phát phim.</Text>
-                    </View>
-                )}
-            </View>
 
-            {/* Back Button Overlay */}
-            <TouchableOpacity
-                style={[styles.backButton, { top: insets.top + 10 }]}
-                onPress={() => navigation.goBack()}
-            >
-                <Ionicons name="close" size={30} color="#FFF" />
-            </TouchableOpacity>
+            <TouchableWithoutFeedback onPress={toggleControls}>
+                <View style={styles.videoContainer}>
+                    {source ? (
+                        <VideoView
+                            style={StyleSheet.absoluteFill}
+                            player={player}
+                            nativeControls={false}
+                            contentFit={resizeMode}
+                        />
+                    ) : (
+                        !isLoading && (
+                            <View style={styles.centerMsg}>
+                                <TouchableOpacity style={styles.errorBackBtn} onPress={handleBack}>
+                                    <Ionicons name="arrow-back" size={30} color="white" />
+                                </TouchableOpacity>
+                                <Ionicons name="alert-circle-outline" size={50} color={COLORS.error} />
+                                <Text style={styles.errorText}>{error || 'Lỗi không xác định'}</Text>
+                                <TouchableOpacity style={styles.retryBtn} onPress={fetchStreamUrl}>
+                                    <Text style={styles.retryText}>Thử lại</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )
+                    )}
+                </View>
+            </TouchableWithoutFeedback>
+
+            {/* Loading Indicator */}
+            {isLoading && (
+                <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                    <Text style={styles.loadingText}>Đang tải phim...</Text>
+                </View>
+            )}
+
+            {/* Controls Overlay */}
+            {source && (showControls || !isPlaying || showQualitySelector) && (
+                <View style={[styles.overlay, isLocked && styles.transparentOverlay]} pointerEvents="box-none">
+
+                    {/* Header */}
+                    {!isLocked && !showQualitySelector && (
+                        <View style={styles.header}>
+                            <TouchableOpacity onPress={handleBack} style={styles.headerBtn}>
+                                <Ionicons name="chevron-back" size={30} color="white" />
+                            </TouchableOpacity>
+                            <Text style={styles.title} numberOfLines={1}>{movie.title}</Text>
+
+                            <View style={styles.headerRight}>
+                                <TouchableOpacity onPress={() => setShowQualitySelector(true)} style={styles.headerBtn}>
+                                    <Ionicons name="settings-outline" size={24} color="white" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setIsLocked(true)} style={styles.headerBtn}>
+                                    <Ionicons name="lock-open-outline" size={24} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Quality Selector Overlay */}
+                    {showQualitySelector && (
+                        <View style={styles.qualityOverlay}>
+                            <Text style={styles.qualityTitle}>Chất lượng video</Text>
+                            <ScrollView style={styles.qualityList}>
+                                {activeQualities.map((item, index) => (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={[styles.qualityItem, currentQuality === item.quality && styles.activeQualityItem]}
+                                        onPress={() => changeQuality(item)}
+                                    >
+                                        <Text style={[styles.qualityText, currentQuality === item.quality && styles.activeQualityText]}>
+                                            {item.quality}
+                                        </Text>
+                                        {currentQuality === item.quality && (
+                                            <Ionicons name="checkmark" size={20} color={COLORS.primary} />
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                            <TouchableOpacity style={styles.closeQualityBtn} onPress={() => setShowQualitySelector(false)}>
+                                <Text style={styles.closeQualityText}>Đóng</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Locked State Button */}
+                    {isLocked && !showQualitySelector && (
+                        <View style={styles.lockedContainer}>
+                            <TouchableOpacity onPress={() => setIsLocked(false)} style={styles.unlockBtn}>
+                                <Ionicons name="lock-closed" size={20} color="black" />
+                                <Text style={styles.unlockText}>Mở khóa</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Center Action Buttons */}
+                    {!isLocked && !showQualitySelector && (
+                        <View style={styles.centerControls}>
+                            <TouchableOpacity onPress={() => seekBy(-10)} style={styles.controlBtn}>
+                                <MaterialIcons name="replay-10" size={50} color="white" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={togglePlay} style={styles.playBtn}>
+                                <Ionicons name={isPlaying ? "pause" : "play"} size={45} color="black" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => seekBy(10)} style={styles.controlBtn}>
+                                <MaterialIcons name="forward-10" size={50} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Bottom Bar */}
+                    {!isLocked && !showQualitySelector && (
+                        <View style={styles.bottomBar}>
+                            <View style={styles.progressContainer}>
+                                <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+                                <Slider
+                                    style={styles.slider}
+                                    minimumValue={0}
+                                    maximumValue={duration > 0 ? duration : 1}
+                                    value={currentTime}
+                                    minimumTrackTintColor={COLORS.primary}
+                                    maximumTrackTintColor="rgba(255,255,255,0.3)"
+                                    thumbTintColor={COLORS.primary}
+                                    onSlidingComplete={seekTo}
+                                />
+                                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                            </View>
+
+                            <View style={styles.actions}>
+                                <TouchableOpacity style={styles.actionItem} onPress={toggleResizeMode}>
+                                    <MaterialIcons name="aspect-ratio" size={20} color="white" />
+                                    <Text style={styles.actionText}>
+                                        {resizeMode === 'contain' ? 'Vừa' : 'Zoom'}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.actionItem}>
+                                    <Ionicons name="chatbox-ellipses-outline" size={20} color="white" />
+                                    <Text style={styles.actionText}>Phụ đề</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#000',
-    },
-    playerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    webview: {
-        flex: 1,
-        backgroundColor: '#000',
-    },
-    backButton: {
-        position: 'absolute',
-        left: 20,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 100,
-    },
-    loadingOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#000',
-    },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#000',
-    },
-    errorText: {
-        color: COLORS.textSecondary,
-        marginTop: 10,
-    }
+    container: { flex: 1, backgroundColor: 'black' },
+    videoContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    centerMsg: { alignItems: 'center', justifyContent: 'center' },
+    errorText: { color: 'white', marginTop: 10, fontSize: 16 },
+    errorBackBtn: { position: 'absolute', top: -100, left: -150, padding: 10 },
+    retryBtn: { marginTop: 15, backgroundColor: COLORS.primary, paddingVertical: 8, paddingHorizontal: 20, borderRadius: 5 },
+    retryText: { color: 'black', fontWeight: 'bold' },
+
+    loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center', zIndex: 20 },
+    loadingText: { color: 'white', marginTop: 10 },
+
+    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'space-between', zIndex: 10 },
+    transparentOverlay: { backgroundColor: 'transparent' },
+
+    header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 20 },
+    headerBtn: { padding: 8 },
+    headerRight: { flexDirection: 'row', alignItems: 'center' },
+    title: { flex: 1, color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginHorizontal: 10 },
+
+    lockedContainer: { alignItems: 'flex-end', paddingTop: 20, paddingRight: 20 },
+    unlockBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
+    unlockText: { fontWeight: 'bold', marginLeft: 4, color: 'black' },
+
+    centerControls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 50 },
+    controlBtn: { alignItems: 'center' },
+    playBtn: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' },
+
+    bottomBar: { paddingHorizontal: 20, paddingBottom: 20 },
+    progressContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+    slider: { flex: 1, marginHorizontal: 10, height: 40 },
+    timeText: { color: 'white', fontSize: 13, minWidth: 45, textAlign: 'center' },
+
+    actions: { flexDirection: 'row', justifyContent: 'center', gap: 30 },
+    actionItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    actionText: { color: 'white', fontSize: 14, fontWeight: '500' },
+
+    qualityOverlay: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 250, backgroundColor: 'rgba(0,0,0,0.9)', padding: 20, zIndex: 30, justifyContent: 'center' },
+    qualityTitle: { color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+    qualityList: { maxHeight: 200 },
+    qualityItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#333' },
+    activeQualityItem: { borderBottomColor: COLORS.primary },
+    qualityText: { color: '#ccc', fontSize: 16 },
+    activeQualityText: { color: COLORS.primary, fontWeight: 'bold' },
+    closeQualityBtn: { marginTop: 20, padding: 10, backgroundColor: '#333', alignItems: 'center', borderRadius: 5 },
+    closeQualityText: { color: 'white', fontWeight: 'bold' }
 });
 
 export default WatchScreen;

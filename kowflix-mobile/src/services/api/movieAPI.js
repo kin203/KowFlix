@@ -16,6 +16,12 @@ export const movieAPI = {
     // Get Recommendations (Simulated for now using category/genre)
     getRecommendations: (movieId) => api.get('/movies', { params: { limit: 10, sort: 'newest' } }),
 
+    // Get Trending Movies
+    getTrendingMovies: (limit = 10) => api.get('/movies/trending', { params: { limit } }),
+
+    // Get Top Rated Movies
+    getTopRatedMovies: (limit = 10) => api.get('/movies/top-rated', { params: { limit } }),
+
     // Add to history
     addToHistory: (movieId) => api.post(`/users/history/${movieId}`),
 };
