@@ -67,7 +67,14 @@ const MovieCard = ({ movie, onPress }) => {
                 {movie.title}
             </Text>
             <Text style={styles.year}>
-                {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : (movie.year || 'N/A')}
+                {(() => {
+                    if (movie.releaseYear) return movie.releaseYear;
+                    if (movie.year) return movie.year;
+                    if (movie.releaseDate) return new Date(movie.releaseDate).getFullYear();
+                    // Fallback to createdAt if nothing else exists (better than N/A for new movies)
+                    if (movie.createdAt) return new Date(movie.createdAt).getFullYear();
+                    return 'N/A';
+                })()}
             </Text>
         </TouchableOpacity>
     );

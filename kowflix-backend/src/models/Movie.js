@@ -47,6 +47,7 @@ const MovieSchema = new mongoose.Schema({
   description: { type: String, default: "" }, // Default (Vietnamese)
   description_en: { type: String, default: "" }, // English Description
   genres: { type: [String], default: [] },
+  countries: { type: [String], default: [] }, // NEW: production countries
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   poster: { type: String, default: "" },
   lqip: { type: String, default: "" }, // Low Quality Image Placeholder (blur, tiny)

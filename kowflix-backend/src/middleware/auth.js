@@ -12,6 +12,12 @@ export default function auth(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = decoded;
+
+    // Update lastActive asynchronously (fire and forget)
+    import("../models/User.js").then(({ default: User }) => {
+      User.findByIdAndUpdate(decoded.id, { lastActive: new Date() }).catch(err => console.error("Update lastActive error", err));
+    });
+
     next();
   } catch (err) {
     return res.status(401).json({ success: false, message: "Token invalid" });

@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, LogOut, Settings, X, Heart, Clock, AlertTriangle } from 'lucide-react';
-import { authAPI, navMenuAPI } from '../services/api';
+import { authAPI, navMenuAPI, movieAPI } from '../services/api';
 import NotificationDropdown from './NotificationDropdown';
+
+
+
 import LanguageSwitcher from './LanguageSwitcher';
 import './Navbar.css';
 
@@ -84,17 +87,55 @@ const Navbar = () => {
 
     const fetchMenuItems = async () => {
         try {
-            const res = await navMenuAPI.getAll();
-            if (res.data && Array.isArray(res.data)) {
-                setMenuItems(res.data);
-            } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
-                setMenuItems(res.data.data);
-            } else {
-                setMenuItems([]);
+            const [menuRes, filterRes] = await Promise.all([
+                navMenuAPI.getAll(),
+                movieAPI.getFilters()
+            ]);
+
+            let items = [];
+            if (menuRes.data && Array.isArray(menuRes.data)) {
+                items = menuRes.data;
+            } else if (menuRes.data && menuRes.data.data && Array.isArray(menuRes.data.data)) {
+                items = menuRes.data.data;
             }
+
+            // Inject filters into menu items
+            if (filterRes.data && filterRes.data.success) {
+                const { countries, genres } = filterRes.data.data;
+
+                items = items.map(item => {
+                    // Inject Countries into 'Series' / 'Quốc gia'
+                    if (item.label === 'Series' || item.label === 'Quốc gia') {
+                        const countrySubItems = countries.map(c => ({
+                            label: c,
+                            path: `/country/${encodeURIComponent(c)}`,
+                            _id: `country-${c}`
+                        }));
+                        return { ...item, subItems: countrySubItems };
+                    }
+
+                    // Inject Genres into 'Movies' / 'Thể loại'
+                    if (item.label === 'Movies' || item.label === 'Thể loại') {
+                        const genreSubItems = genres.map(g => ({
+                            label: g,
+                            path: `/genre/${encodeURIComponent(g)}`,
+                            _id: `genre-${g}`
+                        }));
+                        return { ...item, subItems: genreSubItems };
+                    }
+
+                    return item;
+                });
+            }
+
+            setMenuItems(items);
         } catch (err) {
-            console.error('Error fetching menu:', err);
-            setMenuItems([]);
+            console.error('Error fetching menu or filters:', err);
+            // Fallback to basic menu if filters fail
+            try {
+                const res = await navMenuAPI.getAll();
+                setMenuItems(res.data?.data || []);
+            } catch (e) { setMenuItems([]); }
         }
     };
 
@@ -122,7 +163,32 @@ const Navbar = () => {
     };
 
     const shouldShowMenuItem = (item) => {
+        // Hide duplicate Home item
+        if (item.path === '/' || item.label.toLowerCase() === 'home' || item.label.toLowerCase() === 'trang chủ') {
+            return false;
+        }
         return true;
+    };
+
+    const getLabel = (label) => {
+        // Map backend labels to i18n keys
+        const i18nMap = {
+            'Movies': 'navbar.movies',
+            'Series': 'navbar.series',
+            'New & Popular': 'navbar.new_and_popular', // Need to add this key
+            'Home': 'navbar.home',
+            'My List': 'navbar.my_list',
+            'Countries': 'footer.countries',
+            'Genres': 'footer.categories'
+        };
+
+        const key = i18nMap[label];
+        if (key) {
+            return t(key);
+        }
+
+        // Return label as is if no map found (or handle backend dynamic names)
+        return label;
     };
 
     return (
@@ -158,53 +224,55 @@ const Navbar = () => {
                         <SearchIcon className="navbar-search-icon text-gray-400" width={20} height={20} />
                     </form>
 
-                    {/* Dynamic Nav Links */}
-                    <ul className="nav-links desktop-only">
-                        {/* Static Home Link First */}
-                        <li>
-                            <Link to="/">
-                                {t('navbar.home', 'Trang chủ')}
-                            </Link>
-                        </li>
-
-                        {menuItems.filter(item => shouldShowMenuItem(item)).map((item) => (
-                            <li key={item._id || item.path} className={item.subItems && item.subItems.length > 0 ? 'has-submenu' : ''}>
-                                {item.isExternal ? (
-                                    <a href={item.path} target="_blank" rel="noopener noreferrer">
-                                        {/* Fallback to legacy icon class if new SVG not mapped, assuming library logic or just text */}
-                                        {item.label}
-                                        {item.subItems && item.subItems.length > 0 && <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />}
-                                    </a>
-                                ) : (
-                                    <Link to={item.path}>
-                                        {/* Mapping Dynamic Icons could be complex, sticking to label for dynamic items unless specific maps exist */}
-                                        {item.label}
-                                        {item.subItems && item.subItems.length > 0 && <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />}
-                                    </Link>
-                                )}
-
-                                {/* Submenu Dropdown */}
-                                {item.subItems && item.subItems.length > 0 && (
-                                    <ul className="submenu-dropdown">
-                                        {item.subItems.filter(subItem => shouldShowMenuItem(subItem)).map((subItem) => (
-                                            <li key={subItem._id || subItem.path}>
-                                                {subItem.isExternal ? (
-                                                    <a href={subItem.path} target="_blank" rel="noopener noreferrer">
-                                                        <span>{subItem.label}</span>
-                                                    </a>
-                                                ) : (
-                                                    <Link to={subItem.path}>
-                                                        <span>{subItem.label}</span>
-                                                    </Link>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
                 </div>
+
+                {/* Dynamic Nav Links - Centered */}
+                <ul className="nav-links desktop-only">
+                    {/* Static Home Link First */}
+                    <li>
+                        <Link to="/">
+                            {t('navbar.home', 'Trang chủ')}
+                        </Link>
+                    </li>
+
+                    {menuItems.filter(item => shouldShowMenuItem(item)).map((item) => (
+                        <li key={item._id || item.path} className={item.subItems && item.subItems.length > 0 ? 'has-submenu' : ''}>
+                            {item.isExternal ? (
+                                <a href={item.path} target="_blank" rel="noopener noreferrer">
+                                    {/* Fallback to legacy icon class if new SVG not mapped, assuming library logic or just text */}
+                                    {item.label}
+                                    {item.subItems && item.subItems.length > 0 && <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />}
+                                </a>
+                            ) : (
+                                <Link to={item.path}>
+                                    <span className="nav-item-label">{getLabel(item.label)}</span>
+                                    {Array.isArray(item.subItems) && item.subItems.length > 0 && (
+                                        <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />
+                                    )}
+                                </Link>
+                            )}
+
+                            {/* Submenu Dropdown */}
+                            {item.subItems && item.subItems.length > 0 && (
+                                <ul className="submenu-dropdown">
+                                    {item.subItems.filter(subItem => shouldShowMenuItem(subItem)).map((subItem) => (
+                                        <li key={subItem._id || subItem.path}>
+                                            {subItem.isExternal ? (
+                                                <a href={subItem.path} target="_blank" rel="noopener noreferrer">
+                                                    <span>{subItem.label}</span>
+                                                </a>
+                                            ) : (
+                                                <Link to={subItem.path}>
+                                                    <span>{getLabel(subItem.label)}</span>
+                                                </Link>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
 
                 <div className="navbar-right">
                     {isLoggedIn && <NotificationDropdown />}

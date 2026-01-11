@@ -13,6 +13,26 @@ export const movieAPI = {
     getAll: (params) => api.get('/movies', { params }),
 
     /**
+     * Get trending movies
+     * @param {number} limit 
+     * @returns {Promise} List of trending movies
+     */
+    getTrendingMovies: (limit = 10) => api.get('/movies/trending', { params: { limit } }),
+
+    /**
+     * Get top rated movies (by internal user reviews)
+     * @param {number} limit 
+     * @returns {Promise} List of top rated movies
+     */
+    getTopRatedMovies: (limit = 10) => api.get('/movies/top-rated', { params: { limit } }),
+
+    /**
+     * Get distinct filter options (countries, genres)
+     * @returns {Promise} Filter options
+     */
+    getFilters: () => api.get('/movies/filters'),
+
+    /**
      * Get single movie by ID
      * @param {string} id - Movie ID
      * @returns {Promise} Movie details

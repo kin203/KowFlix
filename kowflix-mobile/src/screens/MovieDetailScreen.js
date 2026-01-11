@@ -9,8 +9,9 @@ import {
     Dimensions,
     Platform,
     Share,
-    Alert, // Added Alert
-    FlatList
+    Alert,
+    FlatList,
+    TextInput
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,38 +23,37 @@ import { movieAPI } from '../services/api/movieAPI';
 import { wishlistAPI } from '../services/api/wishlistAPI';
 import { commentAPI } from '../services/api/commentAPI';
 import { useAuth } from '../context/AuthContext';
-import { TextInput } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const MovieDetailScreen = ({ route, navigation }) => {
     const { movieId, movie: initialMovieData } = route.params;
-    const { isAuthenticated } = useAuth(); // Get auth state
+    const { isAuthenticated } = useAuth();
     const insets = useSafeAreaInsets();
 
     const [movie, setMovie] = useState(initialMovieData || null);
     const [loading, setLoading] = useState(!initialMovieData);
-    const [recommendations, setRecommendations] = useState([]); // Added recommendations state
-    const [comments, setComments] = useState([]); // Comments state
-    const [userComment, setUserComment] = useState(''); // Comment input
+    const [recommendations, setRecommendations] = useState([]);
+    const [comments, setComments] = useState([]);
+    const [userComment, setUserComment] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
 
     const [playingTrailer, setPlayingTrailer] = useState(false);
     const [activeTab, setActiveTab] = useState('cast'); // 'cast', 'recommendations', 'comments'
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-    const [isInWishlist, setIsInWishlist] = useState(false); // New state
+    const [isInWishlist, setIsInWishlist] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
             checkWishlistStatus();
         }
+        fetchMovieDetails();
     }, [movieId, isAuthenticated]);
 
     const checkWishlistStatus = async () => {
         try {
             const wishRes = await wishlistAPI.checkStatus(movieId);
             if (wishRes.data.success) {
-                // Backend returns { success: true, data: { inWishlist: boolean } }
                 setIsInWishlist(!!wishRes.data.data?.inWishlist);
             }
         } catch (err) {
@@ -75,11 +75,28 @@ const MovieDetailScreen = ({ route, navigation }) => {
     const fetchMovieDetails = async () => {
         try {
             const response = await movieAPI.getById(movieId);
+            let currentMovie = initialMovieData;
+
             if (response.data.success) {
-                setMovie(response.data.data);
+                currentMovie = response.data.data;
+                setMovie(currentMovie);
             }
 
-            if (movieAPI.getRecommendations) {
+            // Get Recommendations based on Genre
+            if (currentMovie && currentMovie.genres && currentMovie.genres.length > 0) {
+                const firstGenre = typeof currentMovie.genres[0] === 'string'
+                    ? currentMovie.genres[0]
+                    : currentMovie.genres[0].name;
+
+                // Fetch movies with same genre
+                const recResponse = await movieAPI.getAll({ genre: firstGenre, limit: 10 });
+                if (recResponse.data.success) {
+                    // Filter out current movie
+                    const related = recResponse.data.data.filter(m => m._id !== movieId);
+                    setRecommendations(related);
+                }
+            } else if (movieAPI.getRecommendations) {
+                // Fallback to old method if no genre
                 const recResponse = await movieAPI.getRecommendations(movieId);
                 if (recResponse.data.success) {
                     setRecommendations(recResponse.data.data || []);
@@ -124,10 +141,6 @@ const MovieDetailScreen = ({ route, navigation }) => {
         navigation.navigate('Watch', { movie });
     };
 
-    const handleAddToMyList = () => {
-        Alert.alert("Thông báo", "Đã thêm vào danh sách xem sau!");
-    };
-
     const handleFavorite = async () => {
         try {
             if (isInWishlist) {
@@ -142,7 +155,6 @@ const MovieDetailScreen = ({ route, navigation }) => {
         } catch (error) {
             const errorMessage = error.response?.data?.message || '';
             if (error.response?.status === 400 && (errorMessage.includes('Already in wishlist') || errorMessage.includes('exist'))) {
-                // Auto-correct state
                 setIsInWishlist(true);
                 Alert.alert("Thông báo", "Phim đã có trong danh sách yêu thích");
             } else {
@@ -151,22 +163,6 @@ const MovieDetailScreen = ({ route, navigation }) => {
             }
         }
     };
-
-    // ... (renderHeader, renderActionButtons kept same implicitly by only replacing logic block)
-
-    // ... (Skip to Tab Rendering part)
-    /* 
-       Note: The tool replaces a contiguous block. 
-       I need to replace from 'useEffect' (line 46) down to the end of Tab Content 'line 361' 
-       to cover both logic fixes and the ternary rendering fix.
-       This is a large block. I will try to target specific blocks if possible, 
-       but the logic changes are intertwined.
-       Let's replace the Logic Block first (useEffect to handleShare), 
-       then the Tab Rendering block.
-    */
-
-    // Changing approach: Replace Logic Block first.
-
 
     const handleShare = async () => {
         try {
@@ -178,12 +174,25 @@ const MovieDetailScreen = ({ route, navigation }) => {
         }
     };
 
+    const getYear = () => {
+        if (movie.releaseYear) return movie.releaseYear;
+        if (movie.year) return movie.year;
+        if (movie.releaseDate) {
+            const d = new Date(movie.releaseDate);
+            if (!isNaN(d.getTime())) return d.getFullYear();
+        }
+        if (movie.createdAt) {
+            const d = new Date(movie.createdAt);
+            if (!isNaN(d.getTime())) return d.getFullYear();
+        }
+        return 'N/A';
+    };
+
     if (!movie) return <View style={styles.loadingContainer} />;
 
     const backdropUrl = getImageUrl(movie.backdrop || movie.poster);
-    const posterUrl = getImageUrl(movie.poster);
 
-    // Check for trailer key (Youtube ID) based on user DB schema
+    // Check for trailer key
     const hasTrailer = movie.useTrailer && movie.trailerKey;
     const trailerUrl = hasTrailer ? `https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&modestbranding=1&rel=0` : null;
 
@@ -216,7 +225,6 @@ const MovieDetailScreen = ({ route, navigation }) => {
                     style={styles.gradient}
                 />
 
-                {/* Back Button */}
                 <TouchableOpacity
                     style={[styles.backButton, { top: insets.top + 10 }]}
                     onPress={() => navigation.goBack()}
@@ -224,7 +232,6 @@ const MovieDetailScreen = ({ route, navigation }) => {
                     <Ionicons name="chevron-back" size={28} color="#FFF" />
                 </TouchableOpacity>
 
-                {/* Trailer Toggle Button (if has trailer) */}
                 {hasTrailer && (
                     <TouchableOpacity
                         style={styles.playTrailerButton}
@@ -284,9 +291,8 @@ const MovieDetailScreen = ({ route, navigation }) => {
                             <Text style={styles.tagText}>{movie.ageRating || 'T13'}</Text>
                         </View>
                         <View style={styles.tagBadge}>
-                            <Text style={styles.tagText}>{new Date(movie.releaseDate || movie.year).getFullYear()}</Text>
+                            <Text style={styles.tagText}>{getYear()}</Text>
                         </View>
-                        {/* Quality Badge */}
                         <View style={[styles.tagBadge, { borderColor: 'transparent', backgroundColor: 'rgba(255,255,255,0.1)' }]}>
                             <Text style={styles.tagText}>{movie.quality || 'HD'}</Text>
                         </View>
@@ -433,7 +439,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
     headerImageContainer: {
-        height: width * 0.6, // 16:9 ratio approx
+        height: width * 0.6,
         width: '100%',
         position: 'relative',
     },
@@ -484,10 +490,10 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         padding: SPACING.lg,
-        marginTop: -20, // Overlap slightly
+        marginTop: -20,
     },
     watchButton: {
-        backgroundColor: COLORS.primary, // Yellow
+        backgroundColor: COLORS.primary,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',

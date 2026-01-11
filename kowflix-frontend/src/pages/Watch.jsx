@@ -232,10 +232,10 @@ const Watch = () => {
             <div className="watch-page">
                 {/* Back Button / Breadcrumb */}
                 <div className="watch-breadcrumb">
-                    <Link to="/" className="back-button">
+                    <button onClick={() => navigate(-1)} className="ro-back-btn">
                         <BackIcon width={24} height={24} />
                         <span>Xem phim {movie?.title || ''}</span>
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Video Player Area - Rendered independently of movie details */}

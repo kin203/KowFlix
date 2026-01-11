@@ -16,8 +16,11 @@ import NotificationManagement from './pages/NotificationManagement';
 import NavMenuManagement from './pages/NavMenuManagement';
 import AdminSettings from './pages/AdminSettings';
 import CategoryPage from './pages/CategoryPage';
+import CountryPage from './pages/CountryPage';
+import GenrePage from './pages/GenrePage';
 import Profile from './pages/Profile';
 import MaintenancePage from './pages/MaintenancePage';
+import NewAndPopular from './pages/NewAndPopular';
 import PatrioticLoader from './components/PatrioticLoader';
 import { settingAPI } from './services/api/settingAPI';
 import './index.css';
@@ -46,7 +49,11 @@ function App() {
           <Route path="/admin/nav-menu" element={<NavMenuManagement />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
+          <Route path="/country/:country" element={<CountryPage />} />
+          <Route path="/genre/:genre" element={<GenrePage />} />
+          <Route path="/genre/:genre" element={<GenrePage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/new" element={<NewAndPopular />} />
         </Routes>
       </MaintenanceWrapper>
     </Router>

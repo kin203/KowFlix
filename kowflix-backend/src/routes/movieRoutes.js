@@ -2,6 +2,8 @@
 import express from "express";
 import {
   listMovies,
+  getTrendingMovies,
+  getTopRatedMovies,
   getMovie,
   createMovie,
   updateMovie,
@@ -10,7 +12,8 @@ import {
   searchTMDb,
   getTMDbDetails,
   migrateHlsPaths,
-  streamMP4
+  streamMP4,
+  getFilterOptions
 } from "../controllers/movieController.js";
 
 import auth from "../middleware/auth.js";
@@ -24,6 +27,13 @@ const router = express.Router();
 // TMDb routes (no auth required for search)
 router.get("/search-tmdb", searchTMDb);
 router.get("/tmdb/:tmdbId", getTMDbDetails);
+
+// Filter options (countries, genres)
+// Filter options (countries, genres)
+router.get("/filters", getFilterOptions);
+
+router.get("/trending", getTrendingMovies);
+router.get("/top-rated", getTopRatedMovies);
 
 router.get("/", listMovies);
 router.get("/:id", getMovie);

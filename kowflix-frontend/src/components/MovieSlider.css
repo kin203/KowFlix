@@ -1,12 +1,20 @@
+/* Container */
 .movie-slider {
     margin-bottom: 3rem;
+    position: relative;
+    /* Remove padding from parent, handle in wrapper */
+    padding: 0;
+}
+
+.slider-header {
     padding: 0 4%;
+    /* Align title with rest of page */
 }
 
 .slider-title {
     font-size: 1.6rem;
     font-weight: 700;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
     color: #e5e5e5;
     transition: color 0.2s;
 }
@@ -15,52 +23,69 @@
     color: white;
 }
 
+/* Wrapper for arrows and scrolling area */
+.slider-wrapper {
+    position: relative;
+    padding: 0 4%;
+    /* Align content with rest of page */
+    display: flex;
+    align-items: center;
+}
+
+/* Scroll Container */
 .slider-container {
     display: flex;
-    gap: 0.8rem;
+    gap: 1rem;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 1.5rem;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    padding-bottom: 5px;
+    /* Tiny padding for shadows */
+
+    /* Remove native smooth behavior to let JS handle the easing */
+    /* scroll-behavior: smooth; */
+
+    /* Removed scroll-snap to prevent conflict with JS smooth scroll */
+    /* scroll-snap-type: x mandatory; */
+
+    /* Hide scrollbar completely */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
 }
 
 .slider-container::-webkit-scrollbar {
-    height: 8px;
+    display: none;
+    /* Chrome/Safari */
 }
 
-.slider-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.slider-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-}
-
-.slider-container:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* Movie Card */
-.movie-card {
+/* Movie Card Container (includes Title) */
+.movie-card-container {
     flex: 0 0 auto;
     width: 220px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Removed snap alignment */
+    /* scroll-snap-align: start; */
+}
+
+.movie-card-container:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* The actual image card */
+.movie-card {
+    width: 100%;
     height: 330px;
     border-radius: 8px;
     overflow: hidden;
     position: relative;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background: #1a1a1a;
-}
-
-.movie-card:hover {
-    transform: scale(1.08);
-    z-index: 10;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    margin-bottom: 0.8rem;
+    /* Space between poster and title */
 }
 
 .movie-poster {
@@ -68,13 +93,23 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease;
-    opacity: 1 !important;
-    z-index: 1 !important;
 }
 
-.movie-card:hover .movie-poster {
-    transform: scale(1.05);
+/* Movie Title */
+.movie-title {
+    font-size: 1rem;
+    color: #cecece;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    padding: 0 4px;
+    transition: color 0.2s;
+}
+
+.movie-card-container:hover .movie-title {
+    color: white;
 }
 
 /* Watch Progress Bar */
@@ -91,14 +126,64 @@
 .movie-progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
-    transition: width 0.3s ease;
     box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+/* Navigation Arrows - Matched to Interest Section */
+.slider-arrow {
+    position: absolute;
+    top: 45%;
+    /* Center vertically relative to image */
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    /* Dark semi-transparent background */
+    backdrop-filter: blur(10px);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0;
+    /* Still hide until hover to keep clean look, or remove if user wants always visible */
+    transition: all 0.3s ease;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.slider-wrapper:hover .slider-arrow {
+    opacity: 1;
+}
+
+.slider-arrow:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+/* Positioning */
+.slider-arrow.left {
+    left: 0;
+    margin-left: 0.5%;
+}
+
+.slider-arrow.right {
+    right: 0;
+    margin-right: 0.5%;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
-    .movie-card {
+    .movie-card-container {
         width: 200px;
+    }
+
+    .movie-card {
         height: 300px;
     }
 }
@@ -108,27 +193,45 @@
         font-size: 1.3rem;
     }
 
-    .movie-card {
+    .movie-card-container {
         width: 160px;
+    }
+
+    .movie-card {
         height: 240px;
     }
 
-    .slider-container {
-        gap: 0.6rem;
-        -ms-overflow-style: none;
-        /* IE and Edge */
-        scrollbar-width: none;
-        /* Firefox */
+    .movie-title {
+        font-size: 0.9rem;
     }
 
-    .slider-container::-webkit-scrollbar {
-        display: none;
+    /* On mobile, maybe hide arrows or keep them smaller? 
+       Usually touch scroll is better on mobile, but user asked for buttons.
+       We'll keep buttons but ensure they don't block view too much.
+    */
+    .slider-arrow {
+        opacity: 1;
+        /* Always show on touch screens since no hover */
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .slider-arrow.left {
+        left: 0;
+    }
+
+    .slider-arrow.right {
+        right: 0;
     }
 }
 
 @media (max-width: 480px) {
-    .movie-card {
+    .movie-card-container {
         width: 140px;
+    }
+
+    .movie-card {
         height: 210px;
     }
 }

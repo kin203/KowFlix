@@ -28,8 +28,9 @@
     align-items: center;
     justify-content: space-between;
     z-index: 100;
-    transition: top 0.3s ease, background-color var(--transition-normal);
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, rgba(0, 0, 0, 0));
+    transition: top 0.3s ease, background-color 0.3s ease;
+    background-color: transparent;
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 10%, transparent);
 }
 
 .navbar.has-banner {
@@ -38,7 +39,9 @@
 }
 
 .navbar.scrolled {
-    background-color: var(--background-black);
+    background-color: #141414;
+    /* Force black when scrolled */
+    background-image: none;
 }
 
 .navbar-left {
@@ -48,11 +51,12 @@
 }
 
 .logo {
-    font-size: 2.3rem;
+    font-size: 2.8rem;
     font-weight: bold;
     color: var(--primary-red);
     text-transform: capitalize;
     letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
 }
 
 /* Search Bar */
@@ -96,6 +100,12 @@
     display: flex;
     gap: 2rem;
     list-style: none;
+
+    /* Absolute Center */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
 }
 
 .nav-links li {

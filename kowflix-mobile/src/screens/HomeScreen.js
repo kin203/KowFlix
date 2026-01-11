@@ -25,11 +25,15 @@ const HomeScreen = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
 
     // Data States
-    const [movies, setMovies] = useState([]); // Trending
+    const [trendingMovies, setTrendingMovies] = useState([]);
     const [topRatedMovies, setTopRatedMovies] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [heroBanners, setHeroBanners] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categoryMovies, setCategoryMovies] = useState({});
+
+    // Popular Genres for Rows
+    const POPULAR_GENRES = ['Phim Hành Động', 'Phim Lãng Mạn', 'Phim Hài', 'Phim Hoạt Hình'];
 
     useEffect(() => {
         fetchData();
@@ -39,32 +43,35 @@ const HomeScreen = ({ navigation }) => {
         try {
             setLoading(true);
 
-            // Fetch all data in parallel
-            const [moviesRes, categoriesRes, heroRes, topRatedRes] = await Promise.all([
-                movieAPI.getAll({ limit: 10 }), // Trending
-                categoryAPI.getActive(),
+            // Fetch Core Data in Parallel
+            const [trendingRes, topRatedRes, heroRes, categoriesRes] = await Promise.all([
+                movieAPI.getTrendingMovies(10),
+                movieAPI.getTopRatedMovies(10),
                 heroAPI.getAll(true),
-                movieAPI.getAll({ limit: 10, sort: '-rating' }) // Top Rated simulation
+                categoryAPI.getActive()
             ]);
 
-            if (moviesRes.data.success) {
-                setMovies(moviesRes.data.data || []);
-            }
+            // Set Core Data
+            setTrendingMovies(trendingRes.data.data || []);
+            setTopRatedMovies(topRatedRes.data.data || []);
+            setHeroBanners(heroRes.data.success ? heroRes.data.data : []);
+            setCategories(categoriesRes.data.success ? categoriesRes.data.data : []);
 
-            if (categoriesRes.data.success) {
-                setCategories(categoriesRes.data.data || []);
-            }
+            // Fetch Category Rows in Parallel
+            const categoryPromises = POPULAR_GENRES.map(genre =>
+                movieAPI.getAll({ genre, limit: 10 })
+                    .then(res => ({ genre, data: res.data.data || [] }))
+                    .catch(err => ({ genre, data: [] }))
+            );
 
-            if (heroRes.data.success) {
-                setHeroBanners(heroRes.data.data || []);
-            }
-
-            if (topRatedRes.data.success) {
-                setTopRatedMovies(topRatedRes.data.data || []);
-            } else {
-                // Fallback if API flexible sorting not supported yet, just use some movies
-                setTopRatedMovies(moviesRes.data.data?.slice(0, 5) || []);
-            }
+            const categoryResults = await Promise.all(categoryPromises);
+            const newCategoryMovies = {};
+            categoryResults.forEach(({ genre, data }) => {
+                if (data.length > 0) {
+                    newCategoryMovies[genre] = data;
+                }
+            });
+            setCategoryMovies(newCategoryMovies);
 
         } catch (error) {
             console.error('Failed to fetch home data:', error);
@@ -89,8 +96,6 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const handlePlayPress = (movie) => {
-        // Direct play or go to detail then play?
-        // User asked for detail screen flow usually
         navigation.navigate('MovieDetail', { movieId: movie._id, movie });
     };
 
@@ -109,9 +114,6 @@ const HomeScreen = ({ navigation }) => {
 
     return (
         <View style={[globalStyles.container, { paddingTop: 0 }]}>
-            {/* Remove paddingTop here and handle it inside ScrollView or Header if needed for translucent effect */}
-            {/* But for now let's keep it simple with black background behind status bar */}
-
             <StatusBarTranslucent />
 
             <ScrollView
@@ -121,12 +123,12 @@ const HomeScreen = ({ navigation }) => {
                         refreshing={refreshing}
                         onRefresh={onRefresh}
                         tintColor={COLORS.primary}
-                        progressViewOffset={insets.top} // Ensure spinner is visible
+                        progressViewOffset={insets.top}
                     />
                 }
-                contentContainerStyle={{ paddingBottom: 130 }} // Increased space for bottom tab safe area
+                contentContainerStyle={{ paddingBottom: 130 }}
             >
-                {/* Hero Carousel - Edge to Edge */}
+                {/* Hero Carousel */}
                 <HeroCarousel
                     banners={heroBanners}
                     onPlayPress={handlePlayPress}
@@ -145,8 +147,8 @@ const HomeScreen = ({ navigation }) => {
 
                 {/* Trending Movies */}
                 <MovieCarousel
-                    title="Phim Mới Cập Nhật"
-                    movies={movies}
+                    title="Top Thịnh Hành"
+                    movies={trendingMovies}
                     onMoviePress={handleMoviePress}
                 />
 
@@ -156,6 +158,16 @@ const HomeScreen = ({ navigation }) => {
                     movies={topRatedMovies}
                     onMoviePress={handleMoviePress}
                 />
+
+                {/* Category Rows */}
+                {Object.entries(categoryMovies).map(([genre, movieList]) => (
+                    <MovieCarousel
+                        key={genre}
+                        title={genre}
+                        movies={movieList}
+                        onMoviePress={handleMoviePress}
+                    />
+                ))}
 
             </ScrollView>
         </View>

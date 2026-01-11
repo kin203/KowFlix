@@ -116,6 +116,7 @@ const config = {
                 'http://localhost:3000',
                 'https://kowflix.onrender.com',
                 'https://nk203.id.vn',
+                'https://kow-flix.vercel.app',
                 undefined // Allow non-browser requests (e.g. apps, curl)
             ];
 

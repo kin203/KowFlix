@@ -9,40 +9,52 @@
 /* Breadcrumb Container for Alignment */
 .watch-breadcrumb {
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto 2rem;
-    /* Increased margin */
-    padding: 0 1rem;
+    /* max-width removed to allow full width alignment */
+    margin: 0 0 2rem 0;
+    padding-left: 60px;
+    /* Fixed left padding - closer to edge */
     position: relative;
     z-index: 5;
 }
 
 /* Floating Back Button (Matched Profile Page) */
-.back-button {
+/* Floating Back Button (Matched RoPhim) */
+.ro-back-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: #1f1f1f;
+    border: 1px solid #333;
     border-radius: 50px;
-    color: white;
+    color: #e5e5e5;
     font-weight: 600;
+    font-family: inherit;
+    font-size: 1rem;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
-    max-width: 250px;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ro-back-btn svg {
+    flex-shrink: 0;
+}
+
+.ro-back-btn span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 
-.back-button:hover {
-    background: rgba(255, 215, 0, 0.2);
-    border-color: #FFD700;
+.ro-back-btn:hover {
+    background: #2a2a2a;
+    border-color: #555;
     transform: translateX(-5px);
     color: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .loading,
