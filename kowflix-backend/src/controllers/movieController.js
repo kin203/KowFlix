@@ -566,7 +566,12 @@ export const playMovie = async (req, res) => {
       }
     })();
 
-    const PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+    let PUBLIC_MEDIA_URL = process.env.PUBLIC_MEDIA_URL || (process.env.NODE_ENV === 'production' ? "https://nk203.id.vn/media" : "http://localhost:5000/media");
+
+    // FORCE HTTPS for remote media server (nk203.id.vn) to prevent Mixed Content errors
+    if (PUBLIC_MEDIA_URL.includes("nk203.id.vn") && PUBLIC_MEDIA_URL.startsWith("http:")) {
+      PUBLIC_MEDIA_URL = PUBLIC_MEDIA_URL.replace("http:", "https:");
+    }
 
     // Get all HLS content files
     const hlsFiles = movie.contentFiles.filter(f => f.type === "hls");
@@ -598,6 +603,11 @@ export const playMovie = async (req, res) => {
             url = `${PUBLIC_MEDIA_URL}${url}`;
           }
         }
+      } else {
+        // If it is ALREADY a full URL (e.g. from database legacy), force HTTPS if it matches our remote server
+        if (url.includes("nk203.id.vn") && url.startsWith("http:")) {
+          url = url.replace("http:", "https:");
+        }
       }
 
       return {
@@ -620,6 +630,11 @@ export const playMovie = async (req, res) => {
           } else {
             masterUrl = `${PUBLIC_MEDIA_URL}${masterUrl}`;
           }
+        }
+      } else {
+        // Force HTTPS for existing full URLs
+        if (masterUrl.includes("nk203.id.vn") && masterUrl.startsWith("http:")) {
+          masterUrl = masterUrl.replace("http:", "https:");
         }
       }
     }
