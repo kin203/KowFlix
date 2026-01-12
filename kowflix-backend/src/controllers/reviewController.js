@@ -230,3 +230,41 @@ export const dislikeReview = async (req, res) => {
     }
 };
 
+// Update review
+export const updateReview = async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const review = await Review.findById(req.params.id);
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: 'Review not found'
+            });
+        }
+
+        if (review.userId.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to update this review'
+            });
+        }
+
+        if (rating) review.rating = rating;
+        if (comment) review.comment = comment;
+
+        await review.save();
+
+        res.json({
+            success: true,
+            data: review,
+            message: 'Review updated successfully'
+        });
+    } catch (error) {
+        console.error('updateReview error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update review'
+        });
+    }
+};

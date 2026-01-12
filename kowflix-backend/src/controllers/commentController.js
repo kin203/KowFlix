@@ -223,3 +223,39 @@ export const reportComment = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+// Update a comment
+export const updateComment = async (req, res) => {
+    try {
+        const { content } = req.body;
+        const comment = await Comment.findById(req.params.id);
+
+        if (!comment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Comment not found'
+            });
+        }
+
+        if (comment.userId.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to update this comment'
+            });
+        }
+
+        comment.content = content;
+        await comment.save();
+
+        res.json({
+            success: true,
+            data: comment,
+            message: 'Comment updated successfully'
+        });
+    } catch (error) {
+        console.error('updateComment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update comment'
+        });
+    }
+};

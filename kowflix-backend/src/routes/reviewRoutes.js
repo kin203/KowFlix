@@ -3,7 +3,10 @@ import {
     getAllReviews,
     getMovieReviews,
     createReview,
-    deleteReview
+    deleteReview,
+    updateReview,
+    likeReview,
+    dislikeReview
 } from '../controllers/reviewController.js';
 import auth from '../middleware/auth.js';
 import isAdmin from '../middleware/admin.js';
@@ -15,7 +18,10 @@ router.get('/movie/:movieId', getMovieReviews);
 
 // Protected routes
 router.post('/', auth, createReview);
+router.put('/:id', auth, updateReview);
 router.delete('/:id', auth, deleteReview); // Controller handles admin/owner check
+router.post('/:id/like', auth, likeReview);
+router.post('/:id/dislike', auth, dislikeReview);
 
 // Admin routes
 router.get('/', auth, isAdmin, getAllReviews);

@@ -5,7 +5,8 @@ import {
     deleteComment,
     likeComment,
     dislikeComment,
-    reportComment
+    reportComment,
+    updateComment
 } from '../controllers/commentController.js';
 import auth from '../middleware/auth.js';
 

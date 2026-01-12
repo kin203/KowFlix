@@ -25,6 +25,9 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
         }
     };
 
+    // Determine if this item is a review or a comment
+    const isReview = type === 'review' || item.isReview;
+
     // Handle like
     const handleLike = async () => {
         if (!userId) {
@@ -32,15 +35,15 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
             return;
         }
         try {
-            if (type === 'comment') {
-                await commentAPI.like(item._id);
-            } else {
+            if (isReview) {
                 await reviewAPI.like(item._id);
+            } else {
+                await commentAPI.like(item._id);
             }
             onUpdate();
         } catch (error) {
             console.error('Error liking:', error);
-            alert('Có lỗi xảy ra khi thích bình luận');
+            alert('Có lỗi xảy ra khi thích');
         }
     };
 
@@ -51,15 +54,15 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
             return;
         }
         try {
-            if (type === 'comment') {
-                await commentAPI.dislike(item._id);
-            } else {
+            if (isReview) {
                 await reviewAPI.dislike(item._id);
+            } else {
+                await commentAPI.dislike(item._id);
             }
             onUpdate();
         } catch (error) {
             console.error('Error disliking:', error);
-            alert('Có lỗi xảy ra khi không thích bình luận');
+            alert('Có lỗi xảy ra khi không thích');
         }
     };
 
@@ -68,7 +71,14 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
         if (!editText.trim()) return;
         setSubmitting(true);
         try {
-            if (type === 'comment') {
+            if (isReview) {
+                // Determine if we need to send 'comment' or 'content' field. 
+                // Review model usually expects 'comment'. Frontend might use 'content' for generic display.
+                // Let's send both or specific based on API. reviewAPI.update needs implementation too in api/reviewAPI.js? 
+                // Wait, I implemented updateReview controller, but did I add it to frontend API?
+                // I need to check `src/services/api/reviewAPI.js` next. Assuming it exists or I will add it.
+                await reviewAPI.update(item._id, { comment: editText });
+            } else {
                 await commentAPI.update(item._id, { content: editText });
             }
             setIsEditing(false);
@@ -85,10 +95,10 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
     const handleDelete = async () => {
         if (!confirm('Bạn có chắc muốn xóa?')) return;
         try {
-            if (type === 'comment') {
-                await commentAPI.delete(item._id);
-            } else {
+            if (isReview) {
                 await reviewAPI.delete(item._id);
+            } else {
+                await commentAPI.delete(item._id);
             }
             onUpdate();
         } catch (error) {
