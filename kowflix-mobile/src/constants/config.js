@@ -1,8 +1,8 @@
 // API Base URL Configuration
 // Use process.env.NODE_ENV instead of __DEV__ for better compatibility
 const isDevelopment = process.env.NODE_ENV !== 'production';
-export const API_BASE_URL = 'http://192.168.100.32:5000/api';  // Localhost (User IP)
-// export const API_BASE_URL = 'https://kowflix.onrender.com/api';  // Production
+//export const API_BASE_URL = 'http://192.168.100.32:5000/api';  // Localhost (User IP)
+export const API_BASE_URL = 'https://kowflix.onrender.com/api';  // Production
 
 export const MEDIA_BASE_URL = 'http://192.168.100.32:5000';
 // export const MEDIA_BASE_URL = 'https://kowflix.onrender.com';

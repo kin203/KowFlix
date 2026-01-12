@@ -29,26 +29,77 @@ export const trackView = async (req, res) => {
 // Get overall dashboard statistics
 export const getDashboardStats = async (req, res) => {
     try {
-        // Get total counts
+        // 1. Total User Stats & Growth
         const totalUsers = await User.countDocuments();
-        const totalMovies = await Movie.countDocuments();
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const lastMonthUsers = await User.countDocuments({ createdAt: { $lt: thirtyDaysAgo } });
 
-        // Get online users (active in last 5 minutes)
+        let userGrowth = 0;
+        if (lastMonthUsers > 0) {
+            userGrowth = ((totalUsers - lastMonthUsers) / lastMonthUsers) * 100;
+        } else if (totalUsers > 0) {
+            userGrowth = 100; // If previously 0, growth is 100%
+        }
+
+        // 2. Total Movie Stats & Growth
+        const totalMovies = await Movie.countDocuments();
+        const lastMonthMovies = await Movie.countDocuments({ createdAt: { $lt: thirtyDaysAgo } });
+
+        let movieGrowth = 0;
+        if (lastMonthMovies > 0) {
+            movieGrowth = ((totalMovies - lastMonthMovies) / lastMonthMovies) * 100;
+        } else if (totalMovies > 0) {
+            movieGrowth = 100;
+        }
+        const newMoviesCount = totalMovies - lastMonthMovies;
+
+        // 3. Online/Active Users (Last 5 mins)
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const onlineUsers = await User.countDocuments({
             lastActive: { $gte: fiveMinutesAgo }
         });
+        // Note: We don't have historical data for online users for accurate "vs yesterday" comparison yet.
 
-        // Calculate total views (sum of all movie views)
+        // 4. Total Views & Weekly Growth
         const viewsResult = await Movie.aggregate([
             { $group: { _id: null, totalViews: { $sum: '$views' } } }
         ]);
         const totalViews = viewsResult.length > 0 ? viewsResult[0].totalViews : 0;
 
-        // Get trending movies count (movies with views in last 7 days) - APPROXIMATION
-        // ideally we track this in a separate collection, but for now using updatedAt or just Movie count
-        // Let's use UpdatedAt as proxy or just return 0 if not tracked
+        // Calculate view growth (This week vs Last week) based on DailyStat
+        const today = new Date();
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+
+        // Get total views for last 7 days (including today)
+        const currentWeekStats = await DailyStat.aggregate([
+            { $match: { createdAt: { $gte: sevenDaysAgo } } },
+            { $group: { _id: null, total: { $sum: '$views' } } }
+        ]);
+        const currentWeekViews = currentWeekStats.length > 0 ? currentWeekStats[0].total : 0;
+
+        // Get total views for previous 7 days
+        const lastWeekStats = await DailyStat.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: fourteenDaysAgo,
+                        $lt: sevenDaysAgo
+                    }
+                }
+            },
+            { $group: { _id: null, total: { $sum: '$views' } } }
+        ]);
+        const lastWeekViews = lastWeekStats.length > 0 ? lastWeekStats[0].total : 0;
+
+        let viewGrowth = 0;
+        if (lastWeekViews > 0) {
+            viewGrowth = ((currentWeekViews - lastWeekViews) / lastWeekViews) * 100;
+        } else if (currentWeekViews > 0) {
+            viewGrowth = 100;
+        }
+
+        // Get trending count (Updated in last 7 days)
         const trendingCount = await Movie.countDocuments({
             updatedAt: { $gte: sevenDaysAgo }
         });
@@ -56,10 +107,31 @@ export const getDashboardStats = async (req, res) => {
         res.json({
             success: true,
             data: {
-                totalUsers,
-                onlineUsers,
-                totalMovies,
-                totalViews,
+                totalUsers: {
+                    value: totalUsers,
+                    percent: parseFloat(userGrowth.toFixed(1)),
+                    trend: userGrowth >= 0 ? 'up' : 'down',
+                    label: 'so với tháng trước'
+                },
+                onlineUsers: {
+                    value: onlineUsers,
+                    percent: 0, // Not tracking history for this yet
+                    trend: 'neutral',
+                    label: 'so với hôm qua'
+                },
+                totalMovies: {
+                    value: totalMovies,
+                    percent: newMoviesCount, // Using count instead of percent for movies as per design preference or switch to percent
+                    isCount: true, // Flag to frontend
+                    trend: 'up',
+                    label: 'phim mới'
+                },
+                totalViews: {
+                    value: totalViews,
+                    percent: parseFloat(viewGrowth.toFixed(1)),
+                    trend: viewGrowth >= 0 ? 'up' : 'down',
+                    label: 'tuần này'
+                },
                 trendingCount
             }
         });

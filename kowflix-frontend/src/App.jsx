@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import MaintenanceBanner from './components/MaintenanceBanner';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -65,54 +66,72 @@ function App() {
   );
 }
 
-// Simple wrapper to handle maintenance redirect
+// Maintenance Wrapper with countdown logic
 const MaintenanceWrapper = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [scheduledStart, setScheduledStart] = useState(null);
+  const [showBanner, setShowBanner] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkMaintenance = async () => {
       // Check API for authoritative status
       try {
         const { data } = await settingAPI.getAll();
         const serverMaintenance = data.maintenanceMode === true;
+        const start = data.maintenanceScheduledStart;
+        setScheduledStart(start);
 
         // Update local storage to match server
         if (localStorage.getItem('maintenanceMode') !== String(serverMaintenance)) {
           localStorage.setItem('maintenanceMode', serverMaintenance);
         }
+
+        const now = new Date().getTime();
+        const startTime = start ? new Date(start).getTime() : 0;
+        const isCountdownActive = serverMaintenance && start && now < startTime;
+        const isMaintenanceActive = serverMaintenance && (!start || now >= startTime);
+
+        setShowBanner(isCountdownActive);
+
+        const isAdminRoute = location.pathname.startsWith('/admin');
+        const isLogin = location.pathname === '/login';
+        const isMaintenancePage = location.pathname === '/maintenance';
+
+        if (isMaintenanceActive && !isAdminRoute && !isLogin && !isMaintenancePage) {
+          navigate('/maintenance');
+        }
+
+        // If maintenance turned off but stuck on maintenance page
+        if (!isMaintenanceActive && isMaintenancePage) {
+          navigate('/');
+        }
       } catch (err) {
         console.error("Failed to check maintenance status:", err);
-      }
-
-      const isMaintenance = localStorage.getItem('maintenanceMode') === 'true';
-      const isAdminRoute = location.pathname.startsWith('/admin');
-      const isLogin = location.pathname === '/login';
-      const isMaintenancePage = location.pathname === '/maintenance';
-
-      if (isMaintenance && !isAdminRoute && !isLogin && !isMaintenancePage) {
-        navigate('/maintenance');
-      }
-
-      // If maintenance turned off but stuck on maintenance page
-      if (!isMaintenance && isMaintenancePage) {
-        navigate('/');
       }
     };
 
     checkMaintenance();
+
+    const interval = setInterval(checkMaintenance, 60000); // Check every minute
 
     // Listen for storage events (from other tabs) and custom events (from AdminSettings)
     window.addEventListener('storage', checkMaintenance);
     window.addEventListener('maintenance_update', checkMaintenance);
 
     return () => {
+      clearInterval(interval);
       window.removeEventListener('storage', checkMaintenance);
       window.removeEventListener('maintenance_update', checkMaintenance);
     };
   }, [location, navigate]);
 
-  return children;
+  return (
+    <>
+      {showBanner && <MaintenanceBanner scheduledTime={scheduledStart} />}
+      {children}
+    </>
+  );
 };
 
 export default App;
