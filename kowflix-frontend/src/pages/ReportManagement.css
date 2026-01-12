@@ -1,0 +1,152 @@
+.report-management-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #141414;
+    color: #fff;
+}
+
+.report-content {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 260px;
+    /* Width of sidebar */
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.report-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.report-table-container {
+    background: #1f1f1f;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-table th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.report-user-info,
+.report-movie-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.report-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333;
+}
+
+.report-poster {
+    width: 40px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.report-reason {
+    font-weight: 600;
+    color: #ff4d4f;
+    margin-bottom: 0.25rem;
+}
+
+.report-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-badge.pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.reviewed {
+    background: rgba(64, 169, 255, 0.2);
+    color: #40a9ff;
+    border: 1px solid rgba(64, 169, 255, 0.3);
+}
+
+.status-badge.resolved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-select {
+    padding: 0.4rem;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.action-select:focus {
+    outline: none;
+    border-color: #e50914;
+}
+
+.dashboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: #1f1f1f;
+    border-radius: 12px;
+}

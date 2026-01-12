@@ -12,6 +12,7 @@ import JobManagement from './pages/JobManagement';
 import UserManagement from './pages/UserManagement';
 import HeroManagement from './pages/HeroManagement';
 import ReviewManagement from './pages/ReviewManagement';
+import ReportManagement from './pages/ReportManagement';
 import NotificationManagement from './pages/NotificationManagement';
 import NavMenuManagement from './pages/NavMenuManagement';
 import AdminSettings from './pages/AdminSettings';
@@ -47,6 +48,7 @@ function App() {
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/hero" element={<HeroManagement />} />
           <Route path="/admin/reviews" element={<ReviewManagement />} />
+          <Route path="/admin/reports" element={<ReportManagement />} />
           <Route path="/admin/notifications" element={<NotificationManagement />} />
           <Route path="/admin/nav-menu" element={<NavMenuManagement />} />
           <Route path="/admin/settings" element={<AdminSettings />} />

@@ -12,7 +12,8 @@ import {
     Briefcase,
     LogOut,
     Settings,
-    Menu
+    Menu,
+    AlertTriangle
 } from 'lucide-react';
 import './DashboardSidebar.css';
 
@@ -28,6 +29,7 @@ const DashboardSidebar = () => {
         { path: '/admin/nav-menu', icon: Menu, label: t('admin.nav_menu') || 'Nav Menu' },
         { path: '/admin/jobs', icon: Briefcase, label: t('admin.jobs') || 'Công việc' },
         { path: '/admin/users', icon: Users, label: t('admin.users') || 'Người dùng' },
+        { path: '/admin/reports', icon: AlertTriangle, label: 'Báo lỗi' },
         { path: '/admin/reviews', icon: Star, label: t('admin.reviews') || 'Đánh giá' },
         { path: '/admin/hero', icon: Image, label: t('admin.hero') || 'Hero Banner' },
         { path: '/admin/notifications', icon: Bell, label: t('admin.notifications') || 'Thông báo' },

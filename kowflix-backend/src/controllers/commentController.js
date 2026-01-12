@@ -21,41 +21,50 @@ export const getMovieComments = async (req, res) => {
         const commentMap = {};
         const rootComments = [];
 
+        // Process reviews and add to map
+        const formattedReviews = reviews.map(review => {
+            const formatted = {
+                ...review,
+                _id: review._id.toString(), // Ensure ID is string for map key
+                content: review.comment,
+                isReview: true,
+                rating: review.rating,
+                likeCount: review.likes ? review.likes.length : 0,
+                dislikeCount: review.dislikes ? review.dislikes.length : 0,
+                replies: [],
+                createdAt: review.createdAt
+            };
+            commentMap[formatted._id] = formatted; // Add to map for linking
+            return formatted;
+        });
+
         // First pass: Prepare comments and map them
         comments.forEach(comment => {
             comment.likeCount = comment.likes ? comment.likes.length : 0;
             comment.dislikeCount = comment.dislikes ? comment.dislikes.length : 0;
             comment.replies = [];
             comment.isReview = false;
-            commentMap[comment._id] = comment;
+            commentMap[comment._id.toString()] = comment;
         });
 
-        // Second pass: Link replies to parents
+        // Second pass: Link replies to parents (Comments or Reviews)
         comments.forEach(comment => {
             if (comment.parentId) {
-                const parent = commentMap[comment.parentId];
+                const parent = commentMap[comment.parentId.toString()];
                 if (parent) {
                     parent.replies.push(comment);
                     // Sort replies oldest to newest
                     parent.replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                } else {
+                    // Orphaned reply (parent deleted?) -> Treat as root
+                    rootComments.push(comment);
                 }
             } else {
                 rootComments.push(comment);
             }
         });
 
-        // Process reviews
-        const formattedReviews = reviews.map(review => ({
-            ...review,
-            content: review.comment,
-            isReview: true,
-            rating: review.rating,
-            likeCount: review.likes ? review.likes.length : 0,
-            dislikeCount: review.dislikes ? review.dislikes.length : 0,
-            replies: [] // Reviews don't have threaded replies in this legacy structure usually, or handled differently
-        }));
-
-        // Merge roots and reviews
+        // Merge roots and reviews (reviews are always roots)
         const allContent = [...rootComments, ...formattedReviews].sort((a, b) =>
             new Date(b.createdAt) - new Date(a.createdAt)
         );
