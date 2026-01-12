@@ -17,6 +17,8 @@ import NavMenuManagement from './pages/NavMenuManagement';
 import AdminSettings from './pages/AdminSettings';
 import CategoryPage from './pages/CategoryPage';
 import CountryPage from './pages/CountryPage';
+import AllCountriesPage from './pages/AllCountriesPage';
+import MoviesPage from './pages/MoviesPage';
 import GenrePage from './pages/GenrePage';
 import Profile from './pages/Profile';
 import MaintenancePage from './pages/MaintenancePage';
@@ -49,8 +51,9 @@ function App() {
           <Route path="/admin/nav-menu" element={<NavMenuManagement />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
+          <Route path="/country" element={<AllCountriesPage />} />
           <Route path="/country/:country" element={<CountryPage />} />
-          <Route path="/genre/:genre" element={<GenrePage />} />
+          <Route path="/movie" element={<MoviesPage />} />
           <Route path="/genre/:genre" element={<GenrePage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/new" element={<NewAndPopular />} />

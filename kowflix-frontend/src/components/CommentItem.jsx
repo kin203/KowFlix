@@ -13,7 +13,7 @@ const CommentItem = ({ item, type, userId, onUpdate }) => {
 
 
     const isOwner = userId && item.userId?._id === userId;
-    const displayName = item.isAnonymous ? 'Ẩn danh' : (item.userId?.username || item.userId?.profile?.name || 'User');
+    const displayName = item.isAnonymous ? 'Ẩn danh' : (item.userId?.username || item.userId?.profile?.name || 'Người dùng chưa đặt tên');
     const avatar = item.isAnonymous ? null : (item.userId?.profile?.avatar || null);
 
     // Format timestamp

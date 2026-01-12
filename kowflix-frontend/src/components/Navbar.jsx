@@ -111,7 +111,7 @@ const Navbar = () => {
                             path: `/country/${encodeURIComponent(c)}`,
                             _id: `country-${c}`
                         }));
-                        return { ...item, subItems: countrySubItems };
+                        return { ...item, title: 'Quốc gia', label: 'Quốc gia', path: '/country', subItems: countrySubItems };
                     }
 
                     // Inject Genres into 'Movies' / 'Thể loại'
@@ -121,7 +121,7 @@ const Navbar = () => {
                             path: `/genre/${encodeURIComponent(g)}`,
                             _id: `genre-${g}`
                         }));
-                        return { ...item, subItems: genreSubItems };
+                        return { ...item, title: 'Thể loại', label: 'Thể loại', path: '/movie', subItems: genreSubItems };
                     }
 
                     return item;
