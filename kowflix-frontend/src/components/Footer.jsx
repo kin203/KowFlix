@@ -53,10 +53,10 @@ const Footer = () => {
                 <div className="footer-social">
                     <h3>{t('footer.connect')}</h3>
                     <div className="social-icons">
-                        <a href="#" aria-label="Facebook">www.facebook.com/nk203<Facebook size={24} /></a>
-                        <a href="#" aria-label="Twitter">x.com<Twitter size={24} /></a>
-                        <a href="#" aria-label="Instagram">https://www.instagram.com/nx.k203/<Instagram size={24} /></a>
-                        <a href="#" aria-label="Youtube">www.youtube.com<Youtube size={24} /></a>
+                        <a href="https://facebook.com/nk203" aria-label="Facebook"><Facebook size={24} /></a>
+                        <a href="https://x.com" aria-label="Twitter"><Twitter size={24} /></a>
+                        <a href="https://www.instagram.com/nx.k203" aria-label="Instagram">/<Instagram size={24} /></a>
+                        <a href="https://youtube.com" aria-label="Youtube"><Youtube size={24} /></a>
                     </div>
                 </div>
             </div>
