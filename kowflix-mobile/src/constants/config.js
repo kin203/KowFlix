@@ -4,8 +4,9 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 //export const API_BASE_URL = 'http://192.168.100.32:5000/api';  // Localhost (User IP)
 export const API_BASE_URL = 'https://kowflix.onrender.com/api';  // Production
 
-export const MEDIA_BASE_URL = 'http://192.168.100.32:5000';
+// export const MEDIA_BASE_URL = 'http://192.168.100.32:5000';
 // export const MEDIA_BASE_URL = 'https://kowflix.onrender.com';
+export const MEDIA_BASE_URL = '172.19.31.69:5000';
 
 // App Configuration
 export const APP_NAME = 'KowFlix';

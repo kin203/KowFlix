@@ -28,7 +28,8 @@ const { width } = Dimensions.get('window');
 
 const MovieDetailScreen = ({ route, navigation }) => {
     const { movieId, movie: initialMovieData } = route.params;
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
+    const userId = user?.id || user?._id;
     const insets = useSafeAreaInsets();
 
     const [movie, setMovie] = useState(initialMovieData || null);
@@ -111,6 +112,8 @@ const MovieDetailScreen = ({ route, navigation }) => {
         }
     };
 
+    const [replyingTo, setReplyingTo] = useState(null); // { id: string, name: string }
+
     const handlePostComment = async () => {
         if (!userComment.trim()) return;
         if (!isAuthenticated) {
@@ -122,18 +125,58 @@ const MovieDetailScreen = ({ route, navigation }) => {
         try {
             const res = await commentAPI.create({
                 movieId,
-                content: userComment
+                content: userComment,
+                parentId: replyingTo ? replyingTo.id : null
             });
             if (res.data.success) {
                 setUserComment('');
+                setReplyingTo(null);
                 fetchComments();
-                Alert.alert("Thành công", "Đã đăng bình luận!");
+                // Alert.alert("Thành công", "Đã đăng bình luận!"); // Remove annoying alert for chat-like experience
             }
         } catch (error) {
             console.error('Post comment error:', error);
             Alert.alert("Lỗi", "Không thể đăng bình luận.");
         } finally {
             setSubmittingComment(false);
+        }
+    };
+
+    const handleReply = (comment) => {
+        const name = comment.userId?.profile?.name || comment.userId?.email?.split('@')[0] || 'Người dùng';
+        setReplyingTo({ id: comment._id, name });
+        // Optionally focus input here if possible
+    };
+
+    const cancelReply = () => {
+        setReplyingTo(null);
+    };
+
+    const handleLike = async (comment) => {
+        if (!isAuthenticated) {
+            Alert.alert("Yêu cầu đăng nhập", "Bạn cần đăng nhập để thích bình luận.");
+            return;
+        }
+        try {
+            // Optimistic update could be done here, but for simplicity we fetch or just manual update state
+            await commentAPI.like(comment._id);
+            // Refresh comments to get latest counts and state
+            fetchComments();
+        } catch (error) {
+            console.error('Like error:', error);
+        }
+    };
+
+    const handleDislike = async (comment) => {
+        if (!isAuthenticated) {
+            Alert.alert("Yêu cầu đăng nhập", "Bạn cần đăng nhập để không thích bình luận.");
+            return;
+        }
+        try {
+            await commentAPI.dislike(comment._id);
+            fetchComments();
+        } catch (error) {
+            console.error('Dislike error:', error);
         }
     };
 
@@ -388,34 +431,115 @@ const MovieDetailScreen = ({ route, navigation }) => {
                     {activeTab === 'comments' && (
                         <View style={styles.reviewSection}>
                             {/* Input */}
-                            <View style={styles.reviewInputContainer}>
-                                <TextInput
-                                    style={styles.reviewInput}
-                                    placeholder="Viết bình luận..."
-                                    placeholderTextColor={COLORS.textMuted}
-                                    value={userComment}
-                                    onChangeText={setUserComment}
-                                    multiline
-                                />
-                                <TouchableOpacity
-                                    style={[styles.postButton, !userComment.trim() && { opacity: 0.5 }]}
-                                    onPress={handlePostComment}
-                                    disabled={submittingComment || !userComment.trim()}
-                                >
-                                    <Ionicons name="send" size={20} color="#000" />
-                                </TouchableOpacity>
+                            <View style={styles.reviewInputWrapper}>
+                                {replyingTo && (
+                                    <View style={styles.replyContext}>
+                                        <Text style={styles.replyContextText}>Đang trả lời: <Text style={{ fontWeight: 'bold' }}>{replyingTo.name}</Text></Text>
+                                        <TouchableOpacity onPress={cancelReply}>
+                                            <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                <View style={styles.reviewInputContainer}>
+                                    <TextInput
+                                        style={styles.reviewInput}
+                                        placeholder={replyingTo ? "Viết câu trả lời..." : "Viết bình luận..."}
+                                        placeholderTextColor={COLORS.textMuted}
+                                        value={userComment}
+                                        onChangeText={setUserComment}
+                                        multiline
+                                    />
+                                    <TouchableOpacity
+                                        style={[styles.postButton, !userComment.trim() && { opacity: 0.5 }]}
+                                        onPress={handlePostComment}
+                                        disabled={submittingComment || !userComment.trim()}
+                                    >
+                                        <Ionicons name="send" size={20} color="#000" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
 
                             {/* List */}
                             {comments.length > 0 ? comments.map((comment) => (
                                 <View key={comment._id} style={styles.reviewItem}>
                                     <View style={styles.reviewHeader}>
-                                        <Text style={styles.reviewerName}>{comment.userId?.username || 'Người dùng'}</Text>
+                                        <Text style={styles.reviewerName}>{comment.userId?.profile?.name || comment.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
                                         <Text style={styles.reviewDate}>
                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                         </Text>
                                     </View>
                                     <Text style={styles.reviewContent}>{comment.content}</Text>
+
+                                    {/* Interaction Buttons (Like, Dislike, Reply) */}
+                                    <View style={styles.interactionRow}>
+                                        <TouchableOpacity style={styles.interactionBtn} onPress={() => handleLike(comment)}>
+                                            <Ionicons
+                                                name={user && comment.likes?.includes(userId) ? "thumbs-up" : "thumbs-up-outline"}
+                                                size={16}
+                                                color={user && comment.likes?.includes(userId) ? COLORS.primary : COLORS.textSecondary}
+                                            />
+                                            <Text style={[styles.interactionText, user && comment.likes?.includes(userId) && { color: COLORS.primary }]}>
+                                                {comment.likeCount || 0}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity style={styles.interactionBtn} onPress={() => handleDislike(comment)}>
+                                            <Ionicons
+                                                name={user && comment.dislikes?.includes(userId) ? "thumbs-down" : "thumbs-down-outline"}
+                                                size={16}
+                                                color={user && comment.dislikes?.includes(userId) ? COLORS.error : COLORS.textSecondary}
+                                            />
+                                            <Text style={[styles.interactionText, user && comment.dislikes?.includes(userId) && { color: COLORS.error }]}>
+                                                {comment.dislikeCount || 0}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity style={styles.interactionBtn} onPress={() => handleReply(comment)}>
+                                            <Text style={styles.replyBtnText}>Trả lời</Text>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    {/* Replies Section */}
+                                    {comment.replies && comment.replies.length > 0 && (
+                                        <View style={styles.repliesContainer}>
+                                            {comment.replies.map((reply) => (
+                                                <View key={reply._id} style={styles.replyItem}>
+                                                    <View style={styles.reviewHeader}>
+                                                        <Text style={styles.reviewerName}>{reply.userId?.profile?.name || reply.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
+                                                        <Text style={styles.reviewDate}>
+                                                            {new Date(reply.createdAt).toLocaleDateString('vi-VN')}
+                                                        </Text>
+                                                    </View>
+                                                    <Text style={styles.reviewContent}>{reply.content}</Text>
+
+                                                    {/* Like/Dislike for Reply */}
+                                                    <View style={[styles.interactionRow, { marginTop: 4 }]}>
+                                                        <TouchableOpacity style={styles.interactionBtn} onPress={() => handleLike(reply)}>
+                                                            <Ionicons
+                                                                name={user && reply.likes?.includes(userId) ? "thumbs-up" : "thumbs-up-outline"}
+                                                                size={14}
+                                                                color={user && reply.likes?.includes(userId) ? COLORS.primary : COLORS.textSecondary}
+                                                            />
+                                                            <Text style={[styles.interactionText, { fontSize: 10 }, user && reply.likes?.includes(userId) && { color: COLORS.primary }]}>
+                                                                {reply.likeCount || 0}
+                                                            </Text>
+                                                        </TouchableOpacity>
+
+                                                        <TouchableOpacity style={styles.interactionBtn} onPress={() => handleDislike(reply)}>
+                                                            <Ionicons
+                                                                name={user && reply.dislikes?.includes(userId) ? "thumbs-down" : "thumbs-down-outline"}
+                                                                size={14}
+                                                                color={user && reply.dislikes?.includes(userId) ? COLORS.error : COLORS.textSecondary}
+                                                            />
+                                                            <Text style={[styles.interactionText, { fontSize: 10 }, user && reply.dislikes?.includes(userId) && { color: COLORS.error }]}>
+                                                                {reply.dislikeCount || 0}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    )}
                                 </View>
                             )) : (
                                 <Text style={styles.emptyText}>Chưa có bình luận nào. Hãy là người đầu tiên!</Text>
@@ -697,7 +821,6 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.md,
         paddingHorizontal: SPACING.sm,
         paddingVertical: 4,
-        marginBottom: SPACING.lg,
     },
     reviewInput: {
         flex: 1,
@@ -730,6 +853,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: FONT_SIZES.sm,
     },
+    interactionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        gap: 15,
+    },
+    interactionBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 2,
+    },
+    interactionText: {
+        color: COLORS.textSecondary,
+        fontSize: 12,
+    },
+    replyBtnText: {
+        color: COLORS.textSecondary,
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
     reviewDate: {
         color: COLORS.textSecondary,
         fontSize: FONT_SIZES.xs,
@@ -738,6 +882,58 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         fontSize: FONT_SIZES.md,
         lineHeight: 20,
+    },
+    repliesContainer: {
+        marginTop: SPACING.sm,
+        paddingLeft: SPACING.md,
+        borderLeftWidth: 2,
+        borderLeftColor: '#444',
+    },
+    replyItem: {
+        marginTop: SPACING.sm,
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderRadius: RADIUS.sm,
+        padding: SPACING.sm,
+    },
+    interactionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        gap: 15,
+    },
+    interactionBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 2,
+    },
+    interactionText: {
+        color: COLORS.textSecondary,
+        fontSize: 12,
+    },
+    replyBtnText: {
+        color: COLORS.textSecondary,
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    reviewInputWrapper: {
+        marginBottom: SPACING.lg,
+    },
+    replyContext: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#222',
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 8,
+        borderTopLeftRadius: RADIUS.md,
+        borderTopRightRadius: RADIUS.md,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333',
+    },
+    replyContextText: {
+        color: COLORS.textSecondary,
+        fontSize: 12,
     },
 });
 

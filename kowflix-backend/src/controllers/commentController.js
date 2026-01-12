@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Review from '../models/Review.js'; // Import Review model
+import Notification from '../models/Notification.js';
 
 // Get comments for a movie (including legacy reviews)
 export const getMovieComments = async (req, res) => {
@@ -83,6 +84,7 @@ export const getMovieComments = async (req, res) => {
 };
 
 // Create a new comment
+// Create a new comment
 export const createComment = async (req, res) => {
     try {
         const { movieId, content, parentId } = req.body;
@@ -103,6 +105,45 @@ export const createComment = async (req, res) => {
         });
 
         await comment.save();
+
+        // Notify parent comment owner if this is a reply
+        if (parentId) {
+            try {
+                const parentComment = await Comment.findById(parentId); // Only reply to Comments for now? Or Reviews?
+                // If parentId refers to a Review, Comment.findById might return null depending on if IDs collision or logic.
+                // Assuming replies are only to Comments for this flow or parentId is valid for Comment model.
+                // Ideally, if we allow replying to Reviews, we should check Review model if Comment not found,
+                // BUT the schema for Comment usually stores parentId. If reviews are in Review model, we might need a unified way.
+                // Current frontend passes parentId from comment._id.
+                // If comment was a Review mapped to comment structure, its _id is passed.
+
+                let receiverId = null;
+                if (parentComment) {
+                    receiverId = parentComment.userId;
+                } else {
+                    const parentReview = await Review.findById(parentId);
+                    if (parentReview) {
+                        receiverId = parentReview.userId;
+                    }
+                }
+
+                if (receiverId && receiverId.toString() !== userId) {
+                    const notification = new Notification({
+                        userId: receiverId,
+                        type: 'comment',
+                        title: 'Phản hồi mới',
+                        message: `${req.user.username || 'Một người dùng'} đã trả lời bình luận của bạn: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+                        link: `/watch/${movieId}`,
+                        targetUsers: [userId]
+                    });
+                    await notification.save();
+                    console.log(`Notification created for reply to user ${receiverId}`);
+                }
+            } catch (notifyError) {
+                console.error('Notification creation failed:', notifyError);
+                // Don't fail the request if notification fails
+            }
+        }
 
         // Populate user info for immediate display
         await comment.populate('userId', 'username profile');
@@ -157,21 +198,52 @@ export const deleteComment = async (req, res) => {
 };
 
 // Toggle Like
+// Toggle Like
+// Toggle Like
 export const likeComment = async (req, res) => {
     try {
-        const comment = await Comment.findById(req.params.id);
-        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+        let comment = await Comment.findById(req.params.id);
+        let isReview = false;
+
+        if (!comment) {
+            comment = await Review.findById(req.params.id);
+            isReview = true;
+        }
+
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment or Review not found' });
 
         const userId = req.user.id;
 
-        // Check if already liked
-        if (comment.likes.includes(userId)) {
+        // Use proper string comparison for ObjectIds
+        const isLiked = comment.likes.some(id => id.toString() === userId);
+        const isDisliked = comment.dislikes ? comment.dislikes.some(id => id.toString() === userId) : false;
+
+        if (isLiked) {
             // Unlike
-            comment.likes.pull(userId);
+            comment.likes = comment.likes.filter(id => id.toString() !== userId);
         } else {
-            // Like (and remove dislike if exists)
+            // Like
             comment.likes.push(userId);
-            comment.dislikes.pull(userId);
+            if (isDisliked) {
+                comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
+            }
+
+            // Notification only for Comment (Review usually doesn't need detailed like notification or same logic applies)
+            if (comment.userId.toString() !== userId) {
+                try {
+                    const notification = new Notification({
+                        userId: comment.userId,
+                        type: 'like',
+                        title: 'Lượt thích mới',
+                        message: `${req.user.username || 'Một người dùng'} đã thích ${isReview ? 'đánh giá' : 'bình luận'} của bạn: "${comment.content && comment.content.length > 0 ? comment.content.substring(0, 30) + '...' : (isReview ? 'đánh giá phim' : 'bình luận')}"`,
+                        link: `/watch/${comment.movieId || comment.movie}`,
+                        targetUsers: [userId]
+                    });
+                    await notification.save();
+                } catch (notifyError) {
+                    console.error('Notification creation failed:', notifyError);
+                }
+            }
         }
 
         await comment.save();
@@ -183,21 +255,31 @@ export const likeComment = async (req, res) => {
 };
 
 // Toggle Dislike
+// Toggle Dislike
 export const dislikeComment = async (req, res) => {
     try {
-        const comment = await Comment.findById(req.params.id);
-        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+        let comment = await Comment.findById(req.params.id);
+        if (!comment) {
+            comment = await Review.findById(req.params.id);
+        }
+
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment or Review not found' });
 
         const userId = req.user.id;
 
-        // Check if already disliked
-        if (comment.dislikes.includes(userId)) {
+        // Use proper string comparison
+        const isDisliked = comment.dislikes ? comment.dislikes.some(id => id.toString() === userId) : false;
+        const isLiked = comment.likes.some(id => id.toString() === userId);
+
+        if (isDisliked) {
             // Undislike
-            comment.dislikes.pull(userId);
+            comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
         } else {
-            // Dislike (and remove like if exists)
+            // Dislike
             comment.dislikes.push(userId);
-            comment.likes.pull(userId);
+            if (isLiked) {
+                comment.likes = comment.likes.filter(id => id.toString() !== userId);
+            }
         }
 
         await comment.save();

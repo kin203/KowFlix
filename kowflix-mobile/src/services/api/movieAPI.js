@@ -24,4 +24,7 @@ export const movieAPI = {
 
     // Add to history
     addToHistory: (movieId) => api.post(`/users/history/${movieId}`),
+
+    // Track View
+    trackView: (movieId) => api.post(`/analytics/view/${movieId}`),
 };
