@@ -55,6 +55,9 @@ const WatchScreen = ({ route, navigation }) => {
             if (!isTogglingRef.current) {
                 setIsPlaying(playing);
             }
+            if (playing) {
+                setIsLoading(false); // Hide loader when playing starts
+            }
             if (player.duration > 0 && duration === 0) setDuration(player.duration);
         });
 
@@ -62,6 +65,10 @@ const WatchScreen = ({ route, navigation }) => {
             setCurrentTime(event.currentTime);
             if (player.duration > 0 && duration === 0) {
                 setDuration(player.duration);
+            }
+            // Also hide loader if time is progressing (double check)
+            if (event.currentTime > 0 && isLoading) {
+                setIsLoading(false);
             }
             if (isPlaying && showControls && !isLocked && !showQualitySelector) {
                 resetControlsTimeout();
@@ -73,6 +80,11 @@ const WatchScreen = ({ route, navigation }) => {
             if (!isTogglingRef.current && typeof status.isPlaying === 'boolean') {
                 setIsPlaying(status.isPlaying);
             }
+            // If error or ready
+            if (status.error) {
+                setError('Lỗi phát video: ' + status.error.message);
+                setIsLoading(false);
+            }
         });
 
         return () => {
@@ -80,7 +92,7 @@ const WatchScreen = ({ route, navigation }) => {
             subTime.remove();
             subStatus.remove();
         };
-    }, [player, showControls, isPlaying, isLocked, duration, showQualitySelector]);
+    }, [player, showControls, isPlaying, isLocked, duration, showQualitySelector, isLoading]); // Added isLoading dependency
 
 
     // --- Controls Logic ---
@@ -204,6 +216,9 @@ const WatchScreen = ({ route, navigation }) => {
                 if (finalSource) {
                     setActiveQualities(qualities);
                     setSource(finalSource);
+
+                    // Track view
+                    movieAPI.trackView(movie._id).catch(err => console.log('Track view error:', err));
                 } else {
                     setError('Không tìm thấy nguồn phim.');
                 }
@@ -217,10 +232,18 @@ const WatchScreen = ({ route, navigation }) => {
         }
     };
 
+    // Fetch data on mount
+    useEffect(() => {
+        if (!source) fetchStreamUrl();
+    }, [movie._id]); // Only run once per movie
+
+    // Handle Orientation and Back Button
     useFocusEffect(
         useCallback(() => {
+            // Lock to LANDSCAPE when entering
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-            if (!source) fetchStreamUrl();
+            // Hide StatusBar
+            StatusBar.setHidden(true);
 
             const backAction = () => {
                 if (showQualitySelector) {
@@ -233,13 +256,25 @@ const WatchScreen = ({ route, navigation }) => {
             const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
             return () => {
+                // Cleanup: Unlock orientation and show status bar
                 backHandler.remove();
                 ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                StatusBar.setHidden(false);
+
+                // Note: Player pause/cleanup is handled by the player hook/component unmount
+            };
+        }, []) // Empty dependency array to ensure this only runs on mount/unmount of the screen focus
+    );
+
+    // Initial pause on focus loss (optional, but good for cleanup)
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
                 if (player) {
                     try { player.pause(); } catch (e) { }
                 }
             };
-        }, [source, player, showQualitySelector])
+        }, [player])
     );
 
     const handleBack = () => {
