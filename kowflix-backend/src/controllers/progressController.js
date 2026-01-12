@@ -22,10 +22,18 @@ export const saveProgress = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Movie not found' });
         }
 
+        // Calculate percentage
+        const percentage = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+
         // Update or create progress
         const progress = await WatchProgress.findOneAndUpdate(
             { userId, movieId },
-            { currentTime, duration },
+            {
+                currentTime,
+                duration,
+                percentage,
+                lastWatched: new Date() // Force update timestamp to bubble to top
+            },
             { upsert: true, new: true }
         );
 
