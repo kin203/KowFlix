@@ -28,6 +28,7 @@ export { commentAPI } from './api/commentAPI.js';
 export { jobAPI } from './api/jobAPI.js';
 export { navMenuAPI } from './api/navMenuAPI.js';
 export { wishlistAPI } from './api/wishlistAPI.js';
+export { reportAPI } from './api/reportAPI.js';
 export { default as storageAPI } from './api/storageAPI.js';
 
 // Export base axios instance as default

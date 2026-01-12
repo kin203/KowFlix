@@ -13,8 +13,10 @@ import { movieAPI, progressAPI, reviewAPI, wishlistAPI, analyticsAPI } from '../
 import VideoPlayerWrapper from '../components/VideoPlayerWrapper';
 import Navbar from '../components/Navbar';
 import CommentSection from '../components/CommentSection';
+import ReportModal from '../components/ReportModal';
 import { getUserIdFromToken } from '../utils/authUtils';
 import useDocumentTitle from '../components/useDocumentTitle';
+import { AlertTriangle } from 'lucide-react';
 import './Watch.css';
 import './VideoError.css';
 
@@ -39,6 +41,7 @@ const Watch = () => {
     // Wishlist state
     const [isInWishlist, setIsInWishlist] = useState(false);
     const [wishlistLoading, setWishlistLoading] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -271,15 +274,27 @@ const Watch = () => {
                             {isInWishlist ? <CheckIcon width={18} height={18} /> : <AddIcon width={18} height={18} />}
                             {isInWishlist ? 'Đã thêm' : 'DS của tôi'}
                         </button>
-                        {/* Bookmark Button Removed */}
-                        <button className="action-btn">
+                        {/* Share Button Removed */}
+                        {/* <button className="action-btn">
                             <ShareIcon width={18} height={18} /> Chia sẻ
+                        </button> */}
+
+                        <button
+                            className="action-btn report-btn"
+                            onClick={() => setShowReportModal(true)}
+                        >
+                            <AlertTriangle size={18} /> Báo lỗi
                         </button>
-                        <button className="action-btn">
-                            <DownloadIcon width={18} height={18} /> Tải xuống
-                        </button>
+
+                        {/* Download removed */}
                     </div>
                 </div>
+
+                <ReportModal
+                    isOpen={showReportModal}
+                    onClose={() => setShowReportModal(false)}
+                    movieId={id}
+                />
 
                 {movie && (
                     <div className="content-wrapper">

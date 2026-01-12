@@ -125,7 +125,17 @@ export const listMovies = async (req, res) => {
     const { q, genre, categoryId, page = 1, limit = 12 } = req.query;
     const query = {};
 
-    if (q) query.$text = { $search: q };
+    if (q) {
+      // Use regex for more flexible search (including partial matches)
+      // Search in title, title_en, and cast names
+      const searchRegex = new RegExp(q, 'i');
+      query.$or = [
+        { title: { $regex: searchRegex } },
+        { title_en: { $regex: searchRegex } },
+        { "cast.name": { $regex: searchRegex } }
+      ];
+    }
+
     if (genre) query.genres = genre;
     if (categoryId) query.categories = categoryId;
     // Support filtering by country (exact match from array)

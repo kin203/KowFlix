@@ -147,7 +147,7 @@ const AdminSettings = () => {
                                     </label>
                                 </div>
                                 <p className="setting-desc">
-                                    {t('settings.maintenance_desc') || 'Prevents users from accessing the site while you make updates.'}
+                                    {t('settings.maintenance_desc') || 'Prevents users from accessing the site. Activates after a 5-minute countdown.'}
                                 </p>
                             </div>
 

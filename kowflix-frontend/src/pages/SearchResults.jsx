@@ -27,14 +27,9 @@ const SearchResults = () => {
             setError(null);
 
             try {
-                const response = await movieAPI.getAll();
-                const allMovies = response.data.data || response.data || [];
-
-                const searchResults = allMovies.filter(movie =>
-                    movie.title?.toLowerCase().includes(query.toLowerCase()) ||
-                    movie.description?.toLowerCase().includes(query.toLowerCase()) ||
-                    movie.genres?.some(genre => genre.toLowerCase().includes(query.toLowerCase()))
-                );
+                // Use backend search by passing 'q' parameter
+                const response = await movieAPI.getAll({ q: query, limit: 100 });
+                const searchResults = response.data.data || [];
 
                 setResults(searchResults);
             } catch (err) {
@@ -61,7 +56,7 @@ const SearchResults = () => {
                     <h1>Kết quả tìm kiếm</h1>
                     {query && (
                         <p className="search-query">
-                            Kết quả cho "<span className="highlight">{query}</span>": 
+                            Kết quả cho "<span className="highlight">{query}</span>":
                             <span className="count"> {results.length} phim</span>
                         </p>
                     )}

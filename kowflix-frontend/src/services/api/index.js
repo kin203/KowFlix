@@ -81,4 +81,5 @@ export { reviewAPI } from './reviewAPI.js';
 export { settingAPI } from './settingAPI.js';
 export { userAPI } from './userAPI.js';
 export { wishlistAPI } from './wishlistAPI.js';
+export { reportAPI } from './reportAPI.js';
 export { default as storageAPI } from './storageAPI.js';

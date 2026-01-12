@@ -5,7 +5,8 @@ import {
     deleteComment,
     likeComment,
     dislikeComment,
-    reportComment
+    reportComment,
+    updateComment
 } from '../controllers/commentController.js';
 import auth from '../middleware/auth.js';
 
@@ -19,6 +20,7 @@ router.post('/', auth, createComment);
 router.delete('/:id', auth, deleteComment);
 router.post('/:id/like', auth, likeComment);
 router.post('/:id/dislike', auth, dislikeComment);
+router.put('/:id', auth, updateComment);
 router.post('/:id/report', auth, reportComment);
 
 export default router;

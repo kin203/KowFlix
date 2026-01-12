@@ -32,6 +32,23 @@ export const updateSetting = async (req, res) => {
             return res.status(400).json({ message: "Key is required" });
         }
 
+        if (key === 'maintenanceMode') {
+            if (value === true) {
+                const fiveMinutesFromNow = new Date(Date.now() + 5 * 60 * 1000);
+                await Setting.findOneAndUpdate(
+                    { key: 'maintenanceScheduledStart' },
+                    { value: fiveMinutesFromNow.toISOString(), description: 'Scheduled start time for maintenance' },
+                    { upsert: true }
+                );
+            } else {
+                await Setting.findOneAndUpdate(
+                    { key: 'maintenanceScheduledStart' },
+                    { value: null, description: 'Scheduled start time for maintenance' },
+                    { upsert: true }
+                );
+            }
+        }
+
         const setting = await Setting.findOneAndUpdate(
             { key },
             {
@@ -53,13 +70,31 @@ export const toggleMaintenance = async (req, res) => {
     try {
         const setting = await Setting.findOne({ key: 'maintenanceMode' });
         const newValue = !setting?.value;
+        let updateData = {
+            value: newValue,
+            description: 'System maintenance mode'
+        };
+
+        // If enabling maintenance, set scheduled start time to 5 minutes from now
+        if (newValue) {
+            const fiveMinutesFromNow = new Date(Date.now() + 5 * 60 * 1000);
+            await Setting.findOneAndUpdate(
+                { key: 'maintenanceScheduledStart' },
+                { value: fiveMinutesFromNow.toISOString(), description: 'Scheduled start time for maintenance' },
+                { upsert: true }
+            );
+        } else {
+            // If disabling, clear the start time
+            await Setting.findOneAndUpdate(
+                { key: 'maintenanceScheduledStart' },
+                { value: null, description: 'Scheduled start time for maintenance' },
+                { upsert: true }
+            );
+        }
 
         const updatedSetting = await Setting.findOneAndUpdate(
             { key: 'maintenanceMode' },
-            {
-                value: newValue,
-                description: 'System maintenance mode'
-            },
+            updateData,
             { new: true, upsert: true }
         );
 

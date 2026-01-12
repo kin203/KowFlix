@@ -31,23 +31,8 @@ const Navbar = () => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isMaintenance, setIsMaintenance] = useState(false);
 
     const isAdmin = profile?.role === 'admin' || profile?.isAdmin;
-
-    // Maintenance Mode Check
-    useEffect(() => {
-        const checkStatus = () => {
-            setIsMaintenance(localStorage.getItem('maintenanceMode') === 'true');
-        };
-        checkStatus();
-        window.addEventListener('storage', checkStatus);
-        window.addEventListener('maintenance_update', checkStatus);
-        return () => {
-            window.removeEventListener('storage', checkStatus);
-            window.removeEventListener('maintenance_update', checkStatus);
-        };
-    }, []);
 
     // Scroll Listener
     useEffect(() => {
@@ -111,7 +96,7 @@ const Navbar = () => {
                             path: `/country/${encodeURIComponent(c)}`,
                             _id: `country-${c}`
                         }));
-                        return { ...item, subItems: countrySubItems };
+                        return { ...item, title: 'Quốc gia', label: 'Quốc gia', path: '/country', subItems: countrySubItems };
                     }
 
                     // Inject Genres into 'Movies' / 'Thể loại'
@@ -121,7 +106,7 @@ const Navbar = () => {
                             path: `/genre/${encodeURIComponent(g)}`,
                             _id: `genre-${g}`
                         }));
-                        return { ...item, subItems: genreSubItems };
+                        return { ...item, title: 'Thể loại', label: 'Thể loại', path: '/movie', subItems: genreSubItems };
                     }
 
                     return item;
@@ -193,13 +178,7 @@ const Navbar = () => {
 
     return (
         <>
-            {isMaintenance && (
-                <div className="maintenance-banner">
-                    <AlertTriangle size={16} />
-                    <span>{t('maintenance.active_banner') || 'Maintenance Mode is Active (Visible to Admins only)'}</span>
-                </div>
-            )}
-            <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${isMaintenance ? 'has-banner' : ''}`}>
+            <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
                 <div className="navbar-left">
                     <Link to="/" className="logo-container">
                         {/* Desktop Logo */}

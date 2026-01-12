@@ -14,10 +14,10 @@ const AdminDashboard = () => {
     useDocumentTitle(t('admin.dashboard') + ' - KowFlix');
     const navigate = useNavigate();
     const [stats, setStats] = useState({
-        totalUsers: 0,
-        onlineUsers: 0,
-        totalMovies: 0,
-        totalViews: 0,
+        totalUsers: {},
+        onlineUsers: {},
+        totalMovies: {},
+        totalViews: {},
         trendingCount: 0
     });
     const [weeklyData, setWeeklyData] = useState([]);
@@ -104,33 +104,33 @@ const AdminDashboard = () => {
                     <StatsCard
                         icon={Users}
                         title={t('admin.total_users')}
-                        value={stats.totalUsers.toLocaleString()}
-                        trend="up"
-                        trendValue="+12% so với tháng trước"
+                        value={stats.totalUsers?.value?.toLocaleString() || 0}
+                        trend={stats.totalUsers?.trend || 'neutral'}
+                        trendValue={`${stats.totalUsers?.trend === 'up' ? '+' : ''}${stats.totalUsers?.percent}% ${stats.totalUsers?.label || ''}`}
                         color="#FFD700"
                     />
                     <StatsCard
                         icon={Eye}
                         title={t('admin.active_users')}
-                        value={stats.onlineUsers}
-                        trend="up"
-                        trendValue="+5% so với hôm qua"
+                        value={stats.onlineUsers?.value || 0}
+                        trend={stats.onlineUsers?.trend || 'neutral'}
+                        trendValue={stats.onlineUsers?.percent ? `${stats.onlineUsers.percent}% ${stats.onlineUsers.label}` : 'Đang hoạt động'}
                         color="#10B981"
                     />
                     <StatsCard
                         icon={Film}
                         title={t('admin.total_movies')}
-                        value={stats.totalMovies}
-                        trend="up"
-                        trendValue="+8 phim mới"
+                        value={stats.totalMovies?.value || 0}
+                        trend={stats.totalMovies?.trend || 'up'}
+                        trendValue={`+${stats.totalMovies?.percent || 0} ${stats.totalMovies?.label || 'phim'}`}
                         color="#E50914"
                     />
                     <StatsCard
                         icon={TrendingUp}
                         title={t('admin.total_views')}
-                        value={stats.totalViews >= 1000 ? `${(stats.totalViews / 1000).toFixed(1)}k` : stats.totalViews}
-                        trend="up"
-                        trendValue={`+15% ${t('admin.this_week')}`}
+                        value={stats.totalViews?.value >= 1000 ? `${(stats.totalViews.value / 1000).toFixed(1)}k` : (stats.totalViews?.value || 0)}
+                        trend={stats.totalViews?.trend || 'up'}
+                        trendValue={`${stats.totalViews?.trend === 'up' ? '+' : ''}${stats.totalViews?.percent || 0}% ${stats.totalViews?.label || ''}`}
                         color="#3B82F6"
                     />
                 </div>

@@ -109,7 +109,7 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
                         duration: videoRef.current.duration
                     });
                 }
-            }, 30000); // Save every 30 seconds
+            }, 10000); // Save every 10 seconds
 
             return () => {
                 if (progressIntervalRef.current) {
@@ -148,7 +148,16 @@ const VideoPlayer = ({ src, poster, onProgress, initialTime = 0, movieId, subtit
 
     // Video event handlers
     const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePause = () => {
+        setIsPlaying(false);
+        // Save progress immediately on pause
+        if (onProgress && videoRef.current && videoRef.current.duration > 0) {
+            onProgress({
+                currentTime: videoRef.current.currentTime,
+                duration: videoRef.current.duration
+            });
+        }
+    };
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);

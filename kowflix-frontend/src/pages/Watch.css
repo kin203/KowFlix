@@ -134,22 +134,36 @@
 }
 
 .movie-poster-thumb {
-    width: 150px;
-    height: 220px;
+    width: 240px;
+    /* Increased from 150px */
+    height: 360px;
+    /* Increased from 220px */
     object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 .movie-header-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    /* Ensure left alignment */
 }
 
 .movie-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 1rem 0;
-    line-height: 1.2;
+    font-size: 3.5rem;
+    /* Increased from 2.5rem */
+    font-weight: 800;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.1;
+    text-align: left;
+    /* Force left alignment */
+    width: 100%;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    /* Add shadow for better visibility */
 }
 
 .movie-meta-badges {
