@@ -1,5 +1,6 @@
-// src/controllers/profileController.js
 import User from '../models/User.js';
+import WatchProgress from '../models/WatchProgress.js';
+import Comment from '../models/Comment.js';
 import { deleteAvatar as deleteCloudinaryAvatar } from '../utils/cloudinary.js';
 
 // ====================== GET PROFILE ======================
@@ -127,4 +128,36 @@ export const deleteAvatar = async (req, res) => {
         console.error('Delete avatar error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
-};
+
+
+    // ====================== GET STATS ======================
+    export const getStats = async (req, res) => {
+        try {
+            const userId = req.user.id; // Corrected to use req.user.id consistently
+
+            // 1. Count Watch History (unique movies watched)
+            const historyCount = await WatchProgress.countDocuments({ userId });
+
+            // 2. Count Comments
+            const commentCount = await Comment.countDocuments({
+                userId,
+                isDeleted: false // Assuming we only count active comments
+            });
+
+            // 3. Count Wishlist (Favorites) - stored in User model as 'favorites' array
+            const user = await User.findById(userId);
+            const wishlistCount = user?.favorites?.length || 0;
+
+            res.json({
+                success: true,
+                data: {
+                    historyCount,
+                    commentCount,
+                    wishlistCount
+                }
+            });
+        } catch (error) {
+            console.error('Get stats error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    };

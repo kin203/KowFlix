@@ -11,7 +11,7 @@ export const movieAPI = {
     play: (id) => api.get(`/movies/${id}/play`),
 
     // Search movies
-    search: (query) => api.get('/movies/search', { params: { q: query } }),
+    search: (query) => api.get('/movies', { params: { q: query } }),
 
     // Get Recommendations (Simulated for now using category/genre)
     getRecommendations: (movieId) => api.get('/movies', { params: { limit: 10, sort: 'newest' } }),
