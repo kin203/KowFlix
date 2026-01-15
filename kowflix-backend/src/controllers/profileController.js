@@ -140,14 +140,11 @@ export const getStats = async (req, res) => {
         const historyCount = await WatchProgress.countDocuments({ userId });
 
         // 2. Count Comments
-        const commentCount = await Comment.countDocuments({
-            userId,
-            isDeleted: false // Assuming we only count active comments
-        });
+        const commentCount = await Comment.countDocuments({ userId });
 
-        // 3. Count Wishlist (Favorites) - stored in User model as 'favorites' array
+        // 3. Count Wishlist (Favorites) - stored in User model as 'wishlist' array
         const user = await User.findById(userId);
-        const wishlistCount = user?.favorites?.length || 0;
+        const wishlistCount = user?.wishlist?.length || 0;
 
         res.json({
             success: true,
