@@ -154,7 +154,8 @@ export const getStats = async (req, res) => {
             data: {
                 historyCount,
                 commentCount,
-                wishlistCount
+                wishlistCount,
+                debugUserId: userId // Debugging
             }
         });
     } catch (error) {

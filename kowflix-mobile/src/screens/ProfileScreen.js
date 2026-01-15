@@ -40,11 +40,17 @@ const ProfileScreen = ({ navigation }) => {
     const fetchStats = async () => {
         try {
             const res = await profileAPI.getStats();
+            // console.log('Stats res:', res.data); // Keep log
             if (res.data.success) {
                 setStats(res.data.data);
+                // Temporary Debug Alert: Remove after fixing
+                Alert.alert('Stats Debug', JSON.stringify(res.data.data, null, 2));
+            } else {
+                Alert.alert('Stats Error', 'API Success = false');
             }
         } catch (error) {
             console.error('Fetch stats error:', error);
+            Alert.alert('Lỗi tải thống kê', JSON.stringify(error.message || error));
         }
     };
 
