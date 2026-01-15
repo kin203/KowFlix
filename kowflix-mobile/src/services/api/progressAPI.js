@@ -9,4 +9,7 @@ export const progressAPI = {
 
     // Get all user progress
     getAll: () => api.get('/progress'),
+
+    // Get watch history
+    getWatchHistory: () => api.get('/progress/history'),
 };
