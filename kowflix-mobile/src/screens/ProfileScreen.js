@@ -16,12 +16,37 @@ import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/
 import { globalStyles } from '../styles/globalStyles';
 import * as ImagePicker from 'expo-image-picker';
 import { authAPI } from '../services/api/authAPI';
+import { profileAPI } from '../services/api/profileAPI';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import { getImageUrl } from '../utils/imageUtils';
 
 const ProfileScreen = ({ navigation }) => {
     const { user, logout, loading, refreshUser } = useAuth();
     const insets = useSafeAreaInsets();
     const [uploading, setUploading] = useState(false);
+    const [stats, setStats] = useState({
+        historyCount: 0,
+        commentCount: 0,
+        wishlistCount: 0
+    });
+
+    // Fetch stats when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchStats();
+        }, [])
+    );
+
+    const fetchStats = async () => {
+        try {
+            const res = await profileAPI.getStats();
+            if (res.data.success) {
+                setStats(res.data.data);
+            }
+        } catch (error) {
+            console.error('Fetch stats error:', error);
+        }
+    };
 
     // Helper to get display name
     const getDisplayName = () => {
@@ -104,7 +129,7 @@ const ProfileScreen = ({ navigation }) => {
         {
             icon: 'time-outline',
             title: 'Lịch sử xem',
-            onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển'),
+            onPress: () => navigation.navigate('History'),
             color: '#4ECDC4'
         },
         {
@@ -173,20 +198,20 @@ const ProfileScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Stats Section (Placeholder) */}
+                {/* Stats Section */}
                 <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>0</Text>
+                        <Text style={styles.statNumber}>{stats.historyCount}</Text>
                         <Text style={styles.statLabel}>Đã xem</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>0</Text>
+                        <Text style={styles.statNumber}>{stats.commentCount}</Text>
                         <Text style={styles.statLabel}>Bình luận</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>0</Text>
+                        <Text style={styles.statNumber}>{stats.wishlistCount}</Text>
                         <Text style={styles.statLabel}>Yêu thích</Text>
                     </View>
                 </View>

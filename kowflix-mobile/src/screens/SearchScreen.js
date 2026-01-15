@@ -33,7 +33,7 @@ const SearchScreen = ({ navigation, route }) => {
         if (route.params?.categoryId) {
             const cat = { _id: route.params.categoryId, name: route.params.categoryName };
             setSelectedCategory(cat);
-            handleSearch('', cat._id); // Trigger search with category
+            // Search will be triggered by the main useEffect observing selectedCategory
         }
     }, [route.params]);
 
@@ -44,7 +44,7 @@ const SearchScreen = ({ navigation, route }) => {
 
     const fetchCategories = async () => {
         try {
-            const res = await categoryAPI.getAll();
+            const res = await categoryAPI.getActive();
             if (res.data.success) {
                 setCategories(res.data.data);
             }
@@ -53,13 +53,19 @@ const SearchScreen = ({ navigation, route }) => {
         }
     };
 
-    const handleSearch = async (text, categoryId = selectedCategory?._id) => {
-        setQuery(text); // Update UI immediately
+    // Debounce search when query or category changes
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            handleSearch(query, selectedCategory?._id);
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [query, selectedCategory]);
+
+    const handleSearch = async (text, categoryId) => {
         setLoading(true);
 
         try {
-            // Basic debounce logic could be here, but for now calling directly
-            // In production, use lodash.debounce
             const params = {
                 q: text,
                 limit: 20
@@ -87,17 +93,6 @@ const SearchScreen = ({ navigation, route }) => {
         }
     };
 
-    // Manual debounce wrapper
-    const [timer, setTimer] = useState(null);
-    const onSearchChange = (text) => {
-        setQuery(text);
-        if (timer) clearTimeout(timer);
-        const newTimer = setTimeout(() => {
-            handleSearch(text);
-        }, 500);
-        setTimer(newTimer);
-    };
-
     const clearSearch = () => {
         setQuery('');
         setResults([]);
@@ -107,7 +102,12 @@ const SearchScreen = ({ navigation, route }) => {
     const handleCategorySelect = (category) => {
         const newCat = selectedCategory?._id === category._id ? null : category;
         setSelectedCategory(newCat);
-        handleSearch(query, newCat?._id);
+        // Search triggered by useEffect
+    };
+
+    const handleSearchSubmit = () => {
+        handleSearch(query, selectedCategory?._id);
+        Keyboard.dismiss();
     };
 
     const renderMovieItem = ({ item }) => (
@@ -127,12 +127,13 @@ const SearchScreen = ({ navigation, route }) => {
                     <Ionicons name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Tìm kiếm phim..."
+                        placeholder="Tìm kiếm phim, diễn viên..."
                         placeholderTextColor={COLORS.textMuted}
                         value={query}
-                        onChangeText={onSearchChange}
+                        onChangeText={setQuery}
                         autoCapitalize="none"
                         returnKeyType="search"
+                        onSubmitEditing={handleSearchSubmit}
                     />
                     {query.length > 0 && (
                         <TouchableOpacity onPress={clearSearch}>

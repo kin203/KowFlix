@@ -13,7 +13,7 @@ export const APP_NAME = 'KowFlix';
 export const APP_SLOGAN = 'Thế giới điện ảnh trong tầm tay';
 
 // Splash Screen Duration
-export const SPLASH_DURATION = 2500; // milliseconds
+export const SPLASH_DURATION = 3000; // milliseconds
 
 // Video Player Configuration
 export const VIDEO_PROGRESS_SAVE_INTERVAL = 10000; // Save progress every 10 seconds
