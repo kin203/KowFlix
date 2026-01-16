@@ -12,4 +12,7 @@ export const notificationAPI = {
 
     // Delete notification
     delete: (id) => api.delete(`/notifications/${id}`),
+
+    // Register push token
+    registerPushToken: (token) => api.post('/notifications/push-token', { token }),
 };

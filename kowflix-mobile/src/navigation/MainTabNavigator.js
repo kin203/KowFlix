@@ -3,13 +3,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
-import ScheduleScreen from '../screens/ScheduleScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import NotificationScreen from '../screens/NotificationScreen';
 import { COLORS, FONT_SIZES } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
+    const { colors } = useTheme();
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -20,19 +22,19 @@ const MainTabNavigator = () => {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Search') {
                         iconName = focused ? 'search' : 'search-outline';
-                    } else if (route.name === 'Schedule') {
-                        iconName = focused ? 'calendar' : 'calendar-outline';
+                    } else if (route.name === 'Notification') {
+                        iconName = focused ? 'notifications' : 'notifications-outline';
                     } else if (route.name === 'Profile') {
                         iconName = focused ? 'person' : 'person-outline';
                     }
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: COLORS.primary,
-                tabBarInactiveTintColor: COLORS.textMuted,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.textSecondary || COLORS.textMuted,
                 tabBarStyle: {
-                    backgroundColor: COLORS.backgroundLight,
-                    borderTopColor: COLORS.border,
+                    backgroundColor: colors.background,
+                    borderTopColor: colors.border,
                     borderTopWidth: 1,
                     paddingBottom: 5,
                     paddingTop: 5,
@@ -55,9 +57,9 @@ const MainTabNavigator = () => {
                 options={{ tabBarLabel: 'Duyệt tìm' }}
             />
             <Tab.Screen
-                name="Schedule"
-                component={ScheduleScreen}
-                options={{ tabBarLabel: 'Lịch chiếu' }}
+                name="Notification"
+                component={NotificationScreen}
+                options={{ tabBarLabel: 'Thông báo', tabBarBadge: null }} // Badge could be dynamic later
             />
             <Tab.Screen
                 name="Profile"
@@ -69,3 +71,4 @@ const MainTabNavigator = () => {
 };
 
 export default MainTabNavigator;
+

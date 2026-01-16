@@ -17,7 +17,10 @@ import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, RADIUS } from '../constants/
 import { globalStyles } from '../styles/globalStyles';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { useTheme } from '../context/ThemeContext';
+
 const HistoryScreen = ({ navigation }) => {
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -60,7 +63,7 @@ const HistoryScreen = ({ navigation }) => {
 
         return (
             <TouchableOpacity
-                style={styles.itemContainer}
+                style={[styles.itemContainer, { backgroundColor: colors.backgroundCard }]}
                 onPress={() => handleMoviePress(item)}
             >
                 {/* Thumbnail */}
@@ -72,52 +75,52 @@ const HistoryScreen = ({ navigation }) => {
                     />
                     {/* Progress Bar overlay on bottom of thumbnail */}
                     <View style={styles.progressBarContainer}>
-                        <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+                        <View style={[styles.progressBarFill, { width: `${progressPercent}%`, backgroundColor: colors.primary }]} />
                     </View>
                 </View>
 
                 {/* Info */}
                 <View style={styles.infoContainer}>
-                    <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
-                    <Text style={styles.subtitle}>
+                    <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{movie.title}</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                         {new Date(item.lastWatched).toLocaleDateString('vi-VN')}
                     </Text>
                     <View style={styles.metaContainer}>
-                        <Text style={styles.progressText}>Đã xem {progressPercent}%</Text>
-                        <Ionicons name="play-circle-outline" size={16} color={COLORS.primary} style={{ marginLeft: 8 }} />
+                        <Text style={[styles.progressText, { color: colors.primary }]}>Đã xem {progressPercent}%</Text>
+                        <Ionicons name="play-circle-outline" size={16} color={colors.primary} style={{ marginLeft: 8 }} />
                     </View>
                 </View>
 
-                <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted || '#666'} />
             </TouchableOpacity>
         );
     };
 
     if (loading) {
         return (
-            <View style={globalStyles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
+            <View style={[globalStyles.loadingContainer, { backgroundColor: colors.background }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
 
     return (
-        <View style={[globalStyles.container, { paddingTop: insets.top }]}>
+        <View style={[globalStyles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
                 >
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Lịch sử xem</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Lịch sử xem</Text>
             </View>
 
             {history.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="time-outline" size={64} color={COLORS.textMuted} />
-                    <Text style={styles.emptyText}>Bạn chưa xem phim nào</Text>
+                    <Ionicons name="time-outline" size={64} color={colors.textMuted || '#666'} />
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>Bạn chưa xem phim nào</Text>
                 </View>
             ) : (
                 <FlatList
@@ -132,7 +135,7 @@ const HistoryScreen = ({ navigation }) => {
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={onRefresh}
-                            tintColor={COLORS.primary}
+                            tintColor={colors.primary}
                         />
                     }
                 />
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.lg,
         paddingVertical: SPACING.md,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     backButton: {
         marginRight: SPACING.md,
@@ -157,7 +160,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: FONT_SIZES.xl,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.text,
+        // color handled dynamically
     },
     listContent: {
         padding: SPACING.md,
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
     itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         marginBottom: SPACING.md,
         borderRadius: RADIUS.md,
         padding: SPACING.sm,
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
     },
     infoContainer: {
         flex: 1,
@@ -201,12 +204,12 @@ const styles = StyleSheet.create({
     title: {
         fontSize: FONT_SIZES.md,
         fontWeight: FONT_WEIGHTS.semibold,
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: 4,
     },
     subtitle: {
         fontSize: FONT_SIZES.xs,
-        color: COLORS.textSecondary,
+        // color handled dynamically
         marginBottom: 8,
     },
     metaContainer: {
@@ -215,7 +218,7 @@ const styles = StyleSheet.create({
     },
     progressText: {
         fontSize: FONT_SIZES.xs,
-        color: COLORS.primary,
+        // color handled dynamically
         fontWeight: FONT_WEIGHTS.medium,
     },
     emptyContainer: {
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         marginTop: SPACING.md,
-        color: COLORS.textMuted,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
     },
 });

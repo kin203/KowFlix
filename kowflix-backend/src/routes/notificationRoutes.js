@@ -6,7 +6,9 @@ import {
     deleteNotification,
     createNotification,
     getAllNotifications,
-    deleteNotificationAdmin
+    getAllNotifications,
+    deleteNotificationAdmin,
+    savePushToken
 } from '../controllers/notificationController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -17,6 +19,7 @@ router.get('/', protect, getUserNotifications);
 router.put('/:id/read', protect, markAsRead);
 router.put('/read-all', protect, markAllAsRead);
 router.delete('/:id', protect, deleteNotification);
+router.post('/push-token', protect, savePushToken);
 
 // Admin routes (protected + admin check can be added)
 router.get('/admin/all', protect, getAllNotifications);

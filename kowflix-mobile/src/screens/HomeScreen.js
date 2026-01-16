@@ -11,8 +11,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { movieAPI } from '../services/api/movieAPI';
 import { categoryAPI } from '../services/api/categoryAPI';
 import { heroAPI } from '../services/api/heroAPI';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { globalStyles } from '../styles/globalStyles';
+import { useTheme } from '../context/ThemeContext';
 
 // Components
 import HeroCarousel from '../components/HeroCarousel';
@@ -21,6 +22,7 @@ import MovieCarousel from '../components/MovieCarousel';
 
 const HomeScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
+    const { colors } = useTheme();
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -105,15 +107,15 @@ const HomeScreen = ({ navigation }) => {
 
     if (loading) {
         return (
-            <View style={globalStyles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loadingText}>Đang tải...</Text>
+            <View style={[globalStyles.loadingContainer, { backgroundColor: colors.background }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={[styles.loadingText, { color: colors.text }]}>Đang tải...</Text>
             </View>
         );
     }
 
     return (
-        <View style={[globalStyles.container, { paddingTop: 0 }]}>
+        <View style={[globalStyles.container, { paddingTop: 0, backgroundColor: colors.background }]}>
             <StatusBarTranslucent />
 
             <ScrollView
@@ -122,7 +124,7 @@ const HomeScreen = ({ navigation }) => {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        tintColor={COLORS.primary}
+                        tintColor={colors.primary}
                         progressViewOffset={insets.top}
                     />
                 }
@@ -137,7 +139,7 @@ const HomeScreen = ({ navigation }) => {
 
                 {/* Categories */}
                 <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Danh mục</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Danh mục</Text>
                     <CategoryChip
                         categories={categories}
                         selectedCategory={selectedCategory}
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     loadingText: {
-        color: COLORS.text,
+        // color handled dynamically
         marginTop: SPACING.md,
         fontSize: FONT_SIZES.md,
     },
@@ -197,7 +199,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: FONT_SIZES.xl,
         fontWeight: FONT_WEIGHTS.semibold,
-        color: COLORS.text,
+        // color handled dynamically
         marginLeft: SPACING.lg,
         marginBottom: SPACING.md,
     },

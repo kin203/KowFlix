@@ -12,11 +12,13 @@ import {
     Alert,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { APP_NAME } from '../constants/config';
+import { useTheme } from '../context/ThemeContext';
 
 const LoginScreen = ({ navigation }) => {
     const { login } = useAuth();
+    const { colors } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -39,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.background }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView
@@ -47,17 +49,24 @@ const LoginScreen = ({ navigation }) => {
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.header}>
-                    <Text style={styles.logo}>{APP_NAME}</Text>
-                    <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
+                    <Text style={[styles.logo, { color: colors.primary }]}>{APP_NAME}</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Đăng nhập để tiếp tục</Text>
                 </View>
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Email</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.backgroundCard,
+                                    borderColor: colors.border,
+                                    color: colors.text
+                                }
+                            ]}
                             placeholder="Nhập email của bạn"
-                            placeholderTextColor={COLORS.textMuted}
+                            placeholderTextColor={colors.textMuted}
                             value={email}
                             onChangeText={setEmail}
                             keyboardType="email-address"
@@ -67,11 +76,18 @@ const LoginScreen = ({ navigation }) => {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Mật khẩu</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Mật khẩu</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.backgroundCard,
+                                    borderColor: colors.border,
+                                    color: colors.text
+                                }
+                            ]}
                             placeholder="Nhập mật khẩu"
-                            placeholderTextColor={COLORS.textMuted}
+                            placeholderTextColor={colors.textMuted}
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={true}
@@ -81,21 +97,21 @@ const LoginScreen = ({ navigation }) => {
                     </View>
 
                     <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
+                        style={[styles.button, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
                         onPress={handleLogin}
                         disabled={loading}
                     >
                         {loading ? (
-                            <ActivityIndicator color={COLORS.background} />
+                            <ActivityIndicator color={colors.background} />
                         ) : (
-                            <Text style={styles.buttonText}>Đăng nhập</Text>
+                            <Text style={[styles.buttonText, { color: colors.background }]}>Đăng nhập</Text>
                         )}
                     </TouchableOpacity>
 
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Chưa có tài khoản? </Text>
+                        <Text style={[styles.footerText, { color: colors.textSecondary }]}>Chưa có tài khoản? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                            <Text style={styles.linkText}>Đăng ký ngay</Text>
+                            <Text style={[styles.linkText, { color: colors.primary }]}>Đăng ký ngay</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -107,7 +123,7 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
     },
     scrollContent: {
         flexGrow: 1,
@@ -121,12 +137,12 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 48,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.primary,
+        // color handled dynamically
         marginBottom: SPACING.sm,
     },
     subtitle: {
         fontSize: FONT_SIZES.md,
-        color: COLORS.textSecondary,
+        // color handled dynamically
     },
     form: {
         width: '100%',
@@ -137,21 +153,21 @@ const styles = StyleSheet.create({
     label: {
         fontSize: FONT_SIZES.md,
         fontWeight: FONT_WEIGHTS.medium,
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: SPACING.sm,
     },
     input: {
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderWidth: 1,
-        borderColor: COLORS.border,
+        // borderColor handled dynamically
         borderRadius: RADIUS.md,
         paddingVertical: SPACING.md,
         paddingHorizontal: SPACING.md,
         fontSize: FONT_SIZES.md,
-        color: COLORS.text,
+        // color handled dynamically
     },
     button: {
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         paddingVertical: SPACING.md,
         borderRadius: RADIUS.md,
         alignItems: 'center',
@@ -163,7 +179,7 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: FONT_SIZES.md,
         fontWeight: FONT_WEIGHTS.semibold,
-        color: COLORS.background,
+        // color handled dynamically
     },
     footer: {
         flexDirection: 'row',
@@ -172,12 +188,12 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: FONT_SIZES.md,
-        color: COLORS.textSecondary,
+        // color handled dynamically
     },
     linkText: {
         fontSize: FONT_SIZES.md,
         fontWeight: FONT_WEIGHTS.semibold,
-        color: COLORS.primary,
+        // color handled dynamically
     },
 });
 
