@@ -12,16 +12,18 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { globalStyles } from '../styles/globalStyles';
 import * as ImagePicker from 'expo-image-picker';
 import { authAPI } from '../services/api/authAPI';
 import { profileAPI } from '../services/api/profileAPI';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import { getImageUrl } from '../utils/imageUtils';
+import { useTheme } from '../context/ThemeContext';
 
 const ProfileScreen = ({ navigation }) => {
     const { user, logout, loading, refreshUser } = useAuth();
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const [uploading, setUploading] = useState(false);
     // Stats removed per user request
@@ -112,20 +114,20 @@ const ProfileScreen = ({ navigation }) => {
             icon: 'settings-outline',
             title: 'Cài đặt',
             onPress: () => navigation.navigate('Settings'),
-            color: COLORS.textSecondary
+            color: colors.textSecondary
         },
         {
             icon: 'lock-closed-outline',
             title: 'Đổi mật khẩu',
             onPress: () => navigation.navigate('ChangePassword'),
-            color: COLORS.textSecondary
+            color: colors.textSecondary
         }
     ];
 
     if (loading) {
         return (
-            <View style={globalStyles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
+            <View style={[globalStyles.loadingContainer, { backgroundColor: colors.background }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
@@ -133,7 +135,7 @@ const ProfileScreen = ({ navigation }) => {
     const avatarSource = (user?.profile?.avatar || user?.avatarUrl) ? { uri: getImageUrl(user.profile?.avatar || user.avatarUrl) } : null;
 
     return (
-        <View style={[globalStyles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
             <ScrollView
                 contentContainerStyle={[styles.content, { paddingBottom: 100 + insets.bottom }]}
                 showsVerticalScrollIndicator={false}
@@ -142,35 +144,35 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.header}>
                     <View style={styles.avatarContainer}>
                         {uploading ? (
-                            <View style={[styles.avatarPlaceholder, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-                                <ActivityIndicator color={COLORS.primary} />
+                            <View style={[styles.avatarPlaceholder, { backgroundColor: 'rgba(0,0,0,0.5)', borderColor: colors.primary }]}>
+                                <ActivityIndicator color={colors.primary} />
                             </View>
                         ) : avatarSource ? (
                             <Image
                                 source={avatarSource}
-                                style={styles.avatar}
+                                style={[styles.avatar, { borderColor: colors.primary }]}
                             />
                         ) : (
-                            <View style={styles.avatarPlaceholder}>
-                                <Text style={styles.avatarText}>
+                            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.backgroundCard, borderColor: colors.primary }]}>
+                                <Text style={[styles.avatarText, { color: colors.primary }]}>
                                     {displayName.charAt(0).toUpperCase()}
                                 </Text>
                             </View>
                         )}
                         <TouchableOpacity
-                            style={styles.editButton}
+                            style={[styles.editButton, { backgroundColor: colors.primary, borderColor: colors.background }]}
                             onPress={handleAvatarUpdate}
                             disabled={uploading}
                         >
-                            <Ionicons name="pencil" size={16} color={COLORS.background} />
+                            <Ionicons name="pencil" size={16} color={colors.background} />
                         </TouchableOpacity>
                     </View>
 
-                    <Text style={styles.username}>{displayName}</Text>
-                    <Text style={styles.email}>{user?.email}</Text>
+                    <Text style={[styles.username, { color: colors.text }]}>{displayName}</Text>
+                    <Text style={[styles.email, { color: colors.textSecondary }]}>{user?.email}</Text>
 
-                    <View style={styles.roleBadge}>
-                        <Text style={styles.roleText}>{user?.role || 'Member'}</Text>
+                    <View style={[styles.roleBadge, { backgroundColor: colors.backgroundCard, borderColor: colors.border }]}>
+                        <Text style={[styles.roleText, { color: colors.textMuted }]}>{user?.role || 'Member'}</Text>
                     </View>
                 </View>
 
@@ -181,31 +183,35 @@ const ProfileScreen = ({ navigation }) => {
                     {menuItems.map((item, index) => (
                         <TouchableOpacity
                             key={index}
-                            style={styles.menuItem}
+                            style={[styles.menuItem, { backgroundColor: colors.backgroundCard }]}
                             onPress={item.onPress}
                         >
                             <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
                                 <Ionicons name={item.icon} size={22} color={item.color} />
                             </View>
-                            <Text style={styles.menuTitle}>{item.title}</Text>
-                            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+                            <Text style={[styles.menuTitle, { color: colors.text }]}>{item.title}</Text>
+                            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                         </TouchableOpacity>
                     ))}
                 </View>
 
                 {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={20} color={COLORS.text} />
+                <TouchableOpacity style={[styles.logoutButton, { backgroundColor: colors.error }]} onPress={handleLogout}>
+                    <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
                     <Text style={styles.logoutButtonText}>Đăng xuất</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>Phiên bản 1.0.0</Text>
+                <Text style={[styles.versionText, { color: colors.textMuted }]}>Phiên bản 1.0.0</Text>
             </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        // backgroundColor handled dynamically
+    },
     content: {
         padding: SPACING.lg,
         paddingBottom: 100 + 34, // Approximate safe area, but better to use insets in style prop if possible. 
@@ -224,94 +230,68 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 2,
-        borderColor: COLORS.primary,
+        // borderColor handled dynamically
     },
     avatarPlaceholder: {
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: COLORS.primary,
+        // borderColor handled dynamically
     },
     avatarText: {
         fontSize: 40,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.primary,
+        // color handled dynamically
     },
     editButton: {
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         width: 32,
         height: 32,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: COLORS.background,
+        // borderColor handled dynamically
     },
     username: {
         fontSize: FONT_SIZES.xxl,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: 4,
     },
     email: {
         fontSize: FONT_SIZES.md,
-        color: COLORS.textSecondary,
+        // color handled dynamically
         marginBottom: SPACING.sm,
     },
     roleBadge: {
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: COLORS.border,
+        // borderColor handled dynamically
     },
     roleText: {
         fontSize: FONT_SIZES.xs,
-        color: COLORS.textMuted,
+        // color handled dynamically
         textTransform: 'uppercase',
     },
-    statsContainer: {
-        flexDirection: 'row',
-        backgroundColor: COLORS.backgroundCard,
-        borderRadius: RADIUS.lg,
-        padding: SPACING.md,
-        marginBottom: SPACING.xl,
-        justifyContent: 'space-around',
-    },
-    statItem: {
-        alignItems: 'center',
-    },
-    statNumber: {
-        fontSize: FONT_SIZES.lg,
-        fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.primary,
-    },
-    statLabel: {
-        fontSize: FONT_SIZES.xs,
-        color: COLORS.textSecondary,
-        marginTop: 4,
-    },
-    statDivider: {
-        width: 1,
-        height: '80%',
-        backgroundColor: COLORS.border,
-        alignSelf: 'center',
-    },
+
     menuContainer: {
         marginBottom: SPACING.xl,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         padding: SPACING.md,
         borderRadius: RADIUS.md,
         marginBottom: SPACING.sm,
@@ -327,15 +307,14 @@ const styles = StyleSheet.create({
     menuTitle: {
         flex: 1,
         fontSize: FONT_SIZES.md,
-        color: COLORS.text,
+        // color handled dynamically
         fontWeight: FONT_WEIGHTS.medium,
     },
     logoutButton: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.error, // Fallback if error color not defined, check below
-        backgroundColor: '#FF4757',
+        // backgroundColor handled dynamically
         paddingVertical: SPACING.md,
         borderRadius: RADIUS.md,
     },
@@ -347,7 +326,7 @@ const styles = StyleSheet.create({
     },
     versionText: {
         textAlign: 'center',
-        color: COLORS.textMuted,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
         marginTop: SPACING.lg,
     },

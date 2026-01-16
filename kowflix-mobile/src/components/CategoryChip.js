@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const CategoryChip = ({ categories, selectedCategory, onSelect }) => {
+    const { colors } = useTheme();
+
     if (!categories || categories.length === 0) {
         return null;
     }
@@ -14,13 +17,24 @@ const CategoryChip = ({ categories, selectedCategory, onSelect }) => {
             <TouchableOpacity
                 style={[
                     styles.chip,
-                    isSelected && styles.chipSelected
+                    {
+                        backgroundColor: colors.backgroundCard,
+                        borderColor: colors.border
+                    },
+                    isSelected && {
+                        backgroundColor: colors.primary,
+                        borderColor: colors.primary
+                    }
                 ]}
                 onPress={() => onSelect(item)}
             >
                 <Text style={[
                     styles.text,
-                    isSelected && styles.textSelected
+                    { color: colors.textSecondary },
+                    isSelected && {
+                        color: colors.background, // Text color on selected chip (primary background)
+                        fontWeight: FONT_WEIGHTS.semibold
+                    }
                 ]}>
                     {item.name}
                 </Text>
@@ -52,24 +66,16 @@ const styles = StyleSheet.create({
     chip: {
         paddingVertical: 8,
         paddingHorizontal: 16,
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.round,
         marginRight: SPACING.sm,
         borderWidth: 1,
-        borderColor: COLORS.border,
-    },
-    chipSelected: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
+        // borderColor handled dynamically
     },
     text: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
         fontWeight: FONT_WEIGHTS.medium,
-    },
-    textSelected: {
-        color: COLORS.background, // Black text on yellow background
-        fontWeight: FONT_WEIGHTS.semibold,
     },
 });
 

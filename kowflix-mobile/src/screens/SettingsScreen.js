@@ -1,89 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
-import { authAPI } from '../services/api/authAPI';
-import { useAuth } from '../context/AuthContext';
+import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const SettingsScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
-    const { user, refreshUser } = useAuth(); // Assuming refreshUser updates local user state from backend
+    const { colors, themeMode, toggleTheme } = useTheme();
 
-    // Initialize state from user's saved settings or default to true (Dark Mode)
-    const initialDarkMode = user?.mobileSettings?.theme === 'light' ? false : true;
+    // Local state for UI toggles only (notifications logic separate)
+    const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
 
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [darkModeEnabled, setDarkModeEnabled] = useState(initialDarkMode);
-    const [updating, setUpdating] = useState(false);
+    // Dark mode state derived from context
+    const isDarkMode = themeMode === 'dark';
 
-    const handleThemeToggle = async (value) => {
-        setDarkModeEnabled(value);
-        const theme = value ? 'dark' : 'light';
-
-        try {
-            setUpdating(true);
-            await authAPI.updateMobileSettings({ theme });
-            // Optionally refresh user to sync state immediately, though local state handles UI
-            if (refreshUser) await refreshUser();
-        } catch (error) {
-            console.error('Update theme error:', error);
-            // Revert on failure? For now just log.
-        } finally {
-            setUpdating(false);
-        }
+    const handleThemeToggle = (value) => {
+        toggleTheme(value ? 'dark' : 'light');
     };
 
     const renderHeader = () => (
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Cài đặt</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Cài đặt</Text>
             <View style={{ width: 24 }} />
         </View>
     );
 
     const renderSection = (title, children) => (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            <View style={styles.sectionContent}>{children}</View>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{title}</Text>
+            <View style={[styles.sectionContent, { backgroundColor: colors.backgroundCard }]}>{children}</View>
         </View>
     );
 
     const renderSettingItem = ({ icon, title, value, type = 'arrow', onPress, onToggle }) => (
         <TouchableOpacity
-            style={styles.settingItem}
+            style={[styles.settingItem, { borderBottomColor: colors.border }]}
             onPress={type === 'arrow' ? onPress : () => onToggle(!value)}
-            disabled={(type === 'switch' && !onToggle) || updating}
+            disabled={type === 'switch' && onToggle === undefined}
         >
             <View style={styles.settingIconContainer}>
-                <Ionicons name={icon} size={20} color={COLORS.textSecondary} />
+                <Ionicons name={icon} size={20} color={colors.textSecondary} />
             </View>
-            <Text style={styles.settingTitle}>{title}</Text>
+            <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
 
             {type === 'switch' && (
                 <Switch
-                    trackColor={{ false: '#767577', true: COLORS.primary }}
+                    trackColor={{ false: '#767577', true: colors.primary }}
                     thumbColor={value ? '#fff' : '#f4f3f4'}
                     onValueChange={onToggle}
                     value={value}
-                    disabled={updating}
                 />
             )}
 
             {type === 'arrow' && (
-                <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             )}
 
             {type === 'value' && (
-                <Text style={styles.valueText}>{value}</Text>
+                <Text style={[styles.valueText, { color: colors.textSecondary }]}>{value}</Text>
             )}
         </TouchableOpacity>
     );
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
             {renderHeader()}
             <ScrollView contentContainerStyle={styles.content}>
 
@@ -92,7 +76,7 @@ const SettingsScreen = ({ navigation }) => {
                         {renderSettingItem({
                             icon: 'moon-outline',
                             title: 'Chế độ tối',
-                            value: darkModeEnabled,
+                            value: isDarkMode,
                             type: 'switch',
                             onToggle: handleThemeToggle
                         })}
@@ -137,7 +121,7 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
     },
     header: {
         flexDirection: 'row',
@@ -146,7 +130,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.md,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     backButton: {
         padding: SPACING.sm,
@@ -154,7 +138,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: FONT_SIZES.lg,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.text,
+        // color handled dynamically
     },
     content: {
         padding: SPACING.md,
@@ -164,14 +148,14 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: FONT_SIZES.sm,
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontWeight: FONT_WEIGHTS.bold,
         marginBottom: SPACING.sm,
         marginLeft: SPACING.sm,
         textTransform: 'uppercase',
     },
     sectionContent: {
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.md,
         overflow: 'hidden',
     },
@@ -180,7 +164,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: SPACING.md,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     settingIconContainer: {
         marginRight: SPACING.md,
@@ -190,11 +174,11 @@ const styles = StyleSheet.create({
     settingTitle: {
         flex: 1,
         fontSize: FONT_SIZES.md,
-        color: COLORS.text,
+        // color handled dynamically
     },
     valueText: {
         fontSize: FONT_SIZES.sm,
-        color: COLORS.textSecondary,
+        // color handled dynamically
     },
 });
 

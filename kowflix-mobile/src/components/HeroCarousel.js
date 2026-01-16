@@ -8,16 +8,18 @@ import {
     FlatList,
     TouchableOpacity
 } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, RADIUS } from '../constants/colors';
+import { SPACING, FONT_SIZES, FONT_WEIGHTS, RADIUS } from '../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { IMAGE_PLACEHOLDER } from '../constants/config';
 import { getImageUrl } from '../utils/imageUtils';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 const ITEM_HEIGHT = width * 1.2; // Taller ratio for mobile
 
 const HeroCarousel = ({ banners, onPlayPress, onInfoPress }) => {
+    const { colors } = useTheme();
     const [activeIndex, setActiveIndex] = useState(0);
     const flatListRef = useRef(null);
 
@@ -70,16 +72,16 @@ const HeroCarousel = ({ banners, onPlayPress, onInfoPress }) => {
                     resizeMode="cover"
                 />
                 <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)', COLORS.background]}
+                    colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)', colors.background]}
                     style={styles.gradient}
                 >
                     <View style={styles.contentContainer}>
-                        <Text style={styles.title} numberOfLines={2}>
+                        <Text style={[styles.title, { color: '#FFF' }]} numberOfLines={2}>
                             {title}
                         </Text>
 
                         {genres.length > 0 && (
-                            <Text style={styles.genre}>
+                            <Text style={[styles.genre, { color: 'rgba(255,255,255,0.8)' }]}>
                                 {genres.map(g => g.name || g).slice(0, 3).join(' • ')}
                             </Text>
                         )}
@@ -120,7 +122,9 @@ const HeroCarousel = ({ banners, onPlayPress, onInfoPress }) => {
                         key={index}
                         style={[
                             styles.dot,
-                            index === activeIndex && styles.activeDot
+                            index === activeIndex ?
+                                { backgroundColor: colors.primary, width: 10, height: 10 } :
+                                { backgroundColor: 'rgba(255,255,255,0.4)' }
                         ]}
                     />
                 ))}
@@ -163,25 +167,25 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.sm,
     },
     hdBadge: {
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 4,
         marginRight: 8,
     },
     hdText: {
-        color: COLORS.background,
+        // color handled dynamically
         fontSize: 10,
         fontWeight: 'bold',
     },
     tags: {
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
     },
     title: {
         fontSize: FONT_SIZES.xxl,
         fontWeight: 'bold',
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: SPACING.xs,
         textAlign: 'center',
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -190,7 +194,7 @@ const styles = StyleSheet.create({
     },
     genre: {
         fontSize: FONT_SIZES.sm,
-        color: COLORS.textSecondary,
+        // color handled dynamically
         marginBottom: SPACING.sm,
         textAlign: 'center',
     },
@@ -211,13 +215,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: 'rgba(255,255,255,0.4)',
         marginHorizontal: 4,
-    },
-    activeDot: {
-        backgroundColor: COLORS.primary,
-        width: 10,
-        height: 10,
     },
 });
 

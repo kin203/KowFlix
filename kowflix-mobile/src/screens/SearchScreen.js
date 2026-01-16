@@ -17,10 +17,12 @@ import { categoryAPI } from '../services/api/categoryAPI';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { globalStyles } from '../styles/globalStyles';
 import MovieCard from '../components/MovieCard';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
 const SearchScreen = ({ navigation, route }) => {
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
@@ -120,15 +122,15 @@ const SearchScreen = ({ navigation, route }) => {
     );
 
     return (
-        <View style={[globalStyles.container, { paddingTop: insets.top }]}>
+        <View style={[globalStyles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
             {/* Search Bar */}
-            <View style={styles.header}>
-                <View style={styles.searchContainer}>
-                    <Ionicons name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
+            <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                <View style={[styles.searchContainer, { backgroundColor: colors.backgroundCard }]}>
+                    <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: colors.text }]}
                         placeholder="Tìm kiếm phim, diễn viên..."
-                        placeholderTextColor={COLORS.textMuted}
+                        placeholderTextColor={colors.textMuted || '#666'}
                         value={query}
                         onChangeText={setQuery}
                         autoCapitalize="none"
@@ -137,14 +139,14 @@ const SearchScreen = ({ navigation, route }) => {
                     />
                     {query.length > 0 && (
                         <TouchableOpacity onPress={clearSearch}>
-                            <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
+                            <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}
                 </View>
             </View>
 
             {/* Category Filter Chips */}
-            <View style={styles.filterContainer}>
+            <View style={[styles.filterContainer, { borderBottomColor: colors.border }]}>
                 <FlatList
                     data={categories}
                     horizontal
@@ -157,13 +159,15 @@ const SearchScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 style={[
                                     styles.chip,
-                                    isSelected && styles.chipSelected
+                                    { backgroundColor: colors.backgroundCard, borderColor: colors.border },
+                                    isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }
                                 ]}
                                 onPress={() => handleCategorySelect(item)}
                             >
                                 <Text style={[
                                     styles.chipText,
-                                    isSelected && styles.chipTextSelected
+                                    { color: colors.textSecondary },
+                                    isSelected && { color: colors.background, fontWeight: 'bold' } // Assuming selected text color should contrast with primary
                                 ]}>
                                     {item.name}
                                 </Text>
@@ -175,8 +179,8 @@ const SearchScreen = ({ navigation, route }) => {
 
             {/* Results */}
             {loading ? (
-                <View style={globalStyles.loadingContainer}>
-                    <ActivityIndicator size="large" color={COLORS.primary} />
+                <View style={[globalStyles.loadingContainer, { backgroundColor: colors.background }]}>
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -189,12 +193,12 @@ const SearchScreen = ({ navigation, route }) => {
                     ListEmptyComponent={
                         query.length > 0 ? (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không tìm thấy phim nào</Text>
+                                <Text style={[styles.emptyText, { color: colors.textMuted }]}>Không tìm thấy phim nào</Text>
                             </View>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Ionicons name="film-outline" size={64} color={COLORS.border} />
-                                <Text style={styles.emptyText}>Nhập tên phim để tìm kiếm</Text>
+                                <Ionicons name="film-outline" size={64} color={colors.border} />
+                                <Text style={[styles.emptyText, { color: colors.textMuted }]}>Nhập tên phim để tìm kiếm</Text>
                             </View>
                         )
                     }
@@ -207,14 +211,14 @@ const SearchScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     header: {
         padding: SPACING.md,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.md,
         paddingHorizontal: SPACING.md,
         paddingVertical: 8, // Fixed height for input
@@ -224,34 +228,34 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         paddingVertical: 4, // Reduce padding to align text
     },
     filterContainer: {
         paddingVertical: SPACING.sm,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     chip: {
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         marginRight: SPACING.sm,
         borderWidth: 1,
-        borderColor: COLORS.border,
+        // borderColor handled dynamically
     },
     chipSelected: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
+        // backgroundColor handled dynamically
+        // borderColor handled dynamically
     },
     chipText: {
         fontSize: FONT_SIZES.sm,
-        color: COLORS.textSecondary,
+        // color handled dynamically
     },
     chipTextSelected: {
-        color: COLORS.background,
+        // color handled dynamically
         fontWeight: 'bold',
     },
     listContent: {
@@ -274,7 +278,7 @@ const styles = StyleSheet.create({
         paddingTop: 100,
     },
     emptyText: {
-        color: COLORS.textMuted,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         marginTop: SPACING.md,
     },

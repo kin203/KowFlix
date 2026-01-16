@@ -7,8 +7,10 @@ import { wishlistAPI } from '../services/api/wishlistAPI';
 import MovieCard from '../components/MovieCard';
 import { COLORS, SPACING, FONT_SIZES } from '../constants/colors';
 import { globalStyles } from '../styles/globalStyles';
+import { useTheme } from '../context/ThemeContext';
 
 const WishlistScreen = ({ navigation }) => {
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -49,18 +51,18 @@ const WishlistScreen = ({ navigation }) => {
     );
 
     return (
-        <View style={[globalStyles.container, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
+        <View style={[globalStyles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Danh sách yêu thích</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Danh sách yêu thích</Text>
                 <View style={{ width: 24 }} />
             </View>
 
             {loading ? (
-                <View style={globalStyles.loadingContainer}>
-                    <ActivityIndicator size="large" color={COLORS.primary} />
+                <View style={[globalStyles.loadingContainer, { backgroundColor: colors.background }]}>
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -71,12 +73,12 @@ const WishlistScreen = ({ navigation }) => {
                     contentContainerStyle={styles.listContent}
                     columnWrapperStyle={styles.columnWrapper}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="heart-dislike-outline" size={64} color={COLORS.textMuted} />
-                            <Text style={styles.emptyText}>Chưa có phim nào trong danh sách</Text>
+                            <Ionicons name="heart-dislike-outline" size={64} color={colors.textMuted || '#666'} />
+                            <Text style={[styles.emptyText, { color: colors.textMuted }]}>Chưa có phim nào trong danh sách</Text>
                         </View>
                     }
                 />
@@ -93,12 +95,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.sm,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     headerTitle: {
         fontSize: FONT_SIZES.lg,
         fontWeight: 'bold',
-        color: COLORS.text,
+        // color handled dynamically
     },
     listContent: {
         padding: SPACING.md,
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
         marginTop: 100,
     },
     emptyText: {
-        color: COLORS.textMuted,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         marginTop: SPACING.md,
     },

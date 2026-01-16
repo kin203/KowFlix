@@ -26,12 +26,16 @@ import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
+import { useTheme } from '../context/ThemeContext';
+
 const MovieDetailScreen = ({ route, navigation }) => {
+    const { colors } = useTheme();
     const { movieId, movie: initialMovieData } = route.params;
     const { isAuthenticated, user } = useAuth();
     const userId = user?.id || user?._id;
     const insets = useSafeAreaInsets();
 
+    // ... existing state ...
     const [movie, setMovie] = useState(initialMovieData || null);
     const [loading, setLoading] = useState(!initialMovieData);
     const [recommendations, setRecommendations] = useState([]);
@@ -231,7 +235,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
         return 'N/A';
     };
 
-    if (!movie) return <View style={styles.loadingContainer} />;
+    if (!movie) return <View style={[styles.loadingContainer, { backgroundColor: colors.background }]} />;
 
     const backdropUrl = getImageUrl(movie.backdrop || movie.poster);
 
@@ -264,7 +268,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
             <View style={styles.headerImageContainer}>
                 <Image source={{ uri: backdropUrl }} style={styles.backdrop} resizeMode="cover" />
                 <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.8)', COLORS.background]}
+                    colors={['transparent', 'rgba(0,0,0,0.8)', colors.background]}
                     style={styles.gradient}
                 />
 
@@ -293,9 +297,9 @@ const MovieDetailScreen = ({ route, navigation }) => {
                 <Ionicons
                     name={isInWishlist ? "heart" : "heart-outline"}
                     size={24}
-                    color={isInWishlist ? COLORS.primary : "#FFF"}
+                    color={isInWishlist ? colors.primary : "#FFF"}
                 />
-                <Text style={[styles.actionText, isInWishlist && { color: COLORS.primary }]}>
+                <Text style={[styles.actionText, isInWishlist && { color: colors.primary }]}>
                     {isInWishlist ? "Đã thích" : "Yêu thích"}
                 </Text>
             </TouchableOpacity>
@@ -313,39 +317,39 @@ const MovieDetailScreen = ({ route, navigation }) => {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {renderHeader()}
 
                 <View style={styles.contentContainer}>
                     {/* Main Action Button */}
-                    <TouchableOpacity style={styles.watchButton} onPress={handlePlayPress}>
+                    <TouchableOpacity style={[styles.watchButton, { backgroundColor: colors.primary }]} onPress={handlePlayPress}>
                         <Ionicons name="play" size={24} color="#000" />
                         <Text style={styles.watchButtonText}>Xem phim</Text>
                     </TouchableOpacity>
 
                     {/* Title & Stats */}
-                    <Text style={styles.title}>{movie.title}</Text>
+                    <Text style={[styles.title, { color: colors.text }]}>{movie.title}</Text>
                     <View style={styles.statsRow}>
-                        <View style={styles.imdbBadge}>
-                            <Text style={styles.imdbText}>IMDb {movie.imdbRating || movie.rating || 'N/A'}</Text>
+                        <View style={[styles.imdbBadge, { borderColor: colors.primary }]}>
+                            <Text style={[styles.imdbText, { color: colors.primary }]}>IMDb {movie.imdbRating || movie.rating || 'N/A'}</Text>
                         </View>
-                        <View style={styles.tagBadge}>
-                            <Text style={styles.tagText}>{movie.ageRating || 'T13'}</Text>
+                        <View style={[styles.tagBadge, { borderColor: colors.textSecondary }]}>
+                            <Text style={[styles.tagText, { color: colors.textSecondary }]}>{movie.ageRating || 'T13'}</Text>
                         </View>
-                        <View style={styles.tagBadge}>
-                            <Text style={styles.tagText}>{getYear()}</Text>
+                        <View style={[styles.tagBadge, { borderColor: colors.textSecondary }]}>
+                            <Text style={[styles.tagText, { color: colors.textSecondary }]}>{getYear()}</Text>
                         </View>
                         <View style={[styles.tagBadge, { borderColor: 'transparent', backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                            <Text style={styles.tagText}>{movie.quality || 'HD'}</Text>
+                            <Text style={[styles.tagText, { color: colors.textSecondary }]}>{movie.quality || 'HD'}</Text>
                         </View>
                     </View>
 
                     {/* Genres */}
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.genreScroll}>
                         {movie.genres?.map((genre, index) => (
-                            <View key={index} style={styles.genreTag}>
-                                <Text style={styles.genreText}>{genre.name || genre}</Text>
+                            <View key={index} style={[styles.genreTag, { backgroundColor: '#333' }]}>
+                                <Text style={[styles.genreText, { color: colors.text }]}>{genre.name || genre}</Text>
                             </View>
                         ))}
                     </ScrollView>
@@ -353,7 +357,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                     {/* Description */}
                     <View style={styles.descriptionContainer}>
                         <Text
-                            style={styles.description}
+                            style={[styles.description, { color: colors.textSecondary }]}
                             numberOfLines={isDescriptionExpanded ? undefined : 3}
                         >
                             {movie.description || 'Chưa có mô tả.'}
@@ -371,10 +375,10 @@ const MovieDetailScreen = ({ route, navigation }) => {
                         {['cast', 'recommendations', 'comments'].map(tab => (
                             <TouchableOpacity
                                 key={tab}
-                                style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
+                                style={[styles.tabButton, activeTab === tab && { borderBottomColor: colors.primary }]}
                                 onPress={() => setActiveTab(tab)}
                             >
-                                <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                                <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === tab && { color: colors.primary }]}>
                                     {tab === 'cast' ? 'Diễn viên' : tab === 'recommendations' ? 'Đề xuất' : 'Bình luận'}
                                 </Text>
                             </TouchableOpacity>
@@ -391,12 +395,12 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                         style={styles.castImage}
                                     />
                                     <View style={styles.castInfo}>
-                                        <Text style={styles.castName}>{actor.name}</Text>
-                                        <Text style={styles.characterName}>{actor.character || 'Diễn viên'}</Text>
+                                        <Text style={[styles.castName, { color: colors.text }]}>{actor.name}</Text>
+                                        <Text style={[styles.characterName, { color: colors.textSecondary }]}>{actor.character || 'Diễn viên'}</Text>
                                     </View>
                                 </View>
                             )) : (
-                                <Text style={styles.emptyText}>Đang cập nhật diễn viên...</Text>
+                                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Đang cập nhật diễn viên...</Text>
                             )}
                         </View>
                     )}
@@ -418,12 +422,12 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                                 source={{ uri: getImageUrl(item.poster) }}
                                                 style={styles.recommendationPoster}
                                             />
-                                            <Text style={styles.recommendationTitle} numberOfLines={1}>{item.title}</Text>
+                                            <Text style={[styles.recommendationTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
                                         </TouchableOpacity>
                                     )}
                                 />
                             ) : (
-                                <Text style={styles.emptyText}>Chưa có đề xuất nào.</Text>
+                                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Chưa có đề xuất nào.</Text>
                             )}
                         </View>
                     )}
@@ -434,17 +438,17 @@ const MovieDetailScreen = ({ route, navigation }) => {
                             <View style={styles.reviewInputWrapper}>
                                 {replyingTo && (
                                     <View style={styles.replyContext}>
-                                        <Text style={styles.replyContextText}>Đang trả lời: <Text style={{ fontWeight: 'bold' }}>{replyingTo.name}</Text></Text>
+                                        <Text style={[styles.replyContextText, { color: colors.textSecondary }]}>Đang trả lời: <Text style={{ fontWeight: 'bold', color: colors.text }}>{replyingTo.name}</Text></Text>
                                         <TouchableOpacity onPress={cancelReply}>
-                                            <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
+                                            <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
                                         </TouchableOpacity>
                                     </View>
                                 )}
-                                <View style={styles.reviewInputContainer}>
+                                <View style={[styles.reviewInputContainer, { backgroundColor: colors.backgroundCard, borderColor: colors.border }]}>
                                     <TextInput
-                                        style={styles.reviewInput}
+                                        style={[styles.reviewInput, { color: colors.text }]}
                                         placeholder={replyingTo ? "Viết câu trả lời..." : "Viết bình luận..."}
-                                        placeholderTextColor={COLORS.textMuted}
+                                        placeholderTextColor={colors.textMuted || '#aaa'}
                                         value={userComment}
                                         onChangeText={setUserComment}
                                         multiline
@@ -454,7 +458,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                         onPress={handlePostComment}
                                         disabled={submittingComment || !userComment.trim()}
                                     >
-                                        <Ionicons name="send" size={20} color="#000" />
+                                        <Ionicons name="send" size={20} color={colors.primary} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -463,12 +467,12 @@ const MovieDetailScreen = ({ route, navigation }) => {
                             {comments.length > 0 ? comments.map((comment) => (
                                 <View key={comment._id} style={styles.reviewItem}>
                                     <View style={styles.reviewHeader}>
-                                        <Text style={styles.reviewerName}>{comment.userId?.profile?.name || comment.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
-                                        <Text style={styles.reviewDate}>
+                                        <Text style={[styles.reviewerName, { color: colors.text }]}>{comment.userId?.profile?.name || comment.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
+                                        <Text style={[styles.reviewDate, { color: colors.textSecondary }]}>
                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                         </Text>
                                     </View>
-                                    <Text style={styles.reviewContent}>{comment.content}</Text>
+                                    <Text style={[styles.reviewContent, { color: colors.textSecondary }]}>{comment.content}</Text>
 
                                     {/* Interaction Buttons (Like, Dislike, Reply) */}
                                     <View style={styles.interactionRow}>
@@ -476,9 +480,9 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                             <Ionicons
                                                 name={user && comment.likes?.includes(userId) ? "thumbs-up" : "thumbs-up-outline"}
                                                 size={16}
-                                                color={user && comment.likes?.includes(userId) ? COLORS.primary : COLORS.textSecondary}
+                                                color={user && comment.likes?.includes(userId) ? colors.primary : colors.textSecondary}
                                             />
-                                            <Text style={[styles.interactionText, user && comment.likes?.includes(userId) && { color: COLORS.primary }]}>
+                                            <Text style={[styles.interactionText, { color: colors.textSecondary }, user && comment.likes?.includes(userId) && { color: colors.primary }]}>
                                                 {comment.likeCount || 0}
                                             </Text>
                                         </TouchableOpacity>
@@ -487,30 +491,30 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                             <Ionicons
                                                 name={user && comment.dislikes?.includes(userId) ? "thumbs-down" : "thumbs-down-outline"}
                                                 size={16}
-                                                color={user && comment.dislikes?.includes(userId) ? COLORS.error : COLORS.textSecondary}
+                                                color={user && comment.dislikes?.includes(userId) ? colors.error : colors.textSecondary}
                                             />
-                                            <Text style={[styles.interactionText, user && comment.dislikes?.includes(userId) && { color: COLORS.error }]}>
+                                            <Text style={[styles.interactionText, { color: colors.textSecondary }, user && comment.dislikes?.includes(userId) && { color: colors.error }]}>
                                                 {comment.dislikeCount || 0}
                                             </Text>
                                         </TouchableOpacity>
 
                                         <TouchableOpacity style={styles.interactionBtn} onPress={() => handleReply(comment)}>
-                                            <Text style={styles.replyBtnText}>Trả lời</Text>
+                                            <Text style={[styles.replyBtnText, { color: colors.textSecondary }]}>Trả lời</Text>
                                         </TouchableOpacity>
                                     </View>
 
                                     {/* Replies Section */}
                                     {comment.replies && comment.replies.length > 0 && (
-                                        <View style={styles.repliesContainer}>
+                                        <View style={[styles.repliesContainer, { borderLeftColor: colors.border }]}>
                                             {comment.replies.map((reply) => (
                                                 <View key={reply._id} style={styles.replyItem}>
                                                     <View style={styles.reviewHeader}>
-                                                        <Text style={styles.reviewerName}>{reply.userId?.profile?.name || reply.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
-                                                        <Text style={styles.reviewDate}>
+                                                        <Text style={[styles.reviewerName, { color: colors.text }]}>{reply.userId?.profile?.name || reply.userId?.email?.split('@')[0] || 'Người dùng'}</Text>
+                                                        <Text style={[styles.reviewDate, { color: colors.textSecondary }]}>
                                                             {new Date(reply.createdAt).toLocaleDateString('vi-VN')}
                                                         </Text>
                                                     </View>
-                                                    <Text style={styles.reviewContent}>{reply.content}</Text>
+                                                    <Text style={[styles.reviewContent, { color: colors.textSecondary }]}>{reply.content}</Text>
 
                                                     {/* Like/Dislike for Reply */}
                                                     <View style={[styles.interactionRow, { marginTop: 4 }]}>
@@ -518,9 +522,9 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                                             <Ionicons
                                                                 name={user && reply.likes?.includes(userId) ? "thumbs-up" : "thumbs-up-outline"}
                                                                 size={14}
-                                                                color={user && reply.likes?.includes(userId) ? COLORS.primary : COLORS.textSecondary}
+                                                                color={user && reply.likes?.includes(userId) ? colors.primary : colors.textSecondary}
                                                             />
-                                                            <Text style={[styles.interactionText, { fontSize: 10 }, user && reply.likes?.includes(userId) && { color: COLORS.primary }]}>
+                                                            <Text style={[styles.interactionText, { fontSize: 10, color: colors.textSecondary }, user && reply.likes?.includes(userId) && { color: colors.primary }]}>
                                                                 {reply.likeCount || 0}
                                                             </Text>
                                                         </TouchableOpacity>
@@ -529,9 +533,9 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                                             <Ionicons
                                                                 name={user && reply.dislikes?.includes(userId) ? "thumbs-down" : "thumbs-down-outline"}
                                                                 size={14}
-                                                                color={user && reply.dislikes?.includes(userId) ? COLORS.error : COLORS.textSecondary}
+                                                                color={user && reply.dislikes?.includes(userId) ? colors.error : colors.textSecondary}
                                                             />
-                                                            <Text style={[styles.interactionText, { fontSize: 10 }, user && reply.dislikes?.includes(userId) && { color: COLORS.error }]}>
+                                                            <Text style={[styles.interactionText, { fontSize: 10, color: colors.textSecondary }, user && reply.dislikes?.includes(userId) && { color: colors.error }]}>
                                                                 {reply.dislikeCount || 0}
                                                             </Text>
                                                         </TouchableOpacity>
@@ -542,7 +546,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                                     )}
                                 </View>
                             )) : (
-                                <Text style={styles.emptyText}>Chưa có bình luận nào. Hãy là người đầu tiên!</Text>
+                                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Chưa có bình luận nào. Hãy là người đầu tiên!</Text>
                             )}
                         </View>
                     )}
@@ -556,11 +560,11 @@ const MovieDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
     },
     loadingContainer: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
     },
     headerImageContainer: {
         height: width * 0.6,
@@ -612,12 +616,12 @@ const styles = StyleSheet.create({
         marginTop: -25,
         marginLeft: -25,
     },
-    contentContainer: {
+    contentContainer: { // no change needed
         padding: SPACING.lg,
         marginTop: -20,
     },
     watchButton: {
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
@@ -634,7 +638,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: FONT_SIZES.xxl,
         fontWeight: 'bold',
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: SPACING.sm,
     },
     statsRow: {
@@ -646,7 +650,7 @@ const styles = StyleSheet.create({
     imdbBadge: {
         flexDirection: 'row',
         borderWidth: 1,
-        borderColor: COLORS.primary,
+        // borderColor handled dynamically
         borderRadius: 4,
         paddingHorizontal: 6,
         paddingVertical: 2,
@@ -654,13 +658,13 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     imdbText: {
-        color: COLORS.primary,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
         fontWeight: 'bold',
     },
     tagBadge: {
         borderWidth: 1,
-        borderColor: COLORS.textSecondary,
+        // borderColor handled dynamically
         borderRadius: 4,
         paddingHorizontal: 6,
         paddingVertical: 2,
@@ -668,33 +672,33 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     tagText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
     },
     genreScroll: {
         marginBottom: SPACING.lg,
     },
     genreTag: {
-        backgroundColor: '#333',
+        // backgroundColor handled dynamically or fixed dark grey
         borderRadius: 4,
         paddingHorizontal: 10,
         paddingVertical: 6,
         marginRight: 8,
     },
     genreText: {
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
     },
     descriptionContainer: {
         marginBottom: SPACING.xl,
     },
     description: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         lineHeight: 22,
     },
     moreText: {
-        color: '#FFF',
+        color: '#FFF', // Keep white for contrast
         fontWeight: 'bold',
         marginTop: 4,
     },
@@ -709,7 +713,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     actionText: {
-        color: COLORS.textSecondary,
+        color: '#888', // Fallback or handled dynamically
         fontSize: 10,
         marginTop: 6,
     },
@@ -719,7 +723,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderWidth: 2,
-        borderColor: COLORS.primary,
+        // borderColor handled dynamically
     },
     ratingBadgeText: {
         color: '#000',
@@ -739,15 +743,15 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     activeTabButton: {
-        borderBottomColor: COLORS.primary,
+        // borderBottomColor handled dynamically
     },
     tabText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         fontWeight: '600',
     },
     activeTabText: {
-        color: COLORS.primary,
+        // color handled dynamically
     },
     castList: {
         marginTop: SPACING.sm,
@@ -767,13 +771,13 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     castName: {
-        color: COLORS.text,
+        // color handled dynamically
         fontWeight: 'bold',
         fontSize: FONT_SIZES.md,
         marginBottom: 2,
     },
     characterName: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
     },
     castInfoButton: {
@@ -784,7 +788,7 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     castInfoButtonText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
     },
     recommendationList: {
@@ -801,12 +805,12 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.xs,
     },
     recommendationTitle: {
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
         fontWeight: 'bold',
     },
     emptyText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontStyle: 'italic',
         textAlign: 'center',
         marginTop: SPACING.lg,
@@ -817,19 +821,19 @@ const styles = StyleSheet.create({
     reviewInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#333',
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.md,
         paddingHorizontal: SPACING.sm,
         paddingVertical: 4,
     },
     reviewInput: {
         flex: 1,
-        color: '#FFF',
+        // color handled dynamically
         paddingVertical: 8,
         minHeight: 40,
     },
     postButton: {
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         width: 36,
         height: 36,
         borderRadius: 18,
@@ -838,7 +842,7 @@ const styles = StyleSheet.create({
         marginLeft: SPACING.xs,
     },
     reviewItem: {
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.md,
         padding: SPACING.md,
         marginBottom: SPACING.md,
@@ -849,7 +853,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     reviewerName: {
-        color: COLORS.text,
+        // color handled dynamically
         fontWeight: 'bold',
         fontSize: FONT_SIZES.sm,
     },
@@ -866,20 +870,20 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     interactionText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: 12,
     },
     replyBtnText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: 12,
         fontWeight: 'bold',
     },
     reviewDate: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
     },
     reviewContent: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
         lineHeight: 20,
     },
@@ -908,11 +912,11 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     interactionText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: 12,
     },
     replyBtnText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: 12,
         fontWeight: 'bold',
     },
@@ -932,7 +936,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#333',
     },
     replyContextText: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: 12,
     },
 });

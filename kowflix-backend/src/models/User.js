@@ -20,6 +20,7 @@ const UserSchema = new mongoose.Schema({
   mobileSettings: {
     theme: { type: String, enum: ['light', 'dark'], default: 'dark' }
   },
+  pushTokens: [{ type: String }],
   createdAt: { type: Date, default: Date.now }
 });
 

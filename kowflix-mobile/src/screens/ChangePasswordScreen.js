@@ -12,11 +12,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { authAPI } from '../services/api/authAPI';
+import { useTheme } from '../context/ThemeContext';
 
 const ChangePasswordScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
+    const { colors } = useTheme();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -67,22 +69,22 @@ const ChangePasswordScreen = ({ navigation }) => {
 
     const renderInput = ({ label, value, onChangeText, secureTextEntry, toggleSecure, placeholder }) => (
         <View style={styles.inputGroup}>
-            <Text style={styles.label}>{label}</Text>
-            <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+            <View style={[styles.inputContainer, { backgroundColor: colors.backgroundCard, borderColor: colors.border }]}>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     value={value}
                     onChangeText={onChangeText}
                     secureTextEntry={secureTextEntry}
                     placeholder={placeholder}
-                    placeholderTextColor={COLORS.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     autoCapitalize="none"
                 />
                 <TouchableOpacity onPress={toggleSecure} style={styles.eyeIcon}>
                     <Ionicons
                         name={secureTextEntry ? 'eye-off-outline' : 'eye-outline'}
                         size={20}
-                        color={COLORS.textSecondary}
+                        color={colors.textSecondary}
                     />
                 </TouchableOpacity>
             </View>
@@ -90,12 +92,12 @@ const ChangePasswordScreen = ({ navigation }) => {
     );
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
+        <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Đổi mật khẩu</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Đổi mật khẩu</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -132,11 +134,11 @@ const ChangePasswordScreen = ({ navigation }) => {
                     })}
 
                     <TouchableOpacity
-                        style={[styles.submitButton, loading && styles.disabledButton]}
+                        style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.disabledButton]}
                         onPress={handleChangePassword}
                         disabled={loading}
                     >
-                        <Text style={styles.submitButtonText}>
+                        <Text style={[styles.submitButtonText, { color: colors.background }]}>
                             {loading ? 'Đang xử lý...' : 'Cập nhật mật khẩu'}
                         </Text>
                     </TouchableOpacity>
@@ -149,7 +151,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        // backgroundColor handled dynamically
     },
     header: {
         flexDirection: 'row',
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.md,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        // borderBottomColor handled dynamically
     },
     backButton: {
         padding: SPACING.sm,
@@ -166,7 +168,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: FONT_SIZES.lg,
         fontWeight: FONT_WEIGHTS.bold,
-        color: COLORS.text,
+        // color handled dynamically
     },
     content: {
         padding: SPACING.lg,
@@ -176,29 +178,29 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: FONT_SIZES.md,
-        color: COLORS.text,
+        // color handled dynamically
         marginBottom: SPACING.sm,
         fontWeight: FONT_WEIGHTS.medium,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         borderRadius: RADIUS.md,
         borderWidth: 1,
-        borderColor: COLORS.border,
+        // borderColor handled dynamically
     },
     input: {
         flex: 1,
         padding: SPACING.md,
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.md,
     },
     eyeIcon: {
         padding: SPACING.md,
     },
     submitButton: {
-        backgroundColor: COLORS.primary,
+        // backgroundColor handled dynamically
         padding: SPACING.md,
         borderRadius: RADIUS.md,
         alignItems: 'center',
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     submitButtonText: {
-        color: COLORS.background,
+        // color handled dynamically
         fontSize: FONT_SIZES.lg,
         fontWeight: FONT_WEIGHTS.bold,
     },

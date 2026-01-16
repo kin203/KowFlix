@@ -8,8 +8,10 @@ import Slider from '@react-native-community/slider';
 import { COLORS } from '../constants/colors';
 import { movieAPI } from '../services/api/movieAPI';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { useTheme } from '../context/ThemeContext';
 
 const WatchScreen = ({ route, navigation }) => {
+    const { colors } = useTheme();
     const { movie } = route.params;
     const [source, setSource] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -302,9 +304,9 @@ const WatchScreen = ({ route, navigation }) => {
                                 <TouchableOpacity style={styles.errorBackBtn} onPress={handleBack}>
                                     <Ionicons name="arrow-back" size={30} color="white" />
                                 </TouchableOpacity>
-                                <Ionicons name="alert-circle-outline" size={50} color={COLORS.error} />
+                                <Ionicons name="alert-circle-outline" size={50} color={colors.error} />
                                 <Text style={styles.errorText}>{error || 'Lỗi không xác định'}</Text>
-                                <TouchableOpacity style={styles.retryBtn} onPress={fetchStreamUrl}>
+                                <TouchableOpacity style={[styles.retryBtn, { backgroundColor: colors.primary }]} onPress={fetchStreamUrl}>
                                     <Text style={styles.retryText}>Thử lại</Text>
                                 </TouchableOpacity>
                             </View>
@@ -316,7 +318,7 @@ const WatchScreen = ({ route, navigation }) => {
             {/* Loading Indicator */}
             {isLoading && (
                 <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color={COLORS.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                     <Text style={styles.loadingText}>Đang tải phim...</Text>
                 </View>
             )}
@@ -352,14 +354,20 @@ const WatchScreen = ({ route, navigation }) => {
                                 {activeQualities.map((item, index) => (
                                     <TouchableOpacity
                                         key={index}
-                                        style={[styles.qualityItem, currentQuality === item.quality && styles.activeQualityItem]}
+                                        style={[
+                                            styles.qualityItem,
+                                            currentQuality === item.quality && { borderBottomColor: colors.primary }
+                                        ]}
                                         onPress={() => changeQuality(item)}
                                     >
-                                        <Text style={[styles.qualityText, currentQuality === item.quality && styles.activeQualityText]}>
+                                        <Text style={[
+                                            styles.qualityText,
+                                            currentQuality === item.quality && { color: colors.primary, fontWeight: 'bold' }
+                                        ]}>
                                             {item.quality}
                                         </Text>
                                         {currentQuality === item.quality && (
-                                            <Ionicons name="checkmark" size={20} color={COLORS.primary} />
+                                            <Ionicons name="checkmark" size={20} color={colors.primary} />
                                         )}
                                     </TouchableOpacity>
                                 ))}
@@ -407,9 +415,9 @@ const WatchScreen = ({ route, navigation }) => {
                                     minimumValue={0}
                                     maximumValue={duration > 0 ? duration : 1}
                                     value={currentTime}
-                                    minimumTrackTintColor={COLORS.primary}
+                                    minimumTrackTintColor={colors.primary}
                                     maximumTrackTintColor="rgba(255,255,255,0.3)"
-                                    thumbTintColor={COLORS.primary}
+                                    thumbTintColor={colors.primary}
                                     onSlidingComplete={seekTo}
                                 />
                                 <Text style={styles.timeText}>{formatTime(duration)}</Text>
@@ -442,7 +450,7 @@ const styles = StyleSheet.create({
     centerMsg: { alignItems: 'center', justifyContent: 'center' },
     errorText: { color: 'white', marginTop: 10, fontSize: 16 },
     errorBackBtn: { position: 'absolute', top: -100, left: -150, padding: 10 },
-    retryBtn: { marginTop: 15, backgroundColor: COLORS.primary, paddingVertical: 8, paddingHorizontal: 20, borderRadius: 5 },
+    retryBtn: { marginTop: 15, paddingVertical: 8, paddingHorizontal: 20, borderRadius: 5 }, // backgroundColor dynamic
     retryText: { color: 'black', fontWeight: 'bold' },
 
     loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center', zIndex: 20 },
@@ -477,9 +485,11 @@ const styles = StyleSheet.create({
     qualityTitle: { color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     qualityList: { maxHeight: 200 },
     qualityItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#333' },
-    activeQualityItem: { borderBottomColor: COLORS.primary },
+    activeQualityItem: { // handled in JSX style override
+    },
     qualityText: { color: '#ccc', fontSize: 16 },
-    activeQualityText: { color: COLORS.primary, fontWeight: 'bold' },
+    activeQualityText: { // handled in JSX style override
+    },
     closeQualityBtn: { marginTop: 20, padding: 10, backgroundColor: '#333', alignItems: 'center', borderRadius: 5 },
     closeQualityText: { color: 'white', fontWeight: 'bold' }
 });

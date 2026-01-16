@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { COLORS, RADIUS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { RADIUS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { IMAGE_PLACEHOLDER } from '../constants/config';
 import { getImageUrl } from '../utils/imageUtils';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.35; // 35% of screen width
 
 const MovieCard = ({ movie, onPress }) => {
+    const { colors } = useTheme();
     const [imageError, setImageError] = React.useState(false);
 
     // Normalize path - check for 'poster' field first as per DB schema
@@ -48,7 +50,7 @@ const MovieCard = ({ movie, onPress }) => {
             onPress={() => onPress(movie)}
             activeOpacity={0.7}
         >
-            <View style={styles.imageContainer}>
+            <View style={[styles.imageContainer, { backgroundColor: colors.backgroundCard }]}>
                 <Image
                     source={finalSource}
                     style={styles.poster}
@@ -59,14 +61,14 @@ const MovieCard = ({ movie, onPress }) => {
                 {displayRating && (
                     <View style={styles.ratingBadge}>
                         <Ionicons name="star" size={10} color="#FFD700" />
-                        <Text style={styles.ratingText}>{displayRating}</Text>
+                        <Text style={[styles.ratingText, { color: '#FFFFFF' }]}>{displayRating}</Text>
                     </View>
                 )}
             </View>
-            <Text style={styles.title} numberOfLines={1}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
                 {movie.title}
             </Text>
-            <Text style={styles.year}>
+            <Text style={[styles.year, { color: colors.textSecondary }]}>
                 {(() => {
                     if (movie.releaseYear) return movie.releaseYear;
                     if (movie.year) return movie.year;
@@ -90,7 +92,7 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.md,
         overflow: 'hidden',
         marginBottom: SPACING.sm,
-        backgroundColor: COLORS.backgroundCard,
+        // backgroundColor handled dynamically
         position: 'relative',
     },
     poster: {
@@ -109,18 +111,18 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.sm,
     },
     ratingText: {
-        color: COLORS.text,
+        // color handled dynamically (usually white for visibility on dark overlay)
         fontSize: FONT_SIZES.xs,
         fontWeight: FONT_WEIGHTS.bold,
         marginLeft: 2,
     },
     title: {
-        color: COLORS.text,
+        // color handled dynamically
         fontSize: FONT_SIZES.sm,
         fontWeight: FONT_WEIGHTS.semibold,
     },
     year: {
-        color: COLORS.textSecondary,
+        // color handled dynamically
         fontSize: FONT_SIZES.xs,
         marginTop: 2,
     },
