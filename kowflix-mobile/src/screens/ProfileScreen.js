@@ -24,37 +24,7 @@ const ProfileScreen = ({ navigation }) => {
     const { user, logout, loading, refreshUser } = useAuth();
     const insets = useSafeAreaInsets();
     const [uploading, setUploading] = useState(false);
-    const [stats, setStats] = useState({
-        historyCount: 0,
-        commentCount: 0,
-        wishlistCount: 0
-    });
-
-    // Fetch stats when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            fetchStats();
-        }, [])
-    );
-
-    const fetchStats = async () => {
-        try {
-            const res = await profileAPI.getStats();
-            // console.log('Stats res:', res.data); // Keep log
-            if (res.data.success) {
-                setStats(res.data.data);
-                // Temporary Debug Alert: Remove after fixing
-                Alert.alert('Stats Debug', JSON.stringify(res.data.data, null, 2));
-            } else {
-                Alert.alert('Stats Error', 'API Success = false');
-            }
-        } catch (error) {
-            console.error('Fetch stats error:', error);
-            Alert.alert('Lỗi tải thống kê', JSON.stringify(error.message || error));
-        }
-    };
-
-    // Helper to get display name
+    // Stats removed per user request
     const getDisplayName = () => {
         if (!user) return 'User';
         // Priority: Profile Name > Username > Email Username
@@ -141,13 +111,13 @@ const ProfileScreen = ({ navigation }) => {
         {
             icon: 'settings-outline',
             title: 'Cài đặt',
-            onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển'),
+            onPress: () => navigation.navigate('Settings'),
             color: COLORS.textSecondary
         },
         {
             icon: 'lock-closed-outline',
             title: 'Đổi mật khẩu',
-            onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển'),
+            onPress: () => navigation.navigate('ChangePassword'),
             color: COLORS.textSecondary
         }
     ];
@@ -165,7 +135,7 @@ const ProfileScreen = ({ navigation }) => {
     return (
         <View style={[globalStyles.container, { paddingTop: insets.top }]}>
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[styles.content, { paddingBottom: 100 + insets.bottom }]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header Profile */}
@@ -204,23 +174,7 @@ const ProfileScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Stats Section */}
-                <View style={styles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{stats.historyCount}</Text>
-                        <Text style={styles.statLabel}>Đã xem</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{stats.commentCount}</Text>
-                        <Text style={styles.statLabel}>Bình luận</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{stats.wishlistCount}</Text>
-                        <Text style={styles.statLabel}>Yêu thích</Text>
-                    </View>
-                </View>
+
 
                 {/* Menu Options */}
                 <View style={styles.menuContainer}>
@@ -254,7 +208,8 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     content: {
         padding: SPACING.lg,
-        paddingBottom: 100,
+        paddingBottom: 100 + 34, // Approximate safe area, but better to use insets in style prop if possible. 
+        // Since this is a static style object, we'll handle it in the component render instead.
     },
     header: {
         alignItems: 'center',

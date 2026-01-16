@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
   lastActive: { type: Date, default: Date.now },
   loginCount: { type: Number, default: 0 },
   totalWatchTime: { type: Number, default: 0 }, // in minutes
+  mobileSettings: {
+    theme: { type: String, enum: ['light', 'dark'], default: 'dark' }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

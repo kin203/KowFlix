@@ -23,6 +23,12 @@ export const authAPI = {
     // Delete avatar
     deleteAvatar: () => api.delete('/profile/avatar'),
 
+    // Change password
+    changePassword: (data) => api.post('/auth/change-password', data),
+
+    // Update Mobile Settings (Theme)
+    updateMobileSettings: (data) => api.put('/profile/mobile-settings', data),
+
     // Logout (optional - mainly client-side)
     logout: () => api.post('/auth/logout'),
 };

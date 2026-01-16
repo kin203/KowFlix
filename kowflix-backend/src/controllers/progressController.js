@@ -7,7 +7,7 @@ export const saveProgress = async (req, res) => {
     try {
         const { movieId } = req.params;
         const { currentTime, duration } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         if (currentTime === undefined || currentTime === null || !duration) {
             return res.status(400).json({
@@ -48,7 +48,7 @@ export const saveProgress = async (req, res) => {
 export const getProgress = async (req, res) => {
     try {
         const { movieId } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const progress = await WatchProgress.findOne({ userId, movieId });
 
@@ -66,7 +66,7 @@ export const getProgress = async (req, res) => {
 // Get all user's watch progress (for Continue Watching)
 export const getAllProgress = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
         const { limit = 10 } = req.query;
 
         const progressList = await WatchProgress.find({ userId })
@@ -90,7 +90,7 @@ export const getAllProgress = async (req, res) => {
 export const deleteProgress = async (req, res) => {
     try {
         const { movieId } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         await WatchProgress.findOneAndDelete({ userId, movieId });
 
@@ -104,7 +104,7 @@ export const deleteProgress = async (req, res) => {
 // Get watch history (all movies watched, including completed)
 export const getWatchHistory = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
         const { limit = 50 } = req.query;
 
         const historyList = await WatchProgress.find({ userId })
