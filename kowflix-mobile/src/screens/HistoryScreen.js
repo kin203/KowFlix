@@ -124,7 +124,10 @@ const HistoryScreen = ({ navigation }) => {
                     data={history}
                     keyExtractor={(item) => item._id}
                     renderItem={renderItem}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={[
+                        styles.listContent,
+                        { paddingBottom: insets.bottom + SPACING.lg }
+                    ]}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}

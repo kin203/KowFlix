@@ -160,3 +160,37 @@ export const getStats = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+// ====================== UPDATE MOBILE SETTINGS ======================
+export const updateMobileSettings = async (req, res) => {
+    try {
+        const { theme } = req.body;
+
+        if (!theme) {
+            return res.status(400).json({ success: false, message: 'Missing theme setting' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Initialize mobileSettings if disjoint
+        if (!user.mobileSettings) {
+            user.mobileSettings = {};
+        }
+
+        user.mobileSettings.theme = theme;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Settings updated',
+            data: {
+                mobileSettings: user.mobileSettings
+            }
+        });
+    } catch (error) {
+        console.error('Update settings error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};

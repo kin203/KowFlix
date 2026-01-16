@@ -11,6 +11,8 @@ import MovieDetailScreen from '../screens/MovieDetailScreen';
 import WatchScreen from '../screens/WatchScreen';
 import WishlistScreen from '../screens/WishlistScreen';
 import HistoryScreen from '../screens/HistoryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 const Stack = createStackNavigator();
 
@@ -43,6 +45,16 @@ const AuthenticatedNavigator = () => {
             <Stack.Screen
                 name="History"
                 component={HistoryScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="ChangePassword"
+                component={ChangePasswordScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

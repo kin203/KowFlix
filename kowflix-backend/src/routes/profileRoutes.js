@@ -1,6 +1,6 @@
 // src/routes/profileRoutes.js
 import express from 'express';
-import { getStats, getProfile, updateProfile, uploadAvatar as uploadAvatarController, deleteAvatar } from '../controllers/profileController.js';
+import { getStats, getProfile, updateProfile, uploadAvatar as uploadAvatarController, deleteAvatar, updateMobileSettings } from '../controllers/profileController.js';
 import auth from '../middleware/auth.js';
 import { uploadAvatar } from '../utils/cloudinary.js';
 
@@ -23,5 +23,8 @@ router.post('/avatar', uploadAvatar.single('avatar'), uploadAvatarController);
 
 // DELETE /api/profile/avatar - Delete avatar
 router.delete('/avatar', deleteAvatar);
+
+// PUT /api/profile/mobile-settings - Update mobile specific settings (theme)
+router.put('/mobile-settings', updateMobileSettings);
 
 export default router;
