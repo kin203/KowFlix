@@ -6,7 +6,6 @@ import {
     deleteNotification,
     createNotification,
     getAllNotifications,
-    getAllNotifications,
     deleteNotificationAdmin,
     savePushToken
 } from '../controllers/notificationController.js';
