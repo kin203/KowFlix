@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
                 fetchProfileInBackground();
             }
         } catch (error) {
-            console.error('Auth check failed:', error);
+            // console.error('Auth check failed:', error);
             await logout();
         } finally {
             // Unblock Splash Screen immediately after storage check
@@ -44,11 +44,11 @@ export const AuthProvider = ({ children }) => {
             } else {
                 // Token invalid - logout silently or prompt user?
                 // For now, silent logout to avoid jarring UX if it happens rarely
-                console.log('Token invalid in background check');
+                // console.log('Token invalid in background check');
                 await logout();
             }
         } catch (error) {
-            console.error('Background profile fetch failed:', error);
+            // console.error('Background profile fetch failed:', error);
             // If network error, we might still want to keep the user "logged in" with cached data if we had it.
             // But since we don't persist user profile to storage yet, we might end up with no user data.
             // For now, if 401, logout. Else keep authenticated (maybe offline).
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, message: response.data.message };
         } catch (error) {
-            console.error('Login failed:', error);
+            // console.error('Login failed:', error);
             return {
                 success: false,
                 message: error.response?.data?.message || 'Đăng nhập thất bại'
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, message: response.data.message };
         } catch (error) {
-            console.error('Registration failed:', error);
+            // console.error('Registration failed:', error);
             return {
                 success: false,
                 message: error.response?.data?.message || 'Đăng ký thất bại'
@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setIsAuthenticated(false);
         } catch (error) {
-            console.error('Logout failed:', error);
+            // console.error('Logout failed:', error);
         }
     };
 
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, message: response.data.message };
         } catch (error) {
-            console.error('Update profile failed:', error);
+            // console.error('Update profile failed:', error);
             return {
                 success: false,
                 message: error.response?.data?.message || 'Cập nhật thất bại'

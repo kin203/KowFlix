@@ -10,7 +10,9 @@ import {
     ScrollView,
     ActivityIndicator,
     Alert,
+    Image,
 } from 'react-native';
+import { isValidEmail, validatePassword, validateUsername } from '../utils/validation';
 import { useAuth } from '../context/AuthContext';
 import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { APP_NAME } from '../constants/config';
@@ -31,13 +33,25 @@ const RegisterScreen = ({ navigation }) => {
             return;
         }
 
-        if (password !== confirmPassword) {
-            Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+        if (!isValidEmail(email)) {
+            Alert.alert('Lỗi', 'Email không hợp lệ');
             return;
         }
 
-        if (password.length < 6) {
-            Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+        const usernameCheck = validateUsername(username);
+        if (!usernameCheck.isValid) {
+            Alert.alert('Lỗi', usernameCheck.message);
+            return;
+        }
+
+        const passwordCheck = validatePassword(password);
+        if (!passwordCheck.isValid) {
+            Alert.alert('Lỗi', passwordCheck.message);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
             return;
         }
 

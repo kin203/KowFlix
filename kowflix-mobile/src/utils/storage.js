@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const KEYS = {
     TOKEN: '@kowflix_token',
     USER: '@kowflix_user',
+    THEME: '@kowflix_theme',
 };
 
 // Save token
@@ -69,6 +70,28 @@ export const removeUser = async () => {
     } catch (error) {
         console.error('Error removing user:', error);
         return false;
+    }
+};
+
+// Save theme
+export const saveTheme = async (theme) => {
+    try {
+        await AsyncStorage.setItem(KEYS.THEME, theme);
+        return true;
+    } catch (error) {
+        console.error('Error saving theme:', error);
+        return false;
+    }
+};
+
+// Get theme
+export const getTheme = async () => {
+    try {
+        const theme = await AsyncStorage.getItem(KEYS.THEME);
+        return theme;
+    } catch (error) {
+        console.error('Error getting theme:', error);
+        return null;
     }
 };
 

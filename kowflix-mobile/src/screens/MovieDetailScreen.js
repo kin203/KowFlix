@@ -62,7 +62,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                 setIsInWishlist(!!wishRes.data.data?.inWishlist);
             }
         } catch (err) {
-            console.log('Check wishlist error:', err);
+            // console.log('Check wishlist error:', err);
         }
     };
 
@@ -73,7 +73,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                 setComments(res.data.data);
             }
         } catch (error) {
-            console.log('Fetch comments error:', error);
+            // console.log('Fetch comments error:', error);
         }
     };
 
@@ -110,7 +110,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
 
             await fetchComments();
         } catch (error) {
-            console.error('Fetch movie details error:', error);
+            // console.error('Fetch movie details error:', error);
         } finally {
             setLoading(false);
         }
@@ -139,7 +139,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                 // Alert.alert("Thành công", "Đã đăng bình luận!"); // Remove annoying alert for chat-like experience
             }
         } catch (error) {
-            console.error('Post comment error:', error);
+            // console.error('Post comment error:', error);
             Alert.alert("Lỗi", "Không thể đăng bình luận.");
         } finally {
             setSubmittingComment(false);
@@ -205,7 +205,7 @@ const MovieDetailScreen = ({ route, navigation }) => {
                 setIsInWishlist(true);
                 Alert.alert("Thông báo", "Phim đã có trong danh sách yêu thích");
             } else {
-                console.error('Toggle wishlist error:', error);
+                // console.error('Toggle wishlist error:', error);
                 Alert.alert("Lỗi", "Không thể cập nhật danh sách yêu thích");
             }
         }

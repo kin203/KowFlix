@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "kowflix-mobile",
+    "name": "KowFlix",
     "slug": "kowflix-mobile",
-    "version": "1.0.0",
+    "version": "1.0.1-hotfix",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,14 +13,20 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nk203.kowflixmobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.nk203.kowflixmobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +35,12 @@
       "expo-asset",
       "expo-font",
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b4733522-5062-4f93-ad2a-eda9e4ab80f8"
+      }
+    },
+    "owner": "nk203"
   }
 }
