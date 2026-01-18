@@ -13,6 +13,7 @@ import WishlistScreen from '../screens/WishlistScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -55,6 +56,11 @@ const AuthenticatedNavigator = () => {
             <Stack.Screen
                 name="ChangePassword"
                 component={ChangePasswordScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="EditProfile"
+                component={EditProfileScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

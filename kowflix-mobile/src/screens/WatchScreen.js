@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import { COLORS } from '../constants/colors';
 import { movieAPI } from '../services/api/movieAPI';
+import { progressAPI } from '../services/api/progressAPI';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useTheme } from '../context/ThemeContext';
 
@@ -220,7 +221,7 @@ const WatchScreen = ({ route, navigation }) => {
                     setSource(finalSource);
 
                     // Track view
-                    movieAPI.trackView(movie._id).catch(err => console.log('Track view error:', err));
+                    movieAPI.trackView(movie._id).catch(() => { });
                 } else {
                     setError('Không tìm thấy nguồn phim.');
                 }
@@ -282,6 +283,64 @@ const WatchScreen = ({ route, navigation }) => {
     const handleBack = () => {
         navigation.goBack();
     };
+
+
+    // --- Progress Saving Logic ---
+    const saveProgress = async (time, dur) => {
+        if (!movie._id || time < 5 || dur === 0) return; // Don't save if < 5s or invalid
+        try {
+            await progressAPI.save(movie._id, {
+                currentTime: time,
+                duration: dur
+            });
+        } catch (error) {
+            // console.error('Error saving progress:', error);
+        }
+    };
+
+    // Periodic Save
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isPlaying && currentTime > 0) {
+                saveProgress(currentTime, duration);
+            }
+        }, 10000); // Save every 10 seconds
+
+        return () => clearInterval(interval);
+    }, [isPlaying, currentTime, duration]);
+
+    // Save on Unmount / Back
+    useEffect(() => {
+        return () => {
+            if (currentTime > 5 && duration > 0) {
+                saveProgress(currentTime, duration);
+            }
+        };
+    }, [currentTime, duration]);
+
+    // Fetch initial progress to resume
+    useEffect(() => {
+        const loadProgress = async () => {
+            // Only fetch if source is not ready yet to avoid conflict
+            if (source) return;
+
+            try {
+                const res = await progressAPI.get(movie._id);
+                if (res.data.success && res.data.data) {
+                    const savedTime = res.data.data.currentTime;
+                    const percentage = res.data.data.percentage;
+
+                    // Resume if < 95% watched
+                    if (savedTime > 0 && percentage < 95) {
+                        savedTimeRef.current = savedTime;
+                    }
+                }
+            } catch (error) {
+                // console.error('Error loading progress:', error);
+            }
+        };
+        loadProgress();
+    }, [movie._id]);
 
 
     // --- Render ---

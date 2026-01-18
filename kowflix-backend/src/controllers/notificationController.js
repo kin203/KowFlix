@@ -2,6 +2,7 @@ import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 import mongoose from 'mongoose';
 import axios from 'axios';
+import { sendPushNotification } from '../services/pushService.js';
 
 // Save Push Token
 export const savePushToken = async (req, res) => {
@@ -214,42 +215,12 @@ export const createNotification = async (req, res) => {
 
             // Send Push Notifications (Fire and forget)
             try {
-                // Collect tokens
-                let tokens = [];
-                if (notificationsToCreate.length > 0) {
-                    // Get user IDs involved
-                    const userIds = notificationsToCreate.map(n => n.userId);
-                    const users = await User.find({ _id: { $in: userIds } }, 'pushTokens');
-
-                    users.forEach(u => {
-                        if (u.pushTokens && u.pushTokens.length > 0) {
-                            tokens.push(...u.pushTokens);
-                        }
-                    });
-                }
-
-                if (tokens.length > 0) {
-                    const messages = tokens.map(token => ({
-                        to: token,
-                        sound: 'default',
-                        title: title,
-                        body: message,
-                        data: { link },
-                    }));
-
-                    // Simple chunking for Expo (100 is limit usually, but just sending all for now or creating a utility)
-                    // Using axios to send directly to Expo
-                    await axios.post('https://exp.host/--/api/v2/push/send', messages, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Accept-encoding': 'gzip, deflate',
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                }
+                const userIds = notificationsToCreate.map(n => n.userId);
+                // Use the new service
+                // Note: link is taken from the request body or the first notification's data
+                await sendPushNotification(userIds, title, message, { link });
             } catch (pushError) {
                 console.error('Push notification error:', pushError);
-                // Don't fail the request if push fails
             }
         }
 

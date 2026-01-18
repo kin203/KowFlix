@@ -10,7 +10,9 @@ import {
     ScrollView,
     ActivityIndicator,
     Alert,
+    Image,
 } from 'react-native';
+import { isValidEmail } from '../utils/validation';
 import { useAuth } from '../context/AuthContext';
 import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { APP_NAME } from '../constants/config';
@@ -26,6 +28,11 @@ const LoginScreen = ({ navigation }) => {
     const handleLogin = async () => {
         if (!email || !password) {
             Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            Alert.alert('Lỗi', 'Email không hợp lệ');
             return;
         }
 

@@ -26,7 +26,28 @@ const ProfileScreen = ({ navigation }) => {
     const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const [uploading, setUploading] = useState(false);
-    // Stats removed per user request
+    const [stats, setStats] = useState({ watchedCount: 0, commentCount: 0, wishlistCount: 0 });
+
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
+            const fetchStats = async () => {
+                try {
+                    const response = await profileAPI.getStats();
+                    if (isActive && response.data.success) {
+                        setStats(response.data.data || { historyCount: 0, commentCount: 0, wishlistCount: 0 });
+                    }
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                }
+            };
+            fetchStats();
+
+            return () => {
+                isActive = false;
+            };
+        }, []) // Empty dependency array ensures it runs on focus
+    );
     const getDisplayName = () => {
         if (!user) return 'User';
         // Priority: Profile Name > Username > Email Username
@@ -111,15 +132,15 @@ const ProfileScreen = ({ navigation }) => {
             color: '#4ECDC4'
         },
         {
+            icon: 'person-circle-outline',
+            title: 'Thông tin tài khoản',
+            onPress: () => navigation.navigate('EditProfile'),
+            color: colors.primary
+        },
+        {
             icon: 'settings-outline',
             title: 'Cài đặt',
             onPress: () => navigation.navigate('Settings'),
-            color: colors.textSecondary
-        },
-        {
-            icon: 'lock-closed-outline',
-            title: 'Đổi mật khẩu',
-            onPress: () => navigation.navigate('ChangePassword'),
             color: colors.textSecondary
         }
     ];
@@ -176,7 +197,23 @@ const ProfileScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-
+                {/* Stats Container - Restored */}
+                <View style={[styles.statsContainer, { backgroundColor: colors.backgroundCard }]}>
+                    <View style={styles.statItem}>
+                        <Text style={[styles.statNumber, { color: colors.text }]}>{stats?.historyCount || 0}</Text>
+                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Đã xem</Text>
+                    </View>
+                    <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+                    <View style={styles.statItem}>
+                        <Text style={[styles.statNumber, { color: colors.text }]}>{stats?.commentCount || 0}</Text>
+                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Bình luận</Text>
+                    </View>
+                    <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+                    <View style={styles.statItem}>
+                        <Text style={[styles.statNumber, { color: colors.text }]}>{stats?.wishlistCount || 0}</Text>
+                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Yêu thích</Text>
+                    </View>
+                </View>
 
                 {/* Menu Options */}
                 <View style={styles.menuContainer}>
@@ -283,6 +320,37 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZES.xs,
         // color handled dynamically
         textTransform: 'uppercase',
+    },
+
+    statsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: SPACING.md, // Reduced padding for cleaner look
+        borderRadius: RADIUS.md,
+        marginBottom: SPACING.xl,
+        // backgroundColor handled dynamically
+    },
+    statItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    statNumber: {
+        fontSize: FONT_SIZES.xl,
+        fontWeight: '600', // Changed from bold to 600 for delicate look
+        marginBottom: 4,
+        // color handled dynamically
+    },
+    statLabel: {
+        fontSize: FONT_SIZES.xs, // Smaller font for label
+        // color handled dynamically
+        fontWeight: '400',
+    },
+    statDivider: {
+        width: 1,
+        height: '60%', // Shorter divider
+        alignSelf: 'center',
+        // backgroundColor handled dynamically
+        opacity: 0.5,
     },
 
     menuContainer: {
