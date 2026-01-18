@@ -1,6 +1,7 @@
 import Comment from '../models/Comment.js';
 import Review from '../models/Review.js'; // Import Review model
 import Notification from '../models/Notification.js';
+import { sendPushNotification } from '../services/pushService.js';
 
 // Get comments for a movie (including legacy reviews)
 export const getMovieComments = async (req, res) => {
@@ -137,11 +138,19 @@ export const createComment = async (req, res) => {
                         targetUsers: [userId]
                     });
                     await notification.save();
+
+                    // Send Push Notification
+                    await sendPushNotification(
+                        [receiverId],
+                        notification.title,
+                        notification.message,
+                        { link: notification.link, movieId }
+                    );
+
                     console.log(`Notification created for reply to user ${receiverId}`);
                 }
             } catch (notifyError) {
                 console.error('Notification creation failed:', notifyError);
-                // Don't fail the request if notification fails
             }
         }
 
@@ -240,6 +249,15 @@ export const likeComment = async (req, res) => {
                         targetUsers: [userId]
                     });
                     await notification.save();
+
+                    // Send Push Notification
+                    await sendPushNotification(
+                        [comment.userId],
+                        notification.title,
+                        notification.message,
+                        { link: notification.link, movieId: comment.movieId || comment.movie }
+                    );
+
                 } catch (notifyError) {
                     console.error('Notification creation failed:', notifyError);
                 }
