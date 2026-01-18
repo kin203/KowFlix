@@ -5,11 +5,16 @@ export const sendPushNotification = async (targetUserIds, title, message, data =
     try {
         if (!targetUserIds || targetUserIds.length === 0) return;
 
-        // 1. Fetch tokens for target users
-        const users = await User.find({ _id: { $in: targetUserIds } }, 'pushTokens');
+        // 1. Fetch tokens for target users, respecting their settings
+        const users = await User.find({ _id: { $in: targetUserIds } }, 'pushTokens mobileSettings');
 
         let tokens = [];
         users.forEach(u => {
+            // Check if user has explicitly disabled push notifications
+            if (u.mobileSettings && u.mobileSettings.pushEnabled === false) {
+                return; // Skip this user
+            }
+
             if (u.pushTokens && u.pushTokens.length > 0) {
                 tokens.push(...u.pushTokens);
             }
