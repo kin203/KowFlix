@@ -4,13 +4,39 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api/authAPI';
 
 const SettingsScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const { colors, themeMode, toggleTheme } = useTheme();
 
     // Local state for UI toggles only (notifications logic separate)
+    // Initial state based on user profile. 
+    // Default to true if not set (consistent with backend default)
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+
+    const { user, refreshUser } = useAuth(); // Get refreshUser to sync state
+
+    // Sync state with user profile when screen focuses or user changes
+    React.useEffect(() => {
+        if (user?.mobileSettings?.pushEnabled !== undefined) {
+            setNotificationsEnabled(user.mobileSettings.pushEnabled);
+        }
+    }, [user]);
+
+    const handleNotificationToggle = async (value) => {
+        setNotificationsEnabled(value); // Optimistic update
+        try {
+            await authAPI.updateMobileSettings({ pushEnabled: value });
+            // Optionally refresh user to confirm persistence, though optimistic is faster
+            // refreshUser(); 
+        } catch (error) {
+            console.error('Failed to update push settings:', error);
+            setNotificationsEnabled(!value); // Revert on error
+            Alert.alert('Lỗi', 'Không thể cập nhật cài đặt thông báo.');
+        }
+    };
 
     // Dark mode state derived from context
     const isDarkMode = themeMode === 'dark';
@@ -85,7 +111,7 @@ const SettingsScreen = ({ navigation }) => {
                             title: 'Thông báo đẩy',
                             value: notificationsEnabled,
                             type: 'switch',
-                            onToggle: setNotificationsEnabled
+                            onToggle: handleNotificationToggle
                         })}
                     </>
                 ))}

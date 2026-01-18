@@ -165,9 +165,9 @@ export const updateMobileSettings = async (req, res) => {
     try {
         const { theme } = req.body;
 
-        if (!theme) {
-            return res.status(400).json({ success: false, message: 'Missing theme setting' });
-        }
+        // if (!theme) {
+        //     return res.status(400).json({ success: false, message: 'Missing theme setting' });
+        // }
 
         const user = await User.findById(req.user.id);
         if (!user) {
@@ -179,7 +179,9 @@ export const updateMobileSettings = async (req, res) => {
             user.mobileSettings = {};
         }
 
-        user.mobileSettings.theme = theme;
+        if (theme) user.mobileSettings.theme = theme;
+        if (req.body.pushEnabled !== undefined) user.mobileSettings.pushEnabled = req.body.pushEnabled;
+
         await user.save();
 
         res.json({

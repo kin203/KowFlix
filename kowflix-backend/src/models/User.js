@@ -18,7 +18,8 @@ const UserSchema = new mongoose.Schema({
   loginCount: { type: Number, default: 0 },
   totalWatchTime: { type: Number, default: 0 }, // in minutes
   mobileSettings: {
-    theme: { type: String, enum: ['light', 'dark'], default: 'dark' }
+    theme: { type: String, enum: ['light', 'dark'], default: 'dark' },
+    pushEnabled: { type: Boolean, default: true }
   },
   pushTokens: [{ type: String }],
   createdAt: { type: Date, default: Date.now }
