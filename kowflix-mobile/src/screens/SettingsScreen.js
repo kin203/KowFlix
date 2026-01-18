@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Modal } from 'react-native';
+import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SPACING, RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
@@ -16,7 +17,7 @@ const SettingsScreen = ({ navigation }) => {
     // Default to true if not set (consistent with backend default)
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
 
-    const { user, refreshUser } = useAuth(); // Get refreshUser to sync state
+    const { user, updateMobileSettings } = useAuth();
 
     // Sync state with user profile when screen focuses or user changes
     React.useEffect(() => {
@@ -26,13 +27,17 @@ const SettingsScreen = ({ navigation }) => {
     }, [user]);
 
     const handleNotificationToggle = async (value) => {
-        setNotificationsEnabled(value); // Optimistic update
+        // Optimistic update handled by local state, but we rely on context for truth
+        // setNotificationsEnabled(value); // Let useEffect handle sync from context to avoid conflict
+
         try {
-            await authAPI.updateMobileSettings({ pushEnabled: value });
-            refreshUser();
+            const result = await updateMobileSettings({ pushEnabled: value });
+            if (!result.success) {
+                Alert.alert('Lỗi', 'Không thể cập nhật cài đặt thông báo.');
+                // Revert is automatic if context doesn't update, but we can force it conceptually
+            }
         } catch (error) {
             console.error('Failed to update push settings:', error);
-            setNotificationsEnabled(!value); // Revert on error
             Alert.alert('Lỗi', 'Không thể cập nhật cài đặt thông báo.');
         }
     };
@@ -64,8 +69,14 @@ const SettingsScreen = ({ navigation }) => {
     const renderSettingItem = ({ icon, title, value, type = 'arrow', onPress, onToggle }) => (
         <TouchableOpacity
             style={[styles.settingItem, { borderBottomColor: colors.border }]}
-            onPress={type === 'arrow' ? onPress : () => onToggle(!value)}
-            disabled={type === 'switch' && onToggle === undefined}
+            onPress={() => {
+                if (type === 'switch' && onToggle) {
+                    onToggle(!value);
+                } else if (onPress) {
+                    onPress();
+                }
+            }}
+            disabled={(type === 'switch' && !onToggle) || (!onPress && type !== 'switch')}
         >
             <View style={styles.settingIconContainer}>
                 <Ionicons name={icon} size={20} color={colors.textSecondary} />
@@ -90,6 +101,69 @@ const SettingsScreen = ({ navigation }) => {
             )}
         </TouchableOpacity>
     );
+
+    const [modalVisible, setModalVisible] = React.useState(false);
+
+    const TERMS_OF_SERVICE = `
+1. Giới thiệu dịch vụ
+
+Kowflix là nền tảng cung cấp dịch vụ xem phim và nội dung giải trí trực tuyến, cho phép người dùng truy cập, tìm kiếm và thưởng thức nội dung thông qua internet trên các thiết bị được hỗ trợ.
+
+2. Điều kiện sử dụng
+
+Người dùng phải từ 13 tuổi trở lên hoặc theo quy định pháp luật tại quốc gia cư trú.
+Người dùng chịu trách nhiệm về mọi hoạt động diễn ra trên tài khoản của mình.
+Không sử dụng Kowflix cho mục đích trái pháp luật, gian lận, phá hoại hoặc xâm phạm quyền lợi của bên thứ ba.
+
+3. Tài khoản người dùng
+
+Một số tính năng có thể yêu cầu đăng ký tài khoản.
+Người dùng cam kết cung cấp thông tin chính xác, đầy đủ và cập nhật.
+Kowflix có quyền tạm khóa hoặc chấm dứt tài khoản nếu phát hiện vi phạm điều khoản.
+
+4. Nội dung và bản quyền
+
+Tất cả nội dung hiển thị trên Kowflix (bao gồm phim, hình ảnh, video, giao diện, logo) đều thuộc quyền sở hữu của Kowflix hoặc bên cấp phép.
+Nghiêm cấm sao chép, tải xuống, phân phối, phát tán hoặc sử dụng nội dung cho mục đích thương mại khi chưa có sự cho phép bằng văn bản.
+Người dùng không được can thiệp, phá vỡ hoặc tìm cách vượt qua các biện pháp bảo vệ bản quyền.
+
+5. Hành vi bị cấm
+
+Người dùng không được:
+Sử dụng ứng dụng để phát tán nội dung độc hại, phản cảm, vi phạm pháp luật.
+Tấn công hệ thống, gây gián đoạn dịch vụ hoặc truy cập trái phép dữ liệu.
+Lợi dụng lỗi hệ thống để trục lợi.
+
+6. Giới hạn trách nhiệm
+
+Kowflix không đảm bảo dịch vụ sẽ hoạt động liên tục, không lỗi hoặc không bị gián đoạn.
+Kowflix không chịu trách nhiệm đối với thiệt hại phát sinh do việc sử dụng hoặc không thể sử dụng dịch vụ, trừ khi pháp luật có quy định khác.
+Nội dung có thể bị thay đổi, cập nhật hoặc gỡ bỏ mà không cần báo trước.
+
+7. Liên kết bên thứ ba
+
+Ứng dụng có thể chứa liên kết đến website hoặc dịch vụ của bên thứ ba. Kowflix không chịu trách nhiệm về nội dung, chính sách hay hoạt động của các bên này.
+
+8. Thay đổi điều khoản
+
+Kowflix có quyền cập nhật hoặc điều chỉnh điều khoản này bất kỳ lúc nào. Các thay đổi sẽ có hiệu lực ngay khi được công bố trên ứng dụng hoặc website.
+
+9. Chấm dứt dịch vụ
+
+Kowflix có quyền tạm ngừng hoặc chấm dứt cung cấp dịch vụ mà không cần thông báo trước trong trường hợp:
+Người dùng vi phạm điều khoản
+Yêu cầu từ cơ quan quản lý nhà nước
+Lý do kỹ thuật hoặc vận hành
+
+10. Luật áp dụng
+
+Điều khoản này được điều chỉnh và giải thích theo pháp luật Việt Nam.
+
+11. Thông tin liên hệ
+
+Email hỗ trợ: work.nk203@gmail.com
+Website: https://facebook.com/nk203
+`;
 
     return (
         <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
@@ -122,23 +196,45 @@ const SettingsScreen = ({ navigation }) => {
                         {renderSettingItem({
                             icon: 'information-circle-outline',
                             title: 'Phiên bản',
-                            value: '1.0.0',
+                            value: Constants.expoConfig?.version || '1.0.3',
                             type: 'value'
                         })}
                         {renderSettingItem({
                             icon: 'document-text-outline',
                             title: 'Điều khoản sử dụng',
-                            onPress: () => Alert.alert('Thông tin', 'Đang cập nhật...')
+                            onPress: () => setModalVisible(true)
                         })}
                         {renderSettingItem({
                             icon: 'shield-checkmark-outline',
                             title: 'Chính sách bảo mật',
-                            onPress: () => Alert.alert('Thông tin', 'Đang cập nhật...')
+                            onPress: () => setModalVisible(true)
                         })}
                     </>
                 ))}
 
             </ScrollView>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.backgroundCard, paddingTop: insets.top }]}>
+                        <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>Điều khoản & Chính sách</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                                <Ionicons name="close" size={28} color={colors.text} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={styles.modalBody}>
+                            <Text style={[styles.modalText, { color: colors.text }]}>{TERMS_OF_SERVICE}</Text>
+                            <View style={{ height: 40 }} />
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -204,6 +300,37 @@ const styles = StyleSheet.create({
     valueText: {
         fontSize: FONT_SIZES.sm,
         // color handled dynamically
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        flex: 1,
+        borderTopLeftRadius: RADIUS.lg,
+        borderTopRightRadius: RADIUS.lg,
+        overflow: 'hidden',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: SPACING.md,
+        borderBottomWidth: 1,
+    },
+    modalTitle: {
+        fontSize: FONT_SIZES.lg,
+        fontWeight: FONT_WEIGHTS.bold,
+    },
+    closeButton: {
+        padding: SPACING.xs,
+    },
+    modalBody: {
+        padding: SPACING.md,
+    },
+    modalText: {
+        fontSize: FONT_SIZES.md,
+        lineHeight: 24,
     },
 });
 
