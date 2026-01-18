@@ -2,7 +2,7 @@
   "expo": {
     "name": "KowFlix",
     "slug": "kowflix-mobile",
-    "version": "1.0.1-hotfix",
+    "version": "1.0.2",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
