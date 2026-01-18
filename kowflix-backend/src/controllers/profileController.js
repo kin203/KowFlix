@@ -19,6 +19,7 @@ export const getProfile = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 profile: user.profile,
+                mobileSettings: user.mobileSettings,
                 createdAt: user.createdAt
             }
         });
@@ -53,6 +54,7 @@ export const updateProfile = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 profile: user.profile,
+                mobileSettings: user.mobileSettings,
                 createdAt: user.createdAt
             }
         });

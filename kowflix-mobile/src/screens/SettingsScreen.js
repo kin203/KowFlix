@@ -29,8 +29,7 @@ const SettingsScreen = ({ navigation }) => {
         setNotificationsEnabled(value); // Optimistic update
         try {
             await authAPI.updateMobileSettings({ pushEnabled: value });
-            // Optionally refresh user to confirm persistence, though optimistic is faster
-            // refreshUser(); 
+            refreshUser();
         } catch (error) {
             console.error('Failed to update push settings:', error);
             setNotificationsEnabled(!value); // Revert on error
