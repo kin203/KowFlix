@@ -5,7 +5,7 @@ import Hero from '../components/Hero';
 import CategoryCards from '../components/CategoryCards';
 import MovieSlider from '../components/MovieSlider';
 import Footer from '../components/Footer';
-import { movieAPI, heroAPI } from '../services/api';
+import { movieAPI, heroAPI, categoryAPI } from '../services/api';
 import useDocumentTitle from '../components/useDocumentTitle';
 import axios from 'axios';
 import './Home.css';
