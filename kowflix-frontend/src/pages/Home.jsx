@@ -67,7 +67,7 @@ const Home = () => {
                 // Fetch both Dynamic Genres and Manual Categories
                 const [filtersResponse, categoriesResponse] = await Promise.all([
                     movieAPI.getFilters(),
-                    axios.get('http://localhost:5000/api/categories/active')
+                    categoryAPI.getActive()
                 ]);
 
                 let finalCards = [];
