@@ -62,7 +62,8 @@
         "interested_in": "What are you interested in?",
         "trending": "Trending Now",
         "top_rated": "Top Rated",
-        "action_movies": "Action Movies"
+        "action_movies": "Action Movies",
+        "recommended_for_you": "Recommended For You"
     },
     "settings": {
         "title": "Settings & Customization",

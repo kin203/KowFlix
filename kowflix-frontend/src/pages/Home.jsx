@@ -166,7 +166,7 @@ const Home = () => {
 
             {/* AI Recommendations */}
             {recommendedMovies.length > 0 && (
-                <MovieSlider title={t('Gợi ý từ AI 🤖')} movies={recommendedMovies} />
+                <MovieSlider title={t('home.recommended_for_you')} movies={recommendedMovies} />
             )}
 
             <MovieSlider title={t('home.trending')} movies={trendingMovies} />
