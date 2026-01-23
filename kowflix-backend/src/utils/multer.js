@@ -9,18 +9,37 @@ const posterDir = process.env.POSTER_DIR || path.join(mediaRoot, "posters");
 const uploadDir = process.env.UPLOAD_DIR || path.join(mediaRoot, "uploads");
 const subtitleDir = process.env.SUBTITLE_DIR || path.join(mediaRoot, "subtitles");
 
+import fs from "fs";
+
+// Ensure base directories exist (Create them at startup is good, but inside callback is safer for ephemeral FS)
+[posterDir, uploadDir, subtitleDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (e) {
+      console.error(`Failed to create directory ${dir}:`, e);
+    }
+  }
+});
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    let dir = uploadDir; // Default
+
     if (file.fieldname === "poster") {
-      cb(null, posterDir);
+      dir = posterDir;
     } else if (file.fieldname === "video") {
-      cb(null, uploadDir);
+      dir = uploadDir;
     } else if (file.fieldname.startsWith("subtitle")) {
-      // subtitle_en, subtitle_vi, etc.
-      cb(null, subtitleDir);
-    } else {
-      cb(new Error("Invalid field name"), null);
+      dir = subtitleDir;
     }
+
+    // Double check ensure dir exists (in case it was deleted or ephemeral)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    cb(null, dir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, "_"));
