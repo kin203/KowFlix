@@ -100,7 +100,9 @@
         "back_home": "Quay về trang chủ",
         "no_movies": "Chưa có phim nào trong mục này",
         "all_movies": "Tất cả phim",
-        "error_fetch": "Không thể tải danh sách phim"
+        "error_fetch": "Không thể tải danh sách phim",
+        "no_description": "Chưa có mô tả cho phim này",
+        "updating": "Đang cập nhật"
     },
     "auth": {
         "login": "Đăng nhập",

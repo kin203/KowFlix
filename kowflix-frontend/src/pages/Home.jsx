@@ -5,7 +5,7 @@ import Hero from '../components/Hero';
 import CategoryCards from '../components/CategoryCards';
 import MovieSlider from '../components/MovieSlider';
 import Footer from '../components/Footer';
-import { movieAPI, heroAPI, categoryAPI } from '../services/api';
+import { movieAPI, heroAPI, categoryAPI, progressAPI } from '../services/api';
 import useDocumentTitle from '../components/useDocumentTitle';
 import axios from 'axios';
 import './Home.css';
@@ -19,6 +19,7 @@ const Home = () => {
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [topRatedMovies, setTopRatedMovies] = useState([]);
     const [recommendedMovies, setRecommendedMovies] = useState([]); // AI Recommendations
+    const [continueWatching, setContinueWatching] = useState([]); // Continue Watching
     const [categoryMovies, setCategoryMovies] = useState({});
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,6 +59,18 @@ const Home = () => {
                         }
                     } catch (e) {
                         console.warn("Failed to fetch recommendations", e);
+                    }
+
+                    // Fetch Continue Watching
+                    try {
+                        const progressRes = await progressAPI.getAll();
+                        if (progressRes.data && progressRes.data.success) {
+                            // Map progress items to movie objects
+                            const progressMovies = progressRes.data.data.map(item => item.movieId);
+                            setContinueWatching(progressMovies);
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch continue watching", e);
                     }
                 }
 
@@ -163,6 +176,11 @@ const Home = () => {
             <Navbar />
             <Hero heroBanners={heroBanners} />
             <CategoryCards categories={categories} />
+
+            {/* Continue Watching Section */}
+            {continueWatching.length > 0 && (
+                <MovieSlider title="Tiếp tục xem" movies={continueWatching} />
+            )}
 
             {/* AI Recommendations */}
             {recommendedMovies.length > 0 && (

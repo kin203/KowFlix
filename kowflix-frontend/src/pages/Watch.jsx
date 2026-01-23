@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, Star, Play } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, Play, RotateCcw } from 'lucide-react';
 import PlayIcon from '../assets/icons/play_circle.svg?react';
 import PauseIcon from '../assets/icons/pause.svg?react';
 import InfoIcon from '../assets/icons/info.svg?react';
@@ -26,6 +26,8 @@ const Watch = () => {
     const [movie, setMovie] = useState(null);
     const [hlsUrl, setHlsUrl] = useState(null);
     const [initialTime, setInitialTime] = useState(0);
+    const [showResumePrompt, setShowResumePrompt] = useState(false);
+    const [resumeTime, setResumeTime] = useState(0);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reviews, setReviews] = useState([]);
@@ -65,7 +67,13 @@ const Watch = () => {
                     try {
                         const progressRes = await progressAPI.get(id);
                         if (progressRes.data.success && progressRes.data.data) {
-                            setInitialTime(progressRes.data.data.currentTime || 0);
+                            const { currentTime } = progressRes.data.data;
+                            if (currentTime > 10) {
+                                setResumeTime(currentTime);
+                                setShowResumePrompt(true);
+                            } else {
+                                setInitialTime(0);
+                            }
                         }
                     } catch (err) {
                         // console.log('No previous progress found');
@@ -163,6 +171,23 @@ const Watch = () => {
         }
     };
 
+    const handleResume = () => {
+        setInitialTime(resumeTime);
+        setShowResumePrompt(false);
+    };
+
+    const handleStartOver = () => {
+        setInitialTime(0);
+        setShowResumePrompt(false);
+        progressAPI.save(id, { currentTime: 0, duration: 0 }).catch(console.error);
+    };
+
+    const formatProgressTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const handleProgress = async ({ currentTime, duration }) => {
         try {
             await progressAPI.save(id, { currentTime, duration });
@@ -250,14 +275,34 @@ const Watch = () => {
                             <div className="error-message">{error.message}</div>
                         </div>
                     ) : hlsUrl ? (
-                        <VideoPlayerWrapper
-                            src={hlsUrl}
-                            poster={movie?.backdrop || movie?.background || ''}
-                            onProgress={handleProgress}
-                            initialTime={initialTime}
-                            movieId={id}
-                            subtitles={Array.isArray(movie?.subtitles) ? movie.subtitles : []}
-                        />
+                        showResumePrompt ? (
+                            <div className="resume-overlay" style={{ backgroundImage: `url(${movie.backdrop || movie.poster})` }}>
+                                <div className="resume-backdrop"></div>
+                                <div className="resume-modal">
+                                    <h3>Tiếp tục xem?</h3>
+                                    <p>Bạn đang xem dở tại {formatProgressTime(resumeTime)}</p>
+                                    <div className="resume-btns">
+                                        <button className="resume-btn primary" onClick={handleResume}>
+                                            <Play size={18} style={{ marginRight: '8px' }} />
+                                            Xem tiếp
+                                        </button>
+                                        <button className="resume-btn secondary" onClick={handleStartOver}>
+                                            <RotateCcw size={18} style={{ marginRight: '8px' }} />
+                                            Bắt đầu từ đầu
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <VideoPlayerWrapper
+                                src={hlsUrl}
+                                poster={movie.backdrop || movie.background || ''}
+                                onProgress={handleProgress}
+                                initialTime={initialTime}
+                                movieId={id}
+                                subtitles={Array.isArray(movie.subtitles) ? movie.subtitles : []}
+                            />
+                        )
                     ) : (
                         <div className="video-placeholder">
                             <div className="loading-spinner"></div>
@@ -273,6 +318,13 @@ const Watch = () => {
                         >
                             {isInWishlist ? <CheckIcon width={18} height={18} /> : <AddIcon width={18} height={18} />}
                             {isInWishlist ? 'Đã thêm' : 'DS của tôi'}
+                        </button>
+
+                        <button
+                            className="action-btn"
+                            onClick={handleStartOver}
+                        >
+                            <RotateCcw size={18} /> Bắt đầu lại
                         </button>
                         {/* Share Button Removed */}
                         {/* <button className="action-btn">
