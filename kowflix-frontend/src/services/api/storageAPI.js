@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-// Storage Server URL (hardcoded based on backend config or env)
-const STORAGE_URL = 'https://nk203.id.vn';
+// Storage Server URL (Configurable via env, default to local/remote)
+const STORAGE_URL = import.meta.env.VITE_STORAGE_URL || 'http://192.168.100.52';
+// const STORAGE_URL = 'https://nk203.id.vn'; // Backup remote
 
 const storageAPI = {
     /**
