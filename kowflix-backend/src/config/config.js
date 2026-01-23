@@ -84,8 +84,16 @@ const config = {
 
     // Remote Agent Configuration (using Tunnel)
     remote: {
-        agentUrl: process.env.REMOTE_AGENT_URL || 'https://nk203.id.vn',
-        enabled: true // Always enabled if agentUrl is set (or defaulted)
+        mode: process.env.REMOTE_MODE || 'http', // 'http' or 'ssh'
+        agentUrl: process.env.REMOTE_AGENT_URL || 'http://192.168.100.52:3001',
+        sftp: {
+            host: process.env.SFTP_HOST, // e.g., nk203home.myddns.me
+            port: process.env.SFTP_PORT ? parseInt(process.env.SFTP_PORT) : 2222,
+            username: process.env.SFTP_USER || 'root',
+            password: process.env.SFTP_PASSWORD,
+            privateKey: process.env.SFTP_KEY, // Can be path string or key content
+        },
+        enabled: true
     },
 
     // Cloudinary Configuration
