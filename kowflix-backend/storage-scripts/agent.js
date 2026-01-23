@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import cors from 'cors';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -9,6 +10,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Enable CORS for all routes (since frontend is on Render/Vercel)
+app.use(cors());
 const PORT = process.env.PORT || 3001;
 // Adjust this path to point to your actual media root on the storage server
 const UPLOAD_ROOT = process.env.UPLOAD_ROOT || '/media/DATA/kowflix';
@@ -102,7 +106,8 @@ app.post('/api/encode', (req, res) => {
     }
 
     // Spawn the execute command
-    const ffmpeg = spawn('bash', [INGEST_SCRIPT, videoPath, slug]);
+    // Pass UPLOAD_ROOT as the 3rd argument to the script
+    const ffmpeg = spawn('bash', [INGEST_SCRIPT, videoPath, slug, UPLOAD_ROOT]);
 
     ffmpeg.stdout.on('data', (data) => {
         res.write(data);
