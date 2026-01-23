@@ -15,6 +15,7 @@ import {
   streamMP4,
   getFilterOptions
 } from "../controllers/movieController.js";
+import { getRecommendations } from "../controllers/recommendationController.js";
 
 import auth from "../middleware/auth.js";
 import isAdmin from "../middleware/admin.js";
@@ -34,6 +35,7 @@ router.get("/filters", getFilterOptions);
 
 router.get("/trending", getTrendingMovies);
 router.get("/top-rated", getTopRatedMovies);
+router.get("/recommendations", auth, getRecommendations);
 
 router.get("/", listMovies);
 router.get("/:id", getMovie);

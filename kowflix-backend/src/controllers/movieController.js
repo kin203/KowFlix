@@ -8,6 +8,7 @@ import { uploadPoster, uploadVideo, deleteMovieFiles } from "../utils/remoteUplo
 import { searchMovies, getMovieDetails, getMovieTrailer, downloadImage } from "../utils/tmdb.js";
 import { triggerEncode } from "../utils/remoteEncode.js";
 import * as jobQueue from "../services/jobQueue.js";
+import { parseSearchQuery } from "../utils/searchParser.js";
 
 const mediaBase = ""; // Store relative paths (e.g. /uploads/xxx) so we can map to any root
 
@@ -126,20 +127,70 @@ export const listMovies = async (req, res) => {
     const query = {};
 
     if (q) {
-      // Use regex for more flexible search (including partial matches)
-      // Search in title, title_en, and cast names
-      const searchRegex = new RegExp(q, 'i');
-      query.$or = [
-        { title: { $regex: searchRegex } },
-        { title_en: { $regex: searchRegex } },
-        { "cast.name": { $regex: searchRegex } }
-      ];
+      // Parse query using AI/NLP parser
+      const { text, genres, countries } = parseSearchQuery(q);
+
+      const conditions = [];
+
+      // 1. Text search (if any text remains)
+      if (text) {
+        const searchRegex = new RegExp(text, 'i');
+        conditions.push({
+          $or: [
+            { title: { $regex: searchRegex } },
+            { title_en: { $regex: searchRegex } },
+            { "cast.name": { $regex: searchRegex } }
+          ]
+        });
+      }
+
+      // 2. Genre filter (from parser)
+      if (genres.length > 0) {
+        conditions.push({ genres: { $in: genres } });
+      }
+
+      // 3. Country filter (from parser)
+      if (countries.length > 0) {
+        conditions.push({ countries: { $in: countries } });
+      }
+
+      // Combine conditions
+      if (conditions.length > 0) {
+        query.$and = conditions;
+      }
     }
 
-    if (genre) query.genres = genre;
-    if (categoryId) query.categories = categoryId;
-    // Support filtering by country (exact match from array)
-    if (req.query.country) query.countries = req.query.country;
+    // Explicit filters override or combine with parsed filters
+    if (genre) {
+      // If query already has genres, we need to respect both or just add to it.
+      // Let's assume explicit filter adds to the AND condition
+      // However, typical Mongo structure for existing query["genres"] = genre might overwrite.
+      // Safe way: use $and if not already present, or add to it.
+      if (!query.$and) query.$and = [];
+      query.$and.push({ genres: genre });
+    }
+
+    if (categoryId) {
+      if (!query.$and) query.$and = [];
+      query.$and.push({ categories: categoryId });
+    }
+
+    if (req.query.country) {
+      if (!query.$and) query.$and = [];
+      query.$and.push({ countries: req.query.country });
+    }
+
+    // If no $and, we can simplify (optional but cleaner)
+    // But since we built query.$and, let's stick to it if populated.
+    // However, if only simple filters exist, the old code used `query.genres = ...`.
+    // Let's ensure we don't break simple filters if q is empty.
+
+    // Fallback for simple filters if NO q AND NO $and yet
+    if (!q && !query.$and) {
+      if (genre) query.genres = genre;
+      if (categoryId) query.categories = categoryId;
+      if (req.query.country) query.countries = req.query.country;
+    }
 
     const total = await Movie.countDocuments(query);
 
@@ -167,6 +218,7 @@ export const listMovies = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // ====================== GET ONE ======================
 export const getMovie = async (req, res) => {
