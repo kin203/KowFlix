@@ -193,7 +193,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                         </div>
 
                         <p className="modal-description">
-                            {displayDescription || t('common.no_description') || 'No description available.'}
+                            {displayDescription || t('common.no_description')}
                         </p>
                     </div>
 
@@ -202,7 +202,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                             <span className="modal-label">{t('common.cast')}:</span>
                             <span className="modal-value">
                                 {(() => {
-                                    if (!movie.cast || movie.cast.length === 0) return 'N/A';
+                                    if (!movie.cast || movie.cast.length === 0) return t('common.updating');
 
                                     return movie.cast.map(c => {
                                         // Handle string format
@@ -215,7 +215,7 @@ const MovieInfoModal = ({ movie, onClose }) => {
                                         return null;
                                     })
                                         .filter(Boolean)
-                                        .join(', ') || 'N/A';
+                                        .join(', ') || t('common.updating');
                                 })()}
                             </span>
                         </div>
@@ -226,12 +226,12 @@ const MovieInfoModal = ({ movie, onClose }) => {
                                     const key = `genres.${g.toLowerCase().replace(/\s+/g, '_')}`;
                                     const translated = t(key);
                                     return translated !== key ? translated : g;
-                                }).join(', ') || 'N/A'}
+                                }).join(', ') || t('common.updating')}
                             </span>
                         </div>
                         <div className="modal-info-row">
                             <span className="modal-label">{t('common.director')}:</span>
-                            <span className="modal-value">{movie.director || 'N/A'}</span>
+                            <span className="modal-value">{movie.director || t('common.updating')}</span>
                         </div>
                     </div>
                 </div>
