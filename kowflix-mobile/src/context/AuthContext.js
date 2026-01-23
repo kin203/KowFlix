@@ -129,6 +129,32 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateMobileSettings = async (settings) => {
+        try {
+            const response = await authAPI.updateMobileSettings(settings);
+            if (response.data.success) {
+                // Merge new settings with existing user data
+                const updatedUser = {
+                    ...user,
+                    mobileSettings: {
+                        ...user.mobileSettings,
+                        ...settings
+                    }
+                };
+                setUser(updatedUser);
+                await saveUser(updatedUser);
+                return { success: true };
+            }
+            return { success: false, message: response.data.message };
+        } catch (error) {
+            console.error('Update settings failed:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Cập nhật thất bại'
+            };
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -139,6 +165,7 @@ export const AuthProvider = ({ children }) => {
                 register,
                 logout,
                 updateUserProfile,
+                updateMobileSettings,
                 refreshUser: checkAuth,
             }}
         >

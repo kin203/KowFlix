@@ -18,6 +18,7 @@ const Home = () => {
     const [movies, setMovies] = useState([]);
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [topRatedMovies, setTopRatedMovies] = useState([]);
+    const [recommendedMovies, setRecommendedMovies] = useState([]); // AI Recommendations
     const [categoryMovies, setCategoryMovies] = useState({});
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ const Home = () => {
             try {
                 // Fetch hero banners (active only)
                 const heroResponse = await heroAPI.getAll(true);
-                console.log('🎯 Hero Banners Response:', heroResponse.data);
+                // console.log('🎯 Hero Banners Response:', heroResponse.data);
                 const heroBannerList = heroResponse.data.data || [];
                 setHeroBanners(heroBannerList);
 
@@ -47,6 +48,18 @@ const Home = () => {
                 const topRatedResponse = await movieAPI.getTopRatedMovies(20);
                 const topRatedList = topRatedResponse.data.data || [];
                 setTopRatedMovies(topRatedList);
+
+                // Fetch AI Recommendations (only if logged in)
+                if (localStorage.getItem('token')) {
+                    try {
+                        const recResponse = await movieAPI.getRecommendations();
+                        if (recResponse.data && recResponse.data.success) {
+                            setRecommendedMovies(recResponse.data.data);
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch recommendations", e);
+                    }
+                }
 
                 // Fetch Category Rows in Parallel
                 const categoryPromises = POPULAR_GENRES.map(genre =>
@@ -150,6 +163,12 @@ const Home = () => {
             <Navbar />
             <Hero heroBanners={heroBanners} />
             <CategoryCards categories={categories} />
+
+            {/* AI Recommendations */}
+            {recommendedMovies.length > 0 && (
+                <MovieSlider title={t('Gợi ý từ AI 🤖')} movies={recommendedMovies} />
+            )}
+
             <MovieSlider title={t('home.trending')} movies={trendingMovies} />
             <MovieSlider title={t('home.top_rated')} movies={topRatedMovies.length > 0 ? topRatedMovies : [...movies].reverse()} />
 

@@ -27,6 +27,12 @@ export const movieAPI = {
     getTopRatedMovies: (limit = 10) => api.get('/movies/top-rated', { params: { limit } }),
 
     /**
+     * Get AI-based recommendations
+     * @returns {Promise} List of recommended movies
+     */
+    getRecommendations: () => api.get('/movies/recommendations'),
+
+    /**
      * Get distinct filter options (countries, genres)
      * @returns {Promise} Filter options
      */
