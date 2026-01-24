@@ -58,8 +58,6 @@ export const getRecommendations = async (req, res) => {
         const fakeQuery = keywords.join(" "); // "Hành động Mỹ Kịch tính"
         const { genres, countries } = parseSearchQuery(fakeQuery);
 
-        const { genres, countries } = parseSearchQuery(fakeQuery);
-
         console.log("AI Filters Cleaned:", { genres, countries });
 
         const query = { _id: { $nin: history.map(h => h.movieId._id) } }; // Exclude watched
