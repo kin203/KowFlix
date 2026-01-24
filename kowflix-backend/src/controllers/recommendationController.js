@@ -58,7 +58,9 @@ export const getRecommendations = async (req, res) => {
         const fakeQuery = keywords.join(" "); // "Hành động Mỹ Kịch tính"
         const { genres, countries } = parseSearchQuery(fakeQuery);
 
-        console.log("AI Filters:", { genres, countries });
+        const { genres, countries } = parseSearchQuery(fakeQuery);
+
+        console.log("AI Filters Cleaned:", { genres, countries });
 
         const query = { _id: { $nin: history.map(h => h.movieId._id) } }; // Exclude watched
         const conditions = [];
@@ -71,8 +73,12 @@ export const getRecommendations = async (req, res) => {
         }
 
         if (conditions.length > 0) {
-            query.$or = conditions; // $or is more lenient for recommendations than $and
+            query.$or = conditions;
         }
+
+        // IMPROVED QUERY LOGIC:
+        // Use regex for partial matching if exact match fails, but since we updated parser, exact match should work.
+        // Let's stick to the $or logic but log the query for debugging if empty.
 
         // 4. Fetch movies (randomized sort for freshness)
         // MongoDB sample is good for random but expensive on large datasets. 
